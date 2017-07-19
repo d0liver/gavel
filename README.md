@@ -24,3 +24,5 @@ __utils:__ Contains `attackStrength`, `defendStrength`, `holdStrength`, `holdStr
 __describe:__ Convert logics to human readable text to use as output for testing. E.g. some object describing orders gets translated into "Turkey Moves A to Romania".
 
 __parseOrder:__ What it sounds like - parse orders provided in a text format and convert them to useful objects. Primarily useful for testing.
+
+__Board:__ Passed to the engine to give it information about the map and the current state of the game. Tells the engine everything that it needs to know except for what the rules of the game are and how to resolve them. E.g. answers questions about which regions are adjacent to which, which player owns which units, etc.

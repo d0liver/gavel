@@ -6,14 +6,10 @@ Engine = ({countries, regions}, player_country_name, Resolver) ->
 	self = {}
 
 	self.resolve = (orders) ->
-		debug 'Attempting to resolve orders...'
+		debug 'Resolving orders...'
 
-		units = {}
-
-		for unit in _.pluck countries, 'units'
-			units[unit.region] = unit.type
-
-		console.log "Resolver units: ", units
+		units = _.object
+			[region, type] for {region, type} in _.pluck countries, 'units'
 
 		# From Resolver
 		for order in orders when not order.succeeds?
