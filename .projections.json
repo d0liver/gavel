@@ -1,0 +1,17 @@
+{
+    "README.md": {"type": "doc"},
+    "client/*.coffee": {
+        "alternate": "views/{snakecase|hyphenate}.pug",
+        "type": "client"
+    },
+    "client/main.coffee": { "type": "client" },
+    "lib/*.coffee": {"type": "lib"},
+    "public/bundle.js": {"type": "bundle"},
+    "sass/_*.sass": {"type": "style"},
+    "sass/master.sass": {"type": "style"},
+    "server/*.coffee": {"type": "server"},
+    "server/server.coffee": {"type": "server"},
+    "views/*.pug": {"type": "template"},
+    "views/*.jade": {"type": "template"},
+    "views/index.pug": {"type": "template"}
+}
