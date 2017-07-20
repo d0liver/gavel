@@ -1,4 +1,4 @@
-CycleException = require './CycleException'
+{CycleException} = require './Exceptions'
 
 # TODO: Split out the memoizer (or just use someone else's)
 CycleGuard = (fu, bak, parent) ->

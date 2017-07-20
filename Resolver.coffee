@@ -1,37 +1,45 @@
-CycleGuard     = require './CycleGuard'
-CycleException = require './CycleException'
-utils          = require './utils'
+# 3rd Party
+_ = require 'underscore'
+
+# Local
+CycleGuard       = require './CycleGuard'
+{CycleException} = require './Exceptions'
+utils            = require './utils'
+debug            = require './debug'
 
 # Adapted from "The Math of Adjudication" by Lucas Kruijswijk
 # We assume in the resolver that the map constraints have been satisfied (moves
 # are to valid locations, etc.)
-Resolver = (board, orders, units, DEBUG = false) ->
+Resolver = (board, orders, DEBUG = false) ->
 	self = {}
 
-	init = ->
-		inflateUnits()
+	# Make sure that the units for the orders exist on the board.
+	# TODO: More checks than this are needed
+	self.checkOrder = (order) -> board.region(utils.actor order).unit?
 
-	self.resolve = ->
-		for order in orders when not order.succeeds?
-			try
-				order.succeeds = self.adjudicate(order)
-			catch err
-				if err instanceof CycleException
-					order.succeeds = handleCycle err
-				else
-					throw err
+	self.resolve = (order) ->
+		try
+			order.succeeds =
+				unless self.checkOrder order then 'ILLEGAL'
+				else self.adjudicate order
+		catch err
+			if err instanceof CycleException
+				order.succeeds = handleCycle err
+			else
+				throw err
 
 	succ = (result) -> (result and 'SUCCEEDS') or (! result and 'FAILS')
 
 	# nr - The number of the order to be resolved.
 	# Returns the resolution for that order.
 	self.adjudicate = (order) ->
-		console.log "EVALUATING ORDER: ", self.describe order
+		debug "EVALUATING ORDER: ", self.describe order
 
 		switch order.type
 			when 'MOVE'
+				adj_type = board.adjacency order.from, order.to
 				unless hasPath(order)
-					return false
+					return 'FAILS'
 
 				# Get the largest prevent strength
 				preventers = ordersWhere(order, 'MOVE', 'EXISTS', to: order.to) or []
@@ -67,7 +75,7 @@ Resolver = (board, orders, units, DEBUG = false) ->
 			when 'SUPPORT'
 
 				# Support can only be into an adjacent region
-				unless board.areAdjacent order.supporter, order.to
+				unless board.adjacency(order.supporter, order.to)?
 					return 'ILLEGAL'
 
 				# If there is a move order moving to the unit that is supporting
@@ -93,20 +101,29 @@ Resolver = (board, orders, units, DEBUG = false) ->
 	# Check if _from_ is adjacent to _to_ or for successful convoy orders
 	# allowing _unit_ to move from _from_ to _to_.
 	hasPath = (order) ->
-		corders = ordersWhere null, 'CONVOY', 'SUCCEEDS', {from, to}
+		unit = board.region(utils.actor order).unit
+		adj = board.adjacency(order.from, order.to)
+		corders = ordersWhere null, 'CONVOY', 'SUCCEEDS', _.pick order, 'from', 'to'
+
+		# Check if there's a valid immediately adjacent region
+		if adj is 'mv' and unit.type is 'Army' or
+		adj in ['xc', 'sc', 'nc', 'ec', 'wc'] and unit.type is 'Fleet'
+			return true
+		else unless corders.length
+			return false
+
 		return _hasPath order.from, order.to, corders
 
 	_hasPath = (from, dest, corders) ->
 
-		# We have a _from_ connected to the destination so we are finished.
-		# Either we have a connected convoy or this is the initial _from_ and
-		# the two regions are adjacent.
-		if areAdjacent from, dest
+		# We have a _from_ connected to the destination so this is the end of
+		# the convoy and we are finished.
+		if board.adjacency(from, dest) is 'xc' and 
 			return true
 
 		# We don't have a complete path yet, so we have to keep looking for
 		# convoys that can get us there.
-		next_hops = (order for order in corders when areAdjacent(from, order.convoyer))
+		next_hops = (order for order in corders when board.adjacency(from, order.convoyer) is 'xc')
 
 		# Convoy paths can fork but _.some guarantees that __some__ path to the
 		# destination exists.
@@ -115,7 +132,7 @@ Resolver = (board, orders, units, DEBUG = false) ->
 	holdStrength = (region) ->
 		# If the region is empty or contains a unit that moved successfully then
 		# hold strength is 0
-		if not units[region]? or ordersWhere(null, 'MOVE', 'SUCCEEDS', from: region)
+		if not board.region(region).unit? or ordersWhere(null, 'MOVE', 'SUCCEEDS', from: region)
 			return 0
 		# If a unit tried to move from this region and failed then hold strength is
 		# 1.
@@ -138,9 +155,9 @@ Resolver = (board, orders, units, DEBUG = false) ->
 			else
 				undefined
 
-		if (not units[order.to]?) or (dest_order? and dest_order.to isnt order.from)
+		if (not board.region(order.to).unit?) or (dest_order? and dest_order.to isnt order.from)
 			return 1 + support(order)
-		else if units[order.to]?.country is order.country
+		else if board.region(order.to).unit?.country is order.country
 			# We can't dislodge our own units
 			return 0
 		else
@@ -150,7 +167,7 @@ Resolver = (board, orders, units, DEBUG = false) ->
 			val = 1 + (oW(
 				'SUPPORT', 'SUCCEEDS', {from, to},
 				country: (c) ->
-					c isnt units[order.to]?.country
+					c isnt board.region(order.to).unit?.country
 			)?.length ? 0)
 			return val
 
@@ -211,37 +228,25 @@ Resolver = (board, orders, units, DEBUG = false) ->
 
 	self.describe = (order) ->
 
+		region = (order) -> board.region utils.actor order
 		dscr = switch order.type
 			when 'CONVOY' then "
-				#{units[order.convoyer].country}'s Fleet in
+				#{region(order).unit.country.name}'s Fleet in
 				#{order.convoyer} convoys #{order.from} to #{order.to}
 			"
 			when 'SUPPORT' then "
-				#{units[order.supporter].country}'s
-				#{units[order.supporter].type} in #{order.supporter} supports
-				#{units[order.from].type} in #{order.from} to #{order.to}
+				#{region(order).unit.country.name}'s
+				#{region(order).unit.type} in #{order.supporter} supports
+				#{region(order).unit.type} in #{order.from} to #{order.to}
 			"
 			when 'MOVE' then "
-				#{units[order.from].country}'s
-				#{units[order.from].type} in #{order.from} moves to #{order.to}
+				#{region(order).unit.country.name}'s
+				#{region(order).unit.type} in #{order.from} moves to #{order.to}
 			"
 		return dscr + "#{pad(self.describeSucceeds(order.succeeds), ' ')}"
 
 	showResult = (status) ->
 		debug "ORDER ", status
-
-	inflateUnits = ->
-		# It's convenient to have country and region on the units but kind of a pain to
-		# keep it updated in both places so we build it out just the once here.
-		for region,unit of units
-			unit.region = region
-
-			for order in orders
-				# Figure out which region is the actor int the order so that we can use
-				# that as the key when setting the unit's country.
-				region = utils.actor order.type
-
-				units[region].country = order.country
 
 	pad = (str, end = '') -> str and "#{end or ' '}#{str}#{end}" or '' 
 
@@ -268,7 +273,6 @@ Resolver = (board, orders, units, DEBUG = false) ->
 
 	self.adjudicate = CycleGuard(self.adjudicate, handleCycle).fork()
 
-	init()
 	return self
 
 module.exports = Resolver
