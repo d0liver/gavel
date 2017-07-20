@@ -11,8 +11,6 @@ Resolver = (board, orders, units, DEBUG = false) ->
 	init = ->
 		inflateUnits()
 
-	console.log()
-
 	self.resolve = ->
 		for order in orders when not order.succeeds?
 			try
@@ -26,7 +24,7 @@ Resolver = (board, orders, units, DEBUG = false) ->
 	# nr - The number of the order to be resolved.
 	# Returns the resolution for that order.
 	self.adjudicate = (order) ->
-		console.log "EVALUATING ORDER: ", self.describe(order)
+		console.log "EVALUATING ORDER: ", self.describe order
 
 		switch order.type
 			when 'MOVE'
@@ -81,6 +79,28 @@ Resolver = (board, orders, units, DEBUG = false) ->
 				# move and convoy at the same time so it's sufficient to check if
 				# there was a successful move to the convoyer.
 				return ! ordersWhere order, 'MOVE', 'SUCCEEDS', to: order.convoyer
+
+	# Check if _from_ is adjacent to _to_ or for successful convoy orders
+	# allowing _unit_ to move from _from_ to _to_.
+	hasPath = (unit) ->
+		corders = ordersWhere null, 'CONVOY', 'SUCCEEDS', {from, to}
+		return _hasPath unit.from, unit.to, corders
+
+	_hasPath = (from, dest, corders) ->
+
+		# We have a _from_ connected to the destination so we are finished.
+		# Either we have a connected convoy or this is the initial _from_ and
+		# the two regions are adjacent.
+		if areAdjacent from, dest
+			return true
+
+		# We don't have a complete path yet, so we have to keep looking for
+		# convoys that can get us there.
+		next_hops = (order for order in corders when areAdjacent(from, order.convoyer))
+
+		# Convoy paths can fork but _.some guarantees that __some__ path to the
+		# destination exists.
+		return _.some(_hasPath hop.convoyer, dest, corders for hop in next_hops)
 
 	holdStrength = (region) ->
 		oW = ordersWhere.bind(null, null)
@@ -142,12 +162,6 @@ Resolver = (board, orders, units, DEBUG = false) ->
 		{from, to} = order
 		return ordersWhere(order, 'SUPPORT', 'SUCCEEDS', {from, to})?.length ? 0
 
-	# Fast way to get orders with certain constraints. When we call this function
-	# it's almost always to find __other__ orders that will affect the order
-	# currently being adjudicated. As such, we almost never want to consider the
-	# _current_ order in our results so we take it as the first argument which
-	# makes the function signature slightly more confusing but is much more
-	# convenient.
 	ordersWhere = (current, type, requires, matches) ->
 		results = []
 		`outer: //`

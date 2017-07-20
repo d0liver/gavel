@@ -19,7 +19,9 @@ __Engine:__ A facade into the underlying functionality of the library. Should co
 
 __Resolver:__ Responsible for low level adjudication of orders according to the rules. Doesn't know about orders formats, map data, etc. except via other components but is solely responsible for the logical aspects of adjudication.
 
-__utils:__ Contains `attackStrength`, `defendStrength`, `holdStrength`, `holdStrength`, `preventStrength`, `support` which correspond to the described values in _The Math of Adjudication_.
+Contains `attackStrength`, `defendStrength`, `holdStrength`, `holdStrength`, `preventStrength`, `support` which correspond to the described values in _The Math of Adjudication_.
+
+__Resolver.ordersWhere:__ Fast way to get orders with certain constraints. When we call this function it's almost always to find __other__ orders that will affect the order currently being adjudicated. As such, we almost never want to consider the _current_ order in our results so we take it as the first argument which makes the function signature slightly more confusing but is much more convenient.
 
 __describe:__ Convert logics to human readable text to use as output for testing. E.g. some object describing orders gets translated into "Turkey Moves A to Romania".
 

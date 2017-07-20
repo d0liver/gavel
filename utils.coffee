@@ -53,3 +53,5 @@ exports.expandUnits = ->
 			region = exports.actor order
 
 			units[region].country = order.country
+
+exports.copy = (obj) -> JSON.parse JSON.stringify obj
