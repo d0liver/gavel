@@ -21,6 +21,8 @@ Resolver = (board, orders, units, DEBUG = false) ->
 				else
 					throw err
 
+	succ = (result) -> (result and 'SUCCEEDS') or (! result and 'FAILS')
+
 	# nr - The number of the order to be resolved.
 	# Returns the resolution for that order.
 	self.adjudicate = (order) ->
@@ -28,6 +30,9 @@ Resolver = (board, orders, units, DEBUG = false) ->
 
 		switch order.type
 			when 'MOVE'
+				unless hasPath(order)
+					return false
+
 				# Get the largest prevent strength
 				preventers = ordersWhere(order, 'MOVE', 'EXISTS', to: order.to) or []
 
@@ -51,7 +56,7 @@ Resolver = (board, orders, units, DEBUG = false) ->
 					if opposing_order
 						debug "DEFEND: ", defendStrength(opposing_order)
 
-				return attack_strength > prevent_strength and (
+				return succ attack_strength > prevent_strength and (
 					(
 						opposing_order? and
 						attack_strength > defendStrength(opposing_order)
@@ -60,6 +65,11 @@ Resolver = (board, orders, units, DEBUG = false) ->
 				)
 
 			when 'SUPPORT'
+
+				# Support can only be into an adjacent region
+				unless board.areAdjacent order.supporter, order.to
+					return 'ILLEGAL'
+
 				# If there is a move order moving to the unit that is supporting
 				# that is not the destination of the support (you can't cut a
 				# support that's supporting directly against you) then the support
@@ -68,7 +78,7 @@ Resolver = (board, orders, units, DEBUG = false) ->
 						to: order.supporter
 						from: (f) -> f isnt order.to
 						country: (c) -> c isnt order.country
-				return ! ordersWhere order, 'MOVE', 'EXISTS',
+				return succ ! ordersWhere order, 'MOVE', 'EXISTS',
 					to: order.supporter
 					from: (f) ->
 						f isnt order.to
@@ -78,13 +88,13 @@ Resolver = (board, orders, units, DEBUG = false) ->
 				# A convoy succeeds when it's not dislodged. We know that we can't
 				# move and convoy at the same time so it's sufficient to check if
 				# there was a successful move to the convoyer.
-				return ! ordersWhere order, 'MOVE', 'SUCCEEDS', to: order.convoyer
+				return succ ! ordersWhere order, 'MOVE', 'SUCCEEDS', to: order.convoyer
 
 	# Check if _from_ is adjacent to _to_ or for successful convoy orders
 	# allowing _unit_ to move from _from_ to _to_.
-	hasPath = (unit) ->
+	hasPath = (order) ->
 		corders = ordersWhere null, 'CONVOY', 'SUCCEEDS', {from, to}
-		return _hasPath unit.from, unit.to, corders
+		return _hasPath order.from, order.to, corders
 
 	_hasPath = (from, dest, corders) ->
 
@@ -103,24 +113,23 @@ Resolver = (board, orders, units, DEBUG = false) ->
 		return _.some(_hasPath hop.convoyer, dest, corders for hop in next_hops)
 
 	holdStrength = (region) ->
-		oW = ordersWhere.bind(null, null)
 		# If the region is empty or contains a unit that moved successfully then
 		# hold strength is 0
-		if not units[region]? or oW('MOVE', 'SUCCEEDS', from: region)
+		if not units[region]? or ordersWhere(null, 'MOVE', 'SUCCEEDS', from: region)
 			return 0
 		# If a unit tried to move from this region and failed then hold strength is
 		# 1.
-		else if !! oW('MOVE', 'FAILS', from: region)
+		else if !! ordersWhere(null, 'MOVE', 'FAILS', from: region)
 			return 1
 		else
-			# TODO: A unit cannot support itself to hold. Make sure this is
-			# addressed in the map constraints.
-			return 1 + (oW('SUPPORT', 'SUCCEEDS', from: region, to: region)?.length ? 0)
+			# NOTE: Illegal supports will not be marked as successful and so
+			# will not be included here.
+			supports = ordersWhere 'SUPPORT', 'SUCCEEDS', from: region, to: region
+
+			return 1 + (supports?.length ? 0)
 
 	attackStrength = (order) ->
 		oW = ordersWhere.bind(null, order)
-		# TODO: Check and see if the path for this attack was successful (deal with
-		# convoys, ugh)
 		# TODO: This needs review
 		res = oW('MOVE', 'SUCCEEDS', {from: order.to})
 		dest_order =

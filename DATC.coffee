@@ -1,5 +1,6 @@
 {MongoClient} = require 'mongodb'
 co            = require 'co'
+fs            = require 'fs'
 
 DB_URI                             = "mongodb://localhost:27017/deadpotato"
 Engine                             = require '../lib/Engine'
@@ -12,15 +13,18 @@ process.on 'unhandledRejection', (reason, p) ->
 
 MongoClient.connect DB_URI, co.wrap (err, db) ->
 
-	console.log "Fetching variant data for Standard map.."
-	variant_data = yield db.collection('variants').findOne(slug: 'standard')
-	console.log "Decoding the map data"
-	variant_data.map_data = JSON.parse(variant_data.map_data)
-	engine = Engine(variant_data, "England", Resolver)
+	try
+		gdata = fs.readFileSync './test_game_data.json'
+	catch e
+		console.log 'Failed to read sample game from test_game_data.json'
+		process.exit 1
+
+	gdata.map_data = JSON.parse gdata.map_data
+
+	board = Board gdata
 
 	runTests = ->
 		console.log "Running DATC tests....\n"
-		db.close()
 
 		test 'Illegal move - move to non-adjacent region',
 			'England: F North Sea - Picardy', 'FAILS'
@@ -55,8 +59,8 @@ MongoClient.connect DB_URI, co.wrap (err, db) ->
 			'Italy: A Tyrolia Supports A Venice - Trieste'
 			'Austria: F Trieste Supports F Trieste - Trieste'
 
-	test = (test_name, orders...) ->
-		console.log "Running test: #{test_name}"
+	test = (test_name, expected_result, orders...) ->
+		console.log "Test: #{test_name}"
 		succeeds = true
 		expected_result = expected_result is 'SUCCEEDS'
 
