@@ -4,7 +4,7 @@ fs = require 'fs'
 # Local
 Resolver                           = require './Resolver'
 {UserException, ResolverException} = require './Exceptions'
-debug                              = require './debug'
+debug                              = require('./debug') 'DATC'
 Board                              = require './Board'
 parseOrder                         = require './parseOrder'
 
@@ -22,46 +22,56 @@ datc = (board) ->
 	t 'Illegal move - Army to sea',
 		'England: A Liverpool - Irish Sea', 'FAILS'
 
-	# test 'Illegal move - Fleet to land',
-	# 	'Germany: F Kiel - Munich', 'FAILS'
+	t 'Illegal move - Fleet to land',
+		'Germany: F Kiel - Munich', 'FAILS'
 
-	# test 'Illegal move - Unit to its own region',
-	# 	'Germany: F Kiel - Kiel', 'FAILS'
+	t 'Illegal move - Unit to its own region',
+		'Germany: F Kiel - Kiel', 'ILLEGAL'
 
-	# test 'Illegal move - Unit convoy to its own region',
-	# 	'England: F North Sea Convoys A Yorkshire - Yorkshire', 'SUCCEEDS'
-	# 	'England: A Yorkshire - Yorkshire', 'FAILS'
-	# 	'England: A Liverpool Supports A Yorkshire - Yorkshire', 'SUCCEEDS'
-	# 	'Germany: F London - Yorkshire', 'SUCCEEDS'
-	# 	'Germany: A Wales Supports F London - Yorkshire', 'SUCCEEDS'
+	t 'Illegal move - Unit convoy to its own region',
+		'England: F North Sea Convoys A Yorkshire - Yorkshire', 'ILLEGAL'
+		'England: A Yorkshire - Yorkshire', 'ILLEGAL'
+		'England: A Liverpool Supports A Yorkshire - Yorkshire', 'ILLEGAL'
+		'Germany: F London - Yorkshire', 'SUCCEEDS'
+		'Germany: A Wales Supports F London - Yorkshire', 'SUCCEEDS'
 
 	# NOTE: 6.A.6 doesn't belong here (implementation differences) and
 	# should be tested elsewhere (be sure to add orders in such a way that
 	# the user is checked for their country first, i.e., no orders will
 	# ever exist for the wrong country at this level)
 
-	# test 'Illegal move - Only armies can be convoyed', 'FAILS',
-	# 	'England: F London - Belgium'
-	# 	'England: F North Sea Convoys A London - Belgium'
+	t 'Illegal move - Only armies can be convoyed',
+		# TODO: This should probably be illegal but it's pretty inconsequential
+		# except for when inputting orders via the UI. Additionally, this kind
+		# of thing is actually handled in hasPath which is convenient. Inside
+		# the evaluation of the convoy order itself some work would have to be
+		# done to get the unit type in the from region of the convoy order.
+		# Especially difficult in testing where the units are simply implied
+		# from the orders.
+		'England: F London - Belgium', 'FAILS'
+		'England: F North Sea Convoys A London - Belgium', 'SUCCEEDS'
 
-	# test 'Illegal support - An army cannot support itself to hold', 'FAILS',
-	# 	'Italy: A Venice - Trieste'
-	# 	'Italy: A Tyrolia Supports A Venice - Trieste'
-	# 	'Austria: F Trieste Supports F Trieste - Trieste'
+	t 'Illegal support - An army cannot support itself to hold',
+		'Italy: A Venice - Trieste', 'SUCCEEDS'
+		'Italy: A Tyrolia Supports A Venice - Trieste', 'SUCCEEDS'
+		'Austria: F Trieste Supports F Trieste - Trieste', 'ILLEGAL'
 
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"
 
 	orders = (parseOrder arg for arg in args by 2)
-	resolver = Resolver board, orders
+	resolver = Resolver board, orders, true
 
 	for order, i in orders
 		# Expected results are given after each order in the args.
 		expect = args[2*i+1]
 
-		debug "Expected result is: ", expect
-		debug "Result was: ", resolver.resolve(order)
-		if resolver.resolve(order) isnt expect
+		result = resolver.resolve order
+		debug 'Evaluated order: ', args[2*i]
+		# debug 'Parsed order: ', order
+		debug "Expect: #{expect}, Actual: #{result}"
+
+		if result isnt expect
 			console.log "Test failed\n"
 			return false
 

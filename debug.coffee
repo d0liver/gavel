@@ -1,8 +1,7 @@
-DEBUG = true
+which = ['Resolver', 'DATC']
 
-module.exports =
-	if DEBUG
-		# Print debug message when DEBUG switch is on
-		(args...) -> console.log "DEBUG: ", args...
-	else
-		-> # Do nothing when DEBUG mode is off
+module.exports = (flag) ->
+	(args...) ->
+		if flag in which
+			# Print debug messages where they're enabled (in _which_)
+			console.log "DEBUG: ", args...

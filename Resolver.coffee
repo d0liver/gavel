@@ -5,23 +5,25 @@ _ = require 'underscore'
 CycleGuard       = require './CycleGuard'
 {CycleException} = require './Exceptions'
 utils            = require './utils'
-debug            = require './debug'
+debug            = require('./debug') 'Resolver'
 
 # Adapted from "The Math of Adjudication" by Lucas Kruijswijk
 # We assume in the resolver that the map constraints have been satisfied (moves
 # are to valid locations, etc.)
-Resolver = (board, orders, DEBUG = false) ->
+Resolver = (board, orders, TEST = false) ->
 	self = {}
 
-	# Make sure that the units for the orders exist on the board.
-	# TODO: More checks than this are needed
-	self.checkOrder = (order) -> board.region(utils.actor order).unit?
+	# Make sure that the units for the orders exist on the board and are of the
+	# correct type. Isolating this logic here allows us to trust the orders for
+	# the test cases without having to supply fake data to the board while
+	# still checking that things add up in the real cases.
+	self.checkOrder = (order) ->
+		(TEST or board.region(utils.actor order)?.unit?.type is order.utype) and
+		order.from isnt order.to
 
 	self.resolve = (order) ->
 		try
-			order.succeeds =
-				unless self.checkOrder order then 'ILLEGAL'
-				else self.adjudicate order
+			order.succeeds = self.adjudicate order
 		catch err
 			if err instanceof CycleException
 				order.succeeds = handleCycle err
@@ -33,13 +35,15 @@ Resolver = (board, orders, DEBUG = false) ->
 	# nr - The number of the order to be resolved.
 	# Returns the resolution for that order.
 	self.adjudicate = (order) ->
-		debug "EVALUATING ORDER: ", self.describe order
+
+		# This needs to be here and not in the call to resolve because
+		# adjudicate can be called internally and we still want the ILLEGAL
+		# resolution in those cases.
+		return 'ILLEGAL' unless self.checkOrder order
 
 		switch order.type
 			when 'MOVE'
-				adj_type = board.adjacency order.from, order.to
-				unless hasPath(order)
-					return 'FAILS'
+				unless hasPath(order) then return 'FAILS'
 
 				# Get the largest prevent strength
 				preventers = ordersWhere(order, 'MOVE', 'EXISTS', to: order.to) or []
@@ -56,13 +60,13 @@ Resolver = (board, orders, DEBUG = false) ->
 
 				hold_strength = holdStrength(order.to)
 
-				if DEBUG
-					debug "OPPOSING ORDER: ", opposing_order
-					debug "ATTACK: ", attack_strength
-					debug "PREVENT: ", prevent_strength
-					debug "HOLD: ", hold_strength
-					if opposing_order
-						debug "DEFEND: ", defendStrength(opposing_order)
+				# This stuff is useful but debug needs to take a flag
+				# debug "OPPOSING ORDER: ", opposing_order
+				# debug "ATTACK: ", attack_strength
+				# debug "PREVENT: ", prevent_strength
+				# debug "HOLD: ", hold_strength
+				if opposing_order
+					debug "DEFEND: ", defendStrength(opposing_order)
 
 				return succ attack_strength > prevent_strength and (
 					(
@@ -75,8 +79,7 @@ Resolver = (board, orders, DEBUG = false) ->
 			when 'SUPPORT'
 
 				# Support can only be into an adjacent region
-				unless board.adjacency(order.supporter, order.to)?
-					return 'ILLEGAL'
+				return 'ILLEGAL' unless areAdjacent 'Army', order.from, order.to
 
 				# If there is a move order moving to the unit that is supporting
 				# that is not the destination of the support (you can't cut a
@@ -98,18 +101,33 @@ Resolver = (board, orders, DEBUG = false) ->
 				# there was a successful move to the convoyer.
 				return succ ! ordersWhere order, 'MOVE', 'SUCCEEDS', to: order.convoyer
 
+	# Uses the board adjacencies to determine if an order can move
+	areAdjacent = (type, from, to) ->
+
+		adjacencies = board.adjacencies from, to
+
+		switch type
+			when 'Fleet'
+				_.intersection(
+					adjacencies
+					['xc', 'sc', 'nc', 'ec', 'wc']
+				).length isnt 0
+			when 'Army'
+				'mv' in adjacencies
+
+
 	# Check if _from_ is adjacent to _to_ or for successful convoy orders
 	# allowing _unit_ to move from _from_ to _to_.
 	hasPath = (order) ->
-		unit = board.region(utils.actor order).unit
-		adj = board.adjacency(order.from, order.to)
+
 		corders = ordersWhere null, 'CONVOY', 'SUCCEEDS', _.pick order, 'from', 'to'
 
 		# Check if there's a valid immediately adjacent region
-		if adj is 'mv' and unit.type is 'Army' or
-		adj in ['xc', 'sc', 'nc', 'ec', 'wc'] and unit.type is 'Fleet'
+		if areAdjacent order.utype, order.from, order.to
 			return true
-		else unless corders.length
+		# _hasPath is for figuring out convoy routes which can only happen if
+		# the unit is an army and the destination is land.
+		else unless order.utype is 'Army' and board.region(order.to).type is 'Land'
 			return false
 
 		return _hasPath order.from, order.to, corders
@@ -118,12 +136,15 @@ Resolver = (board, orders, DEBUG = false) ->
 
 		# We have a _from_ connected to the destination so this is the end of
 		# the convoy and we are finished.
-		if board.adjacency(from, dest) is 'xc' and 
+		if board.adjacency(from, dest)
 			return true
 
 		# We don't have a complete path yet, so we have to keep looking for
 		# convoys that can get us there.
-		next_hops = (order for order in corders when board.adjacency(from, order.convoyer) is 'xc')
+		next_hops = (
+			order for order in corders ? [] when \
+			board.adjacency(from, order.convoyer) is 'xc'
+		)
 
 		# Convoy paths can fork but _.some guarantees that __some__ path to the
 		# destination exists.
@@ -175,7 +196,6 @@ Resolver = (board, orders, DEBUG = false) ->
 		return 1 + support(order)
 
 	preventStrength = (order) ->
-		# TODO: Check and see if the path was successful.
 		# For a head to head battle where the other side was successful our
 		# strength is 0
 		if ordersWhere(order, 'MOVE', 'SUCCEEDS', to: order.from)
@@ -191,7 +211,7 @@ Resolver = (board, orders, DEBUG = false) ->
 	ordersWhere = (current, type, requires, matches) ->
 		results = []
 		`outer: //`
-		for order in orders when order.type is type and order isnt current
+		for order in orders when order.type is type and ! _.isEqual order, current
 			for key, value of matches
 				# Check if the order values match the key value pairs given in the
 				# matches or if a function was provided instead of a value then
@@ -206,9 +226,9 @@ Resolver = (board, orders, DEBUG = false) ->
 			# times, we care specifically if the order succeeded or failed. In
 			# these cases one can set _succeeds_ and only orders which match that
 			# criterion will be returned.
-			if requires is 'EXISTS' or
-			(self.adjudicate(order) and requires is 'SUCCEEDS') or
-			(!self.adjudicate(order) and requires is 'FAILS')
+			result = self.adjudicate order
+			if result isnt 'ILLEGAL' and requires is 'EXISTS' or
+			result is requires
 				results.push order
 
 		# This makes it so that we can use the results as a boolean or use the
@@ -231,17 +251,17 @@ Resolver = (board, orders, DEBUG = false) ->
 		region = (order) -> board.region utils.actor order
 		dscr = switch order.type
 			when 'CONVOY' then "
-				#{region(order).unit.country.name}'s Fleet in
+				#{order.country}'s Fleet in
 				#{order.convoyer} convoys #{order.from} to #{order.to}
 			"
 			when 'SUPPORT' then "
-				#{region(order).unit.country.name}'s
-				#{region(order).unit.type} in #{order.supporter} supports
-				#{region(order).unit.type} in #{order.from} to #{order.to}
+				#{order.country}'s
+				#{order.utype} in #{order.supporter} supports
+				#{order.utype} in #{order.from} to #{order.to}
 			"
 			when 'MOVE' then "
-				#{region(order).unit.country.name}'s
-				#{region(order).unit.type} in #{order.from} moves to #{order.to}
+				#{order.country}'s
+				#{order.utype} in #{order.from} moves to #{order.to}
 			"
 		return dscr + "#{pad(self.describeSucceeds(order.succeeds), ' ')}"
 
@@ -252,15 +272,15 @@ Resolver = (board, orders, DEBUG = false) ->
 
 	handleCycle = ({cycle}) ->
 
-		console.log "FIRST"
+		debug 'FIRST'
 		first = cycle.replay(true)
 
-		console.log "SECOND"
+		debug 'SECOND'
 		second = cycle.replay (false)
 
 		# Same result so it doesn't matter which decision we use.
 		if first is second
-			console.log "CONSISTENT OUTCOME"
+			debug 'CONSISTENT OUTCOME'
 			cycle.remember(first)
 			return first
 		else

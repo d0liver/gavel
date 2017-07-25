@@ -3,7 +3,7 @@ parseOrder = (order) ->
 	move_re = ///
 		^
 		([A-Za-z]+)\:           # Country
-		\s+(?:A|F)              # Unit type
+		\s+(A|F)                # Unit type
 		\s+((?:\w+\s+)?(?:\w+)) # Move from
 		\s+\-
 		\s+((?:\w+\s+)?(?:\w+)) # Move to
@@ -38,9 +38,10 @@ parseOrder = (order) ->
 
 	return if matches = order.match(move_re)
 		type    : 'MOVE'
-		from    : matches[2]
-		to      : matches[3]
+		from    : matches[3]
+		to      : matches[4]
 		country : matches[1]
+		utype   : matches[2] is 'A' and 'Army' or 'Fleet'
 	else if matches = order.match(convoy_re)
 		type     : 'CONVOY'
 		convoyer : matches[2]

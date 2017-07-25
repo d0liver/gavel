@@ -22,13 +22,13 @@ Board = (gdata) ->
 	fleets = -> yield from units.bind null, 'Fleet'
 	armies = -> yield from units.bind null, 'Army'
 
-	self.adjacency = (from, to) ->
+	self.adjacencies = (from, to) ->
 		regions = gdata.map_data.regions
 
 		region = do ->
 			return region for rname,region of regions when rname is from
 
-		return region.adjacencies.find (a) -> a.region is to
+		return _.pluck region.adjacencies.filter((a) -> a.region is to), 'type'
 
 	units = (type) ->
 		_.union (
