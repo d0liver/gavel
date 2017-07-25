@@ -56,6 +56,25 @@ datc = (board) ->
 		'Italy: A Tyrolia Supports A Venice - Trieste', 'SUCCEEDS'
 		'Austria: F Trieste Supports F Trieste - Trieste', 'ILLEGAL'
 
+	t 'Illegal move - Fleets must follow coast if not on sea',
+		'Italy: F Rome - Venice', 'FAILS'
+
+	t 'Illegal support - Support on unreachable destination not possible',
+		'Austria: A Venice Hold', 'SUCCEEDS'
+		'Italy: F Rome Supports A Apulia - Venice', 'ILLEGAL'
+		'Italy: A Apulia - Venice', 'FAILS'
+
+	t 'Regular bounce - Two armies bouncing with each other',
+		'Austria: A Vienna - Tyrolia', 'FAILS'
+		'Italy: A Venice - Tyrolia', 'FAILS'
+
+	t 'Regular bounce - Three armies bouncing with each other',
+		'Austria: A Vienna - Tyrolia', 'FAILS'
+		'Germany: A Munich - Tyrolia', 'FAILS'
+		'Italy: A Venice - Tyrolia', 'FAILS'
+
+	# TODO: Enforce Coastal Movements
+
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"
 

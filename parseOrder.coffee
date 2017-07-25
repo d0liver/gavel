@@ -10,6 +10,15 @@ parseOrder = (order) ->
 		$
 	///
 
+	hold_re = ///
+		^
+		([A-Za-z]+)\:           # Country
+		\s+(A|F)                # Unit type
+		\s+((?:\w+\s+)?(?:\w+)) # Move from
+		\s+Hold
+		$
+	///
+
 	convoy_re = ///
 		^
 		([A-Za-z]+)\:           # Country
@@ -42,8 +51,14 @@ parseOrder = (order) ->
 		to      : matches[4]
 		country : matches[1]
 		utype   : matches[2] is 'A' and 'Army' or 'Fleet'
+	else if matches = order.match hold_re
+		type    : 'HOLD'
+		from    : matches[3]
+		country : matches[1]
+		utype   : matches[2] is 'A' and 'Army' or 'Fleet'
 	else if matches = order.match(convoy_re)
 		type     : 'CONVOY'
+		utype    : 'Fleet'
 		convoyer : matches[2]
 		from     : matches[3]
 		to       : matches[4]
@@ -51,6 +66,7 @@ parseOrder = (order) ->
 	else if matches = order.match(support_re)
 		type      : 'SUPPORT'
 		supporter : matches[3]
+		utype     : matches[2] is 'A' and 'Army' or 'Fleet'
 		from      : matches[5]
 		to        : matches[6]
 		country   : matches[1]

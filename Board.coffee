@@ -15,6 +15,8 @@ Board = (gdata) ->
 	# from the game data but with the unit added to it (because units are
 	# attached to the country in the incoming data).
 	self.region = (rname) ->
+		return unless rname of gdata.map_data.regions
+
 		region = utils.copy gdata.map_data.regions[rname]
 		region.unit = _.findWhere units(), region: rname
 		return region

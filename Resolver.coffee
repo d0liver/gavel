@@ -46,7 +46,7 @@ Resolver = (board, orders, TEST = false) ->
 				unless hasPath(order) then return 'FAILS'
 
 				# Get the largest prevent strength
-				preventers = ordersWhere(order, 'MOVE', 'EXISTS', to: order.to) or []
+				preventers = ordersWhere(order, 'MOVE', 'EXISTS', to: order.to) ? []
 
 				prevent_strength = preventers.reduce (max, preventer) ->
 					Math.max max, preventStrength preventer
@@ -79,7 +79,11 @@ Resolver = (board, orders, TEST = false) ->
 			when 'SUPPORT'
 
 				# Support can only be into an adjacent region
-				return 'ILLEGAL' unless areAdjacent 'Army', order.from, order.to
+				unless (
+					order.type is 'HOLD' or
+					areAdjacent order.utype, order.supporter, order.to
+				) and order.supporter isnt order.from
+					return 'ILLEGAL'
 
 				# If there is a move order moving to the unit that is supporting
 				# that is not the destination of the support (you can't cut a
@@ -99,6 +103,9 @@ Resolver = (board, orders, TEST = false) ->
 				# A convoy succeeds when it's not dislodged. We know that we can't
 				# move and convoy at the same time so it's sufficient to check if
 				# there was a successful move to the convoyer.
+				return succ ! ordersWhere order, 'MOVE', 'SUCCEEDS', to: order.convoyer
+			when 'HOLD'
+				# Same thing with convoy and hold orders (see above)
 				return succ ! ordersWhere order, 'MOVE', 'SUCCEEDS', to: order.convoyer
 
 	# Uses the board adjacencies to determine if an order can move
@@ -121,7 +128,6 @@ Resolver = (board, orders, TEST = false) ->
 	hasPath = (order) ->
 
 		corders = ordersWhere null, 'CONVOY', 'SUCCEEDS', _.pick order, 'from', 'to'
-
 		# Check if there's a valid immediately adjacent region
 		if areAdjacent order.utype, order.from, order.to
 			return true
@@ -153,30 +159,25 @@ Resolver = (board, orders, TEST = false) ->
 	holdStrength = (region) ->
 		# If the region is empty or contains a unit that moved successfully then
 		# hold strength is 0
-		if not board.region(region).unit? or ordersWhere(null, 'MOVE', 'SUCCEEDS', from: region)
+		if not board.region(region)?.unit? or ordersWhere(null, 'MOVE', 'SUCCEEDS', from: region)
 			return 0
 		# If a unit tried to move from this region and failed then hold strength is
 		# 1.
 		else if !! ordersWhere(null, 'MOVE', 'FAILS', from: region)
 			return 1
 		else
-			# NOTE: Illegal supports will not be marked as successful and so
-			# will not be included here.
-			supports = ordersWhere 'SUPPORT', 'SUCCEEDS', from: region, to: region
+			supports = ordersWhere 'SUPPORT', 'SUCCEEDS', from: region, type: 'HOLD'
 
 			return 1 + (supports?.length ? 0)
 
 	attackStrength = (order) ->
-		oW = ordersWhere.bind(null, order)
+		oW = ordersWhere.bind null, order
 		# TODO: This needs review
-		res = oW('MOVE', 'SUCCEEDS', {from: order.to})
-		dest_order =
-			if res?.length is 1
-				res[0]
-			else
-				undefined
+		res = oW 'MOVE', 'SUCCEEDS', from: order.to
+		dest_order = res?[0]
 
-		if (not board.region(order.to).unit?) or (dest_order? and dest_order.to isnt order.from)
+		if not board.region(order.to)?.unit? or
+		dest_order? and dest_order.to isnt order.from
 			return 1 + support(order)
 		else if board.region(order.to).unit?.country is order.country
 			# We can't dislodge our own units
@@ -227,8 +228,8 @@ Resolver = (board, orders, TEST = false) ->
 			# these cases one can set _succeeds_ and only orders which match that
 			# criterion will be returned.
 			result = self.adjudicate order
-			if result isnt 'ILLEGAL' and requires is 'EXISTS' or
-			result is requires
+			if result isnt 'ILLEGAL' and
+			(requires is 'EXISTS' or result is requires)
 				results.push order
 
 		# This makes it so that we can use the results as a boolean or use the
