@@ -30,7 +30,21 @@ Board = (gdata) ->
 		region = do ->
 			return region for rname,region of regions when rname is from
 
-		return _.pluck region.adjacencies.filter((a) -> a.region is to), 'type'
+		for adj in region.adjacencies when adj.region is to
+			# TODO: The logic below is a kind of hack that converts an
+			# adjacency that is from a region to a coast into one that
+			# follows the nc, sc, ec, wc convention. It's necessary because
+			# of the way that the parser works currently which should be
+			# changed.  Putting it here ensures that the Resolver won't
+			# need to change when the parser is updated since it will be
+			# the same from the point of view of the Resolver.
+			unless adj.coast?
+				adj.type
+			else switch adj.coast
+				when 'North' then 'nc'
+				when 'South' then 'sc'
+				when 'East' then 'ec'
+				when 'West' then 'wc'
 
 	units = (type) ->
 		_.union (

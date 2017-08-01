@@ -73,7 +73,16 @@ datc = (board) ->
 		'Germany: A Munich - Tyrolia', 'FAILS'
 		'Italy: A Venice - Tyrolia', 'FAILS'
 
-	# TODO: Enforce Coastal Movements
+	t 'Coastal issues - Coast not specified',
+		'France: F Portugal - Spain', 'ILLEGAL'
+
+	t 'Coastal issues - illegal coast',
+		'France: F Gascony - Spain(sc)', 'FAILS'
+
+	t 'Coastal issues - fleet support to non adjacent coast',
+		'France: F Gascony - Spain(nc)', 'SUCCEEDS'
+		# 'France: F Marseilles Supports F Gascony - Spain(nc)', 'SUCCEEDS'
+		# 'Italy: F Western Mediterranean - Spain(sc)', 'FAILS'
 
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"

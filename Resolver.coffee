@@ -13,14 +13,6 @@ debug            = require('./debug') 'Resolver'
 Resolver = (board, orders, TEST = false) ->
 	self = {}
 
-	# Make sure that the units for the orders exist on the board and are of the
-	# correct type. Isolating this logic here allows us to trust the orders for
-	# the test cases without having to supply fake data to the board while
-	# still checking that things add up in the real cases.
-	self.checkOrder = (order) ->
-		(TEST or board.region(utils.actor order)?.unit?.type is order.utype) and
-		order.from isnt order.to
-
 	self.resolve = (order) ->
 		try
 			order.succeeds = self.adjudicate order
@@ -39,11 +31,24 @@ Resolver = (board, orders, TEST = false) ->
 		# This needs to be here and not in the call to resolve because
 		# adjudicate can be called internally and we still want the ILLEGAL
 		# resolution in those cases.
-		return 'ILLEGAL' unless self.checkOrder order
+		valid_region = board.region(utils.actor order)?.unit?.type is order.utype
+		hop_move = order.from is order.to
+		# Determine whether or not the destination region has coasts
+		no_coast = Object.keys(board.region(order.to)?.coasts ? {}).length is 0
+		# If the destination has coasts then we _must_ specify one or the order
+		# is illegal. If it ends up that we can't actually move to a coast then
+		# hasPath will return false and the order will fail but we're not
+		# considering it illegal.
+		specified_coast = no_coast or order?.coast or order.type is 'HOLD'
+
+		unless (valid_region or TEST) and not hop_move and specified_coast
+			return 'ILLEGAL'
 
 		switch order.type
 			when 'MOVE'
-				unless hasPath(order) then return 'FAILS'
+				# Preflight checks. Coast must be specified if the region has
+				# coasts. We must have a path to the destination.
+				return 'FAILS' unless hasPath order
 
 				# Get the largest prevent strength
 				preventers = ordersWhere(order, 'MOVE', 'EXISTS', to: order.to) ? []
@@ -109,18 +114,15 @@ Resolver = (board, orders, TEST = false) ->
 				return succ ! ordersWhere order, 'MOVE', 'SUCCEEDS', to: order.convoyer
 
 	# Uses the board adjacencies to determine if an order can move
-	areAdjacent = (type, from, to) ->
+	areAdjacent = (type, from, to, coast = null) ->
 
 		adjacencies = board.adjacencies from, to
 
-		switch type
-			when 'Fleet'
-				_.intersection(
-					adjacencies
-					['xc', 'sc', 'nc', 'ec', 'wc']
-				).length isnt 0
-			when 'Army'
-				'mv' in adjacencies
+		if type is 'Fleet'
+			types = _.intersection adjacencies, ['xc', 'sc', 'nc', 'ec', 'wc']
+			types.length isnt 0 and (!coast? or coast in types)
+		else if type is 'Army'
+			'mv' in adjacencies
 
 
 	# Check if _from_ is adjacent to _to_ or for successful convoy orders
@@ -128,8 +130,9 @@ Resolver = (board, orders, TEST = false) ->
 	hasPath = (order) ->
 
 		corders = ordersWhere null, 'CONVOY', 'SUCCEEDS', _.pick order, 'from', 'to'
+		{utype, from, to, coast} = order
 		# Check if there's a valid immediately adjacent region
-		if areAdjacent order.utype, order.from, order.to
+		if areAdjacent utype, from, to, coast
 			return true
 		# _hasPath is for figuring out convoy routes which can only happen if
 		# the unit is an army and the destination is land.

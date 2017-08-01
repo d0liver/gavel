@@ -7,6 +7,7 @@ parseOrder = (order) ->
 		\s+((?:\w+\s+)?(?:\w+)) # Move from
 		\s+\-
 		\s+((?:\w+\s+)?(?:\w+)) # Move to
+		(?:\((\w+)\))?                # Optional coast
 		$
 	///
 
@@ -29,6 +30,7 @@ parseOrder = (order) ->
 		\s+((?:\w+\s+)?(?:\w+)) # Move from
 		\s+\-
 		\s+((?:\w+\s+)?(?:\w+)) # Move to
+		(?:\((\w+)\))?          # Optional coast
 		$
 	///
 
@@ -42,6 +44,7 @@ parseOrder = (order) ->
 		\s+((?:\w+\s+)?(?:\w+)) # Move from
 		\s+\-
 		\s+((?:\w+\s+)?(?:\w+)) # Move to
+		(?:\((\w+)\))?          # Optional coast
 		$
 	///
 
@@ -51,6 +54,7 @@ parseOrder = (order) ->
 		to      : matches[4]
 		country : matches[1]
 		utype   : matches[2] is 'A' and 'Army' or 'Fleet'
+		coast   : matches[5]
 	else if matches = order.match hold_re
 		type    : 'HOLD'
 		from    : matches[3]
@@ -63,6 +67,7 @@ parseOrder = (order) ->
 		from     : matches[3]
 		to       : matches[4]
 		country  : matches[1]
+		coast    : matches[5]
 	else if matches = order.match(support_re)
 		type      : 'SUPPORT'
 		supporter : matches[3]
@@ -70,5 +75,6 @@ parseOrder = (order) ->
 		from      : matches[5]
 		to        : matches[6]
 		country   : matches[1]
+		coast     : matches[5]
 
 module.exports = parseOrder
