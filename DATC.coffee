@@ -81,8 +81,39 @@ datc = (board) ->
 
 	t 'Coastal issues - fleet support to non adjacent coast',
 		'France: F Gascony - Spain(nc)', 'SUCCEEDS'
-		# 'France: F Marseilles Supports F Gascony - Spain(nc)', 'SUCCEEDS'
-		# 'Italy: F Western Mediterranean - Spain(sc)', 'FAILS'
+		'France: F Marseilles Supports F Gascony - Spain(nc)', 'SUCCEEDS'
+		'Italy: F Western Mediterranean - Spain(sc)', 'FAILS'
+
+	t 'Coastal issues - A fleet cannot support into an area that is unreachable from its coast',
+		'France: F Spain(nc) Supports F Marseilles - Gulf of Lyon', 'ILLEGAL'
+		'Italy: F Gulf of Lyon Hold', 'SUCCEEDS'
+		'France: F Marseilles - Gulf of Lyon', 'FAILS'
+
+	t 'Coastal issues - Support can be cut from the other coast',
+		'England: F Irish Sea Supports F North Atlantic Ocean - Mid-Atlantic Ocean', 'SUCCEEDS'
+		'England: F North Atlantic Ocean - Mid-Atlantic Ocean', 'SUCCEEDS'
+		'France: F Spain(nc) Supports F Mid-Atlantic Ocean Hold', 'FAILS'
+		'France: F Mid-Atlantic Ocean Hold', 'FAILS'
+		'Italy: F Gulf of Lyon - Spain(sc)', 'FAILS'
+
+	t 'Coastal issues - Most house rules accept support orders without coast specification',
+		'France: F Portugal Supports F Mid-Atlantic Ocean - Spain', 'SUCCEEDS'
+		'France: F Mid-Atlantic Ocean - Spain(nc)', 'FAILS'
+		'Italy: F Gulf of Lyon Supports F Western Mediterranean - Spain(sc)', 'SUCCEEDS'
+		'Italy: F Western Mediterranean - Spain(sc)', 'FAILS'
+
+	# TODO: Double check that 6.B.8 through 6.B.12 are unnecessary
+
+	t 'Coastal issues - Coastal crawl forbidden',
+		'Turkey: F Bulgaria(sc) - Constantinople', 'FAILS'
+		'Turkey: F Constantinople - Bulgaria(ec)', 'FAILS'
+
+	# TODO: 6.B.14 build order issues
+
+	t 'Circular movement - basic',
+		'Turkey: F Ankara - Constantinople', 'SUCCEEDS'
+		'Turkey: A Constantinople - Smyrna', 'SUCCEEDS'
+		'Turkey: A Smyrna - Ankara', 'SUCCEEDS'
 
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"

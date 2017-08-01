@@ -24,11 +24,17 @@ Board = (gdata) ->
 	fleets = -> yield from units.bind null, 'Fleet'
 	armies = -> yield from units.bind null, 'Army'
 
-	self.adjacencies = (from, to) ->
+	# Returns the adjacencies available from _from_ to _to_. In the case that a
+	# coast is specified we return the adjacencies for the given coast instead.
+	self.adjacencies = (from, to, coast) ->
 		regions = gdata.map_data.regions
 
 		region = do ->
 			return region for rname,region of regions when rname is from
+
+		adjacencies =
+			if coast? then region.coasts[coast]
+			else region.adjacencies
 
 		for adj in region.adjacencies when adj.region is to
 			# TODO: The logic below is a kind of hack that converts an

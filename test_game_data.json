@@ -10,20 +10,7 @@
 				"Trieste",
 				"Vienna"
 			],
-			"units" : [
-				{
-					"type" : "Army",
-					"region" : "Budapest"
-				},
-				{
-					"type" : "Fleet",
-					"region" : "Trieste"
-				},
-				{
-					"type" : "Army",
-					"region" : "Vienna"
-				}
-			]
+			"units" : []
 		},
 		{
 			"name" : "England",
@@ -35,20 +22,7 @@
 				"Liverpool",
 				"Edinburgh"
 			],
-			"units" : [
-				{
-					"type" : "Fleet",
-					"region" : "London"
-				},
-				{
-					"type" : "Army",
-					"region" : "Liverpool"
-				},
-				{
-					"type" : "Fleet",
-					"region" : "Edinburgh"
-				}
-			]
+			"units" : []
 		},
 		{
 			"name" : "France",
@@ -60,20 +34,7 @@
 				"Marseilles",
 				"Paris"
 			],
-			"units" : [
-				{
-					"type" : "Fleet",
-					"region" : "Brest"
-				},
-				{
-					"type" : "Army",
-					"region" : "Marseilles"
-				},
-				{
-					"type" : "Army",
-					"region" : "Paris"
-				}
-			]
+			"units" : []
 		},
 		{
 			"name" : "Germany",
@@ -85,20 +46,7 @@
 				"Berlin",
 				"Kiel"
 			],
-			"units" : [
-				{
-					"type" : "Army",
-					"region" : "Munich"
-				},
-				{
-					"type" : "Army",
-					"region" : "Berlin"
-				},
-				{
-					"type" : "Fleet",
-					"region" : "Kiel"
-				}
-			]
+			"units" : []
 		},
 		{
 			"name" : "Italy",
@@ -110,20 +58,7 @@
 				"Rome",
 				"Venice"
 			],
-			"units" : [
-				{
-					"type" : "Fleet",
-					"region" : "Naples"
-				},
-				{
-					"type" : "Army",
-					"region" : "Rome"
-				},
-				{
-					"type" : "Army",
-					"region" : "Venice"
-				}
-			]
+			"units" : []
 		},
 		{
 			"name" : "Russia",
@@ -136,25 +71,7 @@
 				"Sevastopol",
 				"Warsaw"
 			],
-			"units" : [
-				{
-					"type" : "Fleet",
-					"coast" : "South",
-					"region" : "St Petersburg"
-				},
-				{
-					"type" : "Army",
-					"region" : "Moscow"
-				},
-				{
-					"type" : "Fleet",
-					"region" : "Sevastopol"
-				},
-				{
-					"type" : "Army",
-					"region" : "Warsaw"
-				}
-			]
+			"units" : []
 		},
 		{
 			"name" : "Turkey",
@@ -166,20 +83,7 @@
 				"Ankara",
 				"Smyrna"
 			],
-			"units" : [
-				{
-					"type" : "Army",
-					"region" : "Constantinople"
-				},
-				{
-					"type" : "Fleet",
-					"region" : "Ankara"
-				},
-				{
-					"type" : "Army",
-					"region" : "Smyrna"
-				}
-			]
+			"units" : []
 		}
 	],
 	"game_name" : "Standard",

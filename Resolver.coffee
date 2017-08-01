@@ -31,7 +31,7 @@ Resolver = (board, orders, TEST = false) ->
 		# This needs to be here and not in the call to resolve because
 		# adjudicate can be called internally and we still want the ILLEGAL
 		# resolution in those cases.
-		valid_region = board.region(utils.actor order)?.unit?.type is order.utype
+		valid_region = board.region(order.actor)?.unit?.type is order.utype
 		hop_move = order.from is order.to
 		# Determine whether or not the destination region has coasts
 		no_coast = Object.keys(board.region(order.to)?.coasts ? {}).length is 0
@@ -39,7 +39,7 @@ Resolver = (board, orders, TEST = false) ->
 		# is illegal. If it ends up that we can't actually move to a coast then
 		# hasPath will return false and the order will fail but we're not
 		# considering it illegal.
-		specified_coast = no_coast or order?.coast or order.type is 'HOLD'
+		specified_coast = order.type isnt 'MOVE' or no_coast or order?.to_coast?
 
 		unless (valid_region or TEST) and not hop_move and specified_coast
 			return 'ILLEGAL'
@@ -70,8 +70,8 @@ Resolver = (board, orders, TEST = false) ->
 				# debug "ATTACK: ", attack_strength
 				# debug "PREVENT: ", prevent_strength
 				# debug "HOLD: ", hold_strength
-				if opposing_order
-					debug "DEFEND: ", defendStrength(opposing_order)
+				# if opposing_order
+				# 	debug "DEFEND: ", defendStrength(opposing_order)
 
 				return succ attack_strength > prevent_strength and (
 					(
@@ -85,21 +85,18 @@ Resolver = (board, orders, TEST = false) ->
 
 				# Support can only be into an adjacent region
 				unless (
-					order.type is 'HOLD' or
-					areAdjacent order.utype, order.supporter, order.to
-				) and order.supporter isnt order.from
+					# Indicates a support hold order
+					!order.to? or
+					areAdjacent order.utype, order.actor, order.to
+				) and order.actor isnt order.from
 					return 'ILLEGAL'
 
 				# If there is a move order moving to the unit that is supporting
 				# that is not the destination of the support (you can't cut a
 				# support that's supporting directly against you) then the support
 				# will be cut (even when the move order failed)
-				if order.supporter is 'Greece'
-						to: order.supporter
-						from: (f) -> f isnt order.to
-						country: (c) -> c isnt order.country
 				return succ ! ordersWhere order, 'MOVE', 'EXISTS',
-					to: order.supporter
+					to: order.actor
 					from: (f) ->
 						f isnt order.to
 					country: (c) -> c isnt order.country
@@ -108,15 +105,15 @@ Resolver = (board, orders, TEST = false) ->
 				# A convoy succeeds when it's not dislodged. We know that we can't
 				# move and convoy at the same time so it's sufficient to check if
 				# there was a successful move to the convoyer.
-				return succ ! ordersWhere order, 'MOVE', 'SUCCEEDS', to: order.convoyer
+				return succ ! ordersWhere order, 'MOVE', 'SUCCEEDS', to: order.actor
 			when 'HOLD'
 				# Same thing with convoy and hold orders (see above)
-				return succ ! ordersWhere order, 'MOVE', 'SUCCEEDS', to: order.convoyer
+				return succ ! ordersWhere order, 'MOVE', 'SUCCEEDS', to: order.actor
 
 	# Uses the board adjacencies to determine if an order can move
 	areAdjacent = (type, from, to, coast = null) ->
 
-		adjacencies = board.adjacencies from, to
+		adjacencies = board.adjacencies from, to, coast
 
 		if type is 'Fleet'
 			types = _.intersection adjacencies, ['xc', 'sc', 'nc', 'ec', 'wc']
@@ -130,9 +127,9 @@ Resolver = (board, orders, TEST = false) ->
 	hasPath = (order) ->
 
 		corders = ordersWhere null, 'CONVOY', 'SUCCEEDS', _.pick order, 'from', 'to'
-		{utype, from, to, coast} = order
+		{utype, from, to, to_coast} = order
 		# Check if there's a valid immediately adjacent region
-		if areAdjacent utype, from, to, coast
+		if areAdjacent utype, from, to, to_coast
 			return true
 		# _hasPath is for figuring out convoy routes which can only happen if
 		# the unit is an army and the destination is land.
@@ -152,17 +149,18 @@ Resolver = (board, orders, TEST = false) ->
 		# convoys that can get us there.
 		next_hops = (
 			order for order in corders ? [] when \
-			board.adjacency(from, order.convoyer) is 'xc'
+			board.adjacency(from, order.actor) is 'xc'
 		)
 
 		# Convoy paths can fork but _.some guarantees that __some__ path to the
 		# destination exists.
-		return _.some(_hasPath hop.convoyer, dest, corders for hop in next_hops)
+		return _.some(_hasPath hop.actor, dest, corders for hop in next_hops)
 
 	holdStrength = (region) ->
-		# If the region is empty or contains a unit that moved successfully then
-		# hold strength is 0
-		if not board.region(region)?.unit? or ordersWhere(null, 'MOVE', 'SUCCEEDS', from: region)
+		region_has_units = !! orders.find (o) -> o.actor is region
+		# If the region started empty or contains a unit that moved
+		# successfully then hold strength is 0
+		if !region_has_units or ordersWhere(null, 'MOVE', 'SUCCEEDS', from: region)
 			return 0
 		# If a unit tried to move from this region and failed then hold strength is
 		# 1.
@@ -239,35 +237,24 @@ Resolver = (board, orders, TEST = false) ->
 		# actual results which is convenient.
 		return results if results?.length
 
-
-	self.describeSucceeds = (succeeds) ->
-		return (
-			if typeof succeeds is 'boolean' and succeeds
-				'SUCCEEDS'
-			else if typeof succeeds is 'boolean' and not succeeds
-				'FAILS'
-			else if not succeeds?
-				'UNRESOLVED'
-		)
-
 	self.describe = (order) ->
 
-		region = (order) -> board.region utils.actor order
+		region = (order) -> board.region order.actor
 		dscr = switch order.type
 			when 'CONVOY' then "
 				#{order.country}'s Fleet in
-				#{order.convoyer} convoys #{order.from} to #{order.to}
+				#{order.actor} convoys #{order.from} to #{order.to}
 			"
 			when 'SUPPORT' then "
 				#{order.country}'s
-				#{order.utype} in #{order.supporter} supports
+				#{order.utype} in #{order.actor} supports
 				#{order.utype} in #{order.from} to #{order.to}
 			"
 			when 'MOVE' then "
 				#{order.country}'s
 				#{order.utype} in #{order.from} moves to #{order.to}
 			"
-		return dscr + "#{pad(self.describeSucceeds(order.succeeds), ' ')}"
+		return dscr + "#{pad(order.succeeds, ' ')}"
 
 	showResult = (status) ->
 		debug "ORDER ", status
@@ -277,10 +264,10 @@ Resolver = (board, orders, TEST = false) ->
 	handleCycle = ({cycle}) ->
 
 		debug 'FIRST'
-		first = cycle.replay(true)
+		first = cycle.replay 'SUCCEEDS'
 
 		debug 'SECOND'
-		second = cycle.replay (false)
+		second = cycle.replay 'FAILS'
 
 		# Same result so it doesn't matter which decision we use.
 		if first is second
