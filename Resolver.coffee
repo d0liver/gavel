@@ -42,13 +42,18 @@ Resolver = (board, orders, TEST = false) ->
 		hop_move = order.from is order.to
 		# Determine whether or not the destination region has coasts
 		no_coast = Object.keys(board.region(order.to)?.coasts ? {}).length is 0
+		# TODO: If a fleet doesn't specify a coast then the order will simply
+		# fail because the adjacencies are set on the coasts and not the
+		# region. We probably need to consider getting rid of the 'ILLEGAL'
+		# result and just returning fails because ILLEGAL can get really
+		# complicated.
 		# If the destination has coasts then we _must_ specify one or the order
 		# is illegal. If it ends up that we can't actually move to a coast then
 		# hasPath will return false and the order will fail but we're not
 		# considering it illegal.
 		specified_coast = order.type isnt 'MOVE' or no_coast or order?.to_coast?
 
-		unless (valid_region or TEST) and not hop_move and specified_coast
+		unless (valid_region or TEST) and not hop_move
 			return 'ILLEGAL'
 
 		switch order.type
@@ -117,51 +122,60 @@ Resolver = (board, orders, TEST = false) ->
 				# Same thing with convoy and hold orders (see above)
 				return succ ! ordersWhere order, 'MOVE', 'SUCCEEDS', to: order.actor
 
-	# Uses the board adjacencies to determine if an order can move
-	areAdjacent = (type, from, to, coast = null) ->
+	# Uses the board adjacencies to determine if an order can move.
+	# TODO: Deal with from_coast also.
+	areAdjacent = (utype, from, to) ->
 
-		adjacencies = board.adjacencies from, to, coast
+		adjacencies = board.adjacencies from, to
 
-		if type is 'Fleet'
-			types = _.intersection adjacencies, ['xc', 'sc', 'nc', 'ec', 'wc']
-			types.length isnt 0 and (!coast? or coast in types)
-		else if type is 'Army'
+		if utype is 'Fleet'
+			# There's at least some kind of water adjacency between the two
+			# regions. This is enough to say the regions are adjacent (for
+			# purposes of support and convoying an army)
+			_.intersection(adjacencies, ['xc', 'sc', 'nc', 'ec', 'wc']).length > 0
+		else if utype is 'Army'
 			'mv' in adjacencies
 
+	canMove = (utype, from, to, coast) ->
+		are_adj = areAdjacent utype, from, to
+		has_coasts = Object.keys(board.region(to)?.coasts ? {}).length > 0
 
-	# Check if _from_ is adjacent to _to_ or for successful convoy orders
-	# allowing _unit_ to move from _from_ to _to_.
+		# If the two regions are adjacent and the destination region doesn't
+		# have coasts then we are finished.
+		if are_adj and (utype is 'Army' or !has_coasts)
+			return true
+		# If the two regions are adjacent and this is a fleet then we need
+		# to make sure that we have access to the destination coast.
+		else if are_adj and utype is 'Fleet'
+			adjacencies = board.adjacencies from, to
+			return coast in adjacencies
+
+		console.log "Falling off..."
+		return false
+
 	hasPath = (order) ->
+		{utype, from, to, actor, to_coast, from_coast} = order
 
-		corders = ordersWhere null, 'CONVOY', 'SUCCEEDS', _.pick order, 'from', 'to'
-		{utype, from, to, to_coast} = order
-		# Check if there's a valid immediately adjacent region
-		if areAdjacent utype, from, to, to_coast
+		# We have a _from_ connected to the _to_ so this is the end of the path
+		# and we are finished.
+		if canMove utype, from, to, to_coast
 			return true
-		# _hasPath is for figuring out convoy routes which can only happen if
-		# the unit is an army and the destination is land.
-		else unless order.utype is 'Army' and board.region(order.to).type is 'Land'
+		# We can't convoy a fleet
+		else if utype is 'Fleet'
 			return false
+		else
+			corders = ordersWhere null, 'CONVOY', 'SUCCEEDS', {from, to}
 
-		return _hasPath order.from, order.to, corders
+			# We don't have a complete path yet, so we have to keep looking for
+			# convoys that can get us there.
+			next_hops = (
+				cord for cord in corders ? [] when \
+				areAdjacent 'Fleet', actor, cord.actor
+			)
 
-	_hasPath = (from, dest, corders) ->
-
-		# We have a _from_ connected to the destination so this is the end of
-		# the convoy and we are finished.
-		if board.adjacency(from, dest)
-			return true
-
-		# We don't have a complete path yet, so we have to keep looking for
-		# convoys that can get us there.
-		next_hops = (
-			order for order in corders ? [] when \
-			board.adjacency(from, order.actor) is 'xc'
-		)
-
-		# Convoy paths can fork but _.some guarantees that __some__ path to the
-		# destination exists.
-		return _.some(_hasPath hop.actor, dest, corders for hop in next_hops)
+			# Convoy paths can fork but _.some guarantees that __some__ path to the
+			# destination exists.
+			return _.some(hasPath hop for hop in next_hops)
 
 	holdStrength = (region) ->
 		region_has_units = !! orders.find (o) -> o.actor is region
@@ -294,24 +308,23 @@ Resolver = (board, orders, TEST = false) ->
 		# success to break the cycle. A chain of length 2 is simply a head
 		# to head so we ignore those.
 		if order? and !order.succeeds
-			debug 'Breaking cycle...'
+			# debug 'Breaking cycle...'
 			return 'SUCCEEDS'
 
 	handleCycle = ({cycle}, order) ->
 
-		debug 'FIRST'
+		# debug 'FIRST'
 		first = cycle.replay 'SUCCEEDS'
 
-		debug 'SECOND'
+		# debug 'SECOND'
 		second = cycle.replay 'FAILS'
 
 		# Same result so it doesn't matter which decision we use.
 		if first is second
-			debug 'CONSISTENT OUTCOME'
+			# debug 'CONSISTENT OUTCOME'
 			cycle.remember(first)
 			return first
 		else
-			console.log "Order: ", order
 			breakCircularMovement(order) or
 			throw new Error 'Unhandleable cycle detected.'
 

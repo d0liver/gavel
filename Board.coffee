@@ -26,17 +26,17 @@ Board = (gdata) ->
 
 	# Returns the adjacencies available from _from_ to _to_. In the case that a
 	# coast is specified we return the adjacencies for the given coast instead.
-	self.adjacencies = (from, to, coast) ->
+	self.adjacencies = (from, to) ->
 		regions = gdata.map_data.regions
 
 		region = do ->
 			return region for rname,region of regions when rname is from
 
 		adjacencies =
-			if coast? then region.coasts[coast]
+			if from_coast? then region.coasts[coast].adjacencies
 			else region.adjacencies
 
-		for adj in region.adjacencies when adj.region is to
+		for adj in adjacencies when adj.region is to
 			# TODO: The logic below is a kind of hack that converts an
 			# adjacency that is from a region to a coast into one that
 			# follows the nc, sc, ec, wc convention. It's necessary because

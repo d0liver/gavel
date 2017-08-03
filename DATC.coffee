@@ -74,7 +74,7 @@ datc = (board) ->
 		'Italy: A Venice - Tyrolia', 'FAILS'
 
 	t 'Coastal issues - Coast not specified',
-		'France: F Portugal - Spain', 'ILLEGAL'
+		'France: F Portugal - Spain', 'FAILS'
 
 	t 'Coastal issues - illegal coast',
 		'France: F Gascony - Spain(sc)', 'FAILS'
@@ -115,6 +115,27 @@ datc = (board) ->
 		'Turkey: A Constantinople - Smyrna', 'SUCCEEDS'
 		'Turkey: A Smyrna - Ankara', 'SUCCEEDS'
 
+	t 'Circular movement - Three units can change place, even when one gets support',
+		'Turkey: F Ankara - Constantinople', 'SUCCEEDS'
+		'Turkey: A Constantinople - Smyrna', 'SUCCEEDS'
+		'Turkey: A Smyrna - Ankara', 'SUCCEEDS'
+		'Turkey: A Bulgaria Supports F Ankara - Constantinople', 'SUCCEEDS'
+
+	t 'Circular movement - One unit bounces, the whole circular movement is blocked',
+		'Turkey: F Ankara - Constantinople', 'FAILS'
+		'Turkey: A Constantinople - Smyrna', 'FAILS'
+		'Turkey: A Smyrna - Ankara', 'FAILS'
+		'Turkey: A Bulgaria - Constantinople', 'FAILS'
+
+	t 'Circular movement - Movement contains an attacked convoy, still succeeds',
+		# 'Austria: A Trieste - Serbia', 'SUCCEEDS'
+		'Austria: A Serbia - Bulgaria', 'SUCCEEDS'
+		# 'Turkey: A Bulgaria - Trieste', 'SUCCEEDS'
+		# 'Turkey: F Aegean Sea Convoys A Bulgaria - Trieste', 'SUCCEEDS'
+		# 'Turkey: F Ionian Sea Convoys A Bulgaria - Trieste', 'SUCCEEDS'
+		# 'Turkey: F Adriatic Sea Convoys A Bulgaria - Trieste', 'SUCCEEDS'
+		# 'Italy: F Naples - Ionian Sea', 'FAILS'
+
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"
 
@@ -124,13 +145,11 @@ test = (board, test_name, args...) ->
 	for order, i in orders
 		# Expected results are given after each order in the args.
 		expect = args[2*i+1]
-
 		result = resolver.resolve order
-		debug 'Evaluated order: ', args[2*i]
-		# debug 'Parsed order: ', order
-		debug "Expect: #{expect}, Actual: #{result}"
 
 		if result isnt expect
+			debug 'Evaluated order: ', args[2*i]
+			debug "Expect: #{expect}, Actual: #{result}"
 			console.log "Test failed\n"
 			return false
 
