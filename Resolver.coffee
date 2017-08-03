@@ -14,13 +14,12 @@ Resolver = (board, orders, TEST = false) ->
 	self = {}
 
 	self.resolve = (order) ->
-		breakCycles()
 
 		try
 			order.succeeds = self.adjudicate order
 		catch err
 			if err instanceof CycleException
-				order.succeeds = handleCycle err
+				order.succeeds = handleCycle err, order
 			else
 				throw err
 
@@ -276,28 +275,29 @@ Resolver = (board, orders, TEST = false) ->
 	breakCycles = ->
 		breakCircularMovement()
 
-	breakCircularMovement = ->
-		morders = (order for order in orders when order.type is 'MOVE')
+	breakCircularMovement = (order) ->
+		# Obviously circular movements can only occur when the order itself is
+		# a move
+		return false if order.type isnt 'MOVE'
 
-		for order in morders
-			# List of moves that have been seen so far in this chain
-			chain = []
-			od = order
+		# List of moves that have been seen so far in this chain
+		chain = []
+		morders = _.where orders, type: 'MOVE'
 
-			while od? and od.from not in chain and !od.succeeds?
-				chain.push od.from
-				od = morders.find (o) -> od.from is o.to
+		while order? and order.from not in chain and !order.succeeds?
+			chain.push order.from
+			order = morders.find (o) -> order.from is o.to
 
-			# If order was defined then that means that we broke out of the
-			# loop because a cycle was detected (otherwise we would hit the end
-			# of the chain). In that case, we want to resolve our order with a
-			# success to break the cycle. A chain of length 2 is simply a head
-			# to head so we ignore those.
-			if od? and !od.succeeds and chain.length > 2
-				console.log "Breaking cycle..."
-				order.succeeds = 'SUCCEEDS'
+		# If order was defined then that means that we broke out of the
+		# loop because a cycle was detected (otherwise we would hit the end
+		# of the chain). In that case, we want to resolve our order with a
+		# success to break the cycle. A chain of length 2 is simply a head
+		# to head so we ignore those.
+		if order? and !order.succeeds
+			debug 'Breaking cycle...'
+			return 'SUCCEEDS'
 
-	handleCycle = ({cycle}) ->
+	handleCycle = ({cycle}, order) ->
 
 		debug 'FIRST'
 		first = cycle.replay 'SUCCEEDS'
@@ -311,6 +311,8 @@ Resolver = (board, orders, TEST = false) ->
 			cycle.remember(first)
 			return first
 		else
+			console.log "Order: ", order
+			breakCircularMovement(order) or
 			throw new Error 'Unhandleable cycle detected.'
 
 	self.adjudicate = CycleGuard(self.adjudicate, handleCycle).fork()
