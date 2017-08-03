@@ -14,6 +14,8 @@ Resolver = (board, orders, TEST = false) ->
 	self = {}
 
 	self.resolve = (order) ->
+		breakCycles()
+
 		try
 			order.succeeds = self.adjudicate order
 		catch err
@@ -27,6 +29,12 @@ Resolver = (board, orders, TEST = false) ->
 	# nr - The number of the order to be resolved.
 	# Returns the resolution for that order.
 	self.adjudicate = (order) ->
+
+		# If we already have a resolution then we just spit that out. Normally
+		# memoization would prevent this from happening but breakCycles will
+		# insert its own resolutions from time to time that occur outside of
+		# the normal adjudication process.
+		return order.succeeds if order.succeeds?
 
 		# This needs to be here and not in the call to resolve because
 		# adjudicate can be called internally and we still want the ILLEGAL
@@ -261,6 +269,34 @@ Resolver = (board, orders, TEST = false) ->
 
 	pad = (str, end = '') -> str and "#{end or ' '}#{str}#{end}" or '' 
 
+	# This corresponds to the fallbacks that are discussed in MOA. The
+	# difference is that we just go ahead and address these first so that we
+	# don't have to readjudicate afterwards. Anything not handled preemptively
+	# by this should be handleable by the handleCycle method.
+	breakCycles = ->
+		breakCircularMovement()
+
+	breakCircularMovement = ->
+		morders = (order for order in orders when order.type is 'MOVE')
+
+		for order in morders
+			# List of moves that have been seen so far in this chain
+			chain = []
+			od = order
+
+			while od? and od.from not in chain and !od.succeeds?
+				chain.push od.from
+				od = morders.find (o) -> od.from is o.to
+
+			# If order was defined then that means that we broke out of the
+			# loop because a cycle was detected (otherwise we would hit the end
+			# of the chain). In that case, we want to resolve our order with a
+			# success to break the cycle. A chain of length 2 is simply a head
+			# to head so we ignore those.
+			if od? and !od.succeeds and chain.length > 2
+				console.log "Breaking cycle..."
+				order.succeeds = 'SUCCEEDS'
+
 	handleCycle = ({cycle}) ->
 
 		debug 'FIRST'
@@ -275,12 +311,7 @@ Resolver = (board, orders, TEST = false) ->
 			cycle.remember(first)
 			return first
 		else
-			# We achieved different outcomes so there is some symmetric cycle
-			# at work and we need a fallback rule to adjudicate.
-			return cycle.replay(fallback(cycle))
-
-	fallback = (cycle) ->
-		throw new Error "Fallback not implemented"
+			throw new Error 'Unhandleable cycle detected.'
 
 	self.adjudicate = CycleGuard(self.adjudicate, handleCycle).fork()
 
