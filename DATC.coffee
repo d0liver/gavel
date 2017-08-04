@@ -159,10 +159,76 @@ datc = (board) ->
 		'France: A Burgundy - Belgium', 'FAILS'
 
 	t 'Support to hold - The simplest support to hold order',
+		'Austria: F Adriatic Sea Supports A Trieste - Venice', 'SUCCEEDS'
+		'Austria: A Trieste - Venice', 'FAILS'
+		'Italy: A Venice Hold', 'SUCCEEDS'
+		'Italy: A Tyrolia Supports A Venice Hold', 'SUCCEEDS'
+
+	t 'Support to hold - The most simple support on hold cut',
+		'Austria: F Adriatic Sea Supports A Trieste - Venice', 'SUCCEEDS'
+		'Austria: A Trieste - Venice', 'SUCCEEDS'
+		'Austria: A Vienna - Tyrolia', 'FAILS'
+		'Italy: A Venice Hold', 'FAILS'
+		'Italy: A Tyrolia Supports A Venice Hold', 'FAILS'
+
+	t 'Support on move - The most simple support on move cut',
 		'Austria: F Adriatic Sea Supports A Trieste - Venice', 'FAILS'
 		'Austria: A Trieste - Venice', 'FAILS'
 		'Italy: A Venice Hold', 'SUCCEEDS'
-		'Italy: A Tyrolia Supports A Venice', 'SUCCEEDS'
+		'Italy: F Ionian Sea - Adriatic Sea', 'FAILS'
+
+	t 'Support hold - A unit that is supporting a hold, can receive a hold support',
+		'Germany: A Berlin Supports F Kiel Hold', 'FAILS'
+		'Germany: F Kiel Supports A Berlin Hold', 'SUCCEEDS'
+		'Russia: A Prussia - Berlin', 'FAILS'
+		'Russia: F Baltic Sea Supports A Prussia - Berlin', 'SUCCEEDS'
+
+	t 'Support hold - A unit that is supporting a move, can receive a hold support',
+		'Germany: A Berlin Supports A Munich - Silesia', 'FAILS'
+		'Germany: F Kiel Supports A Berlin Hold', 'SUCCEEDS'
+		'Germany: A Munich - Silesia', 'SUCCEEDS'
+		'Russia: F Baltic Sea Supports A Prussia - Berlin', 'SUCCEEDS'
+		'Russia: A Prussia - Berlin', 'FAILS'
+
+	t 'Support hold - A unit that is convoying, can receive a hold support',
+		'Germany: A Berlin - Sweden', 'SUCCEEDS'
+		'Germany: F Baltic Sea Convoys A Berlin - Sweden', 'SUCCEEDS'
+		'Germany: F Prussia Supports F Baltic Sea Hold', 'SUCCEEDS'
+		'Russia: F Livonia - Baltic Sea', 'FAILS'
+		'Russia: F Gulf of Bothnia Supports F Livonia - Baltic Sea', 'SUCCEEDS'
+
+	t 'Support hold - A unit that is moving cannot receive a hold support if the move fails',
+		'Germany: F Baltic Sea - Sweden', 'FAILS'
+		'Germany: F Prussia Supports F Baltic Sea Hold', 'ILLEGAL'
+		'Russia: F Livonia - Baltic Sea', 'SUCCEEDS'
+		'Russia: F Gulf of Bothnia Supports F Livonia - Baltic Sea', 'SUCCEEDS'
+		'Russia: A Finland - Sweden', 'FAILS'
+
+	t 'Support hold - Failed convoy can not receive hold support',
+		'Austria: F Ionian Sea Hold', 'SUCCEEDS'
+		'Austria: A Serbia Supports A Albania - Greece', 'SUCCEEDS'
+		'Austria: A Albania - Greece', 'SUCCEEDS'
+		'Turkey: A Greece - Naples', 'FAILS'
+		'Turkey: A Bulgaria Supports A Greece Hold', 'ILLEGAL'
+
+	t 'Hold - A unit that is holding can not receive a support in moving',
+		'Italy: A Venice - Trieste', 'SUCCEEDS'
+		'Italy: A Tyrolia Supports A Venice - Trieste', 'SUCCEEDS'
+		'Austria: A Albania Supports A Trieste - Serbia', 'SUCCEEDS'
+		'Austria: A Trieste Hold', 'FAILS'
+
+	# TODO: This may be a bit tricky. - through 6.D.15
+	# t 'Illegal dislodge - A unit may not dislodge a unit of the same great power',
+	# 	'Germany: A Berlin Hold', 'SUCCEEDS'
+	# 	'Germany: F Kiel - Berlin', 'FAILS'
+	# 	'Germany: A Munich Supports F Kiel - Berlin', 'FAILS'
+
+	t 'Illegal Support Cut - A unit cannot cut support into its own region',
+		'Russia: F Constantinople Supports F Black Sea - Ankara', 'SUCCEEDS'
+		'Russia: F Black Sea - Ankara', 'SUCCEEDS'
+		'Turkey: F Ankara - Constantinople', 'FAILS'
+
+	# 6.D.16
 
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"

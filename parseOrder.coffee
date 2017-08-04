@@ -43,7 +43,7 @@ parseOrder = (order) ->
 			\s+\-
 			\s+((?:[\w-]+\s+)*(?:[\w-]+)) # Move to
 			(?:\(([\w-]+)\))?          # Optional coast
-			|\s+Hold
+			|\s+(Hold)
 		)
 		$
 	///
@@ -61,7 +61,7 @@ parseOrder = (order) ->
 		from_utype  : matches[6] is 'A' and 'Army' or 'Fleet'
 		from        : matches[7]
 		from_coast  : coastName matches[8]
-		to          : matches[9]
+		to          : matches[9] ? matches[11] # Either a dest region or 'Hold'
 		to_coast    : coastName matches[10]
 	else if matches = order.match(move_re)
 		type       : 'MOVE'

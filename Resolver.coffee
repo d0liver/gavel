@@ -60,7 +60,7 @@ Resolver = (board, orders, TEST = false) ->
 			when 'MOVE'
 				# Preflight checks. Coast must be specified if the region has
 				# coasts. We must have a path to the destination.
-				return 'FAILS' unless hasPath order
+				return 'FAILS' unless hasPath(order)
 
 				# Get the largest prevent strength
 				preventers = ordersWhere(order, 'MOVE', 'EXISTS', to: order.to) ? []
@@ -76,12 +76,12 @@ Resolver = (board, orders, TEST = false) ->
 				) ? []
 
 				hold_strength = holdStrength(order.to)
-				# console.log "Hold strength: ", hold_strength
 
 				# This stuff is useful but debug needs to take a flag
 				# debug "OPPOSING ORDER: ", opposing_order
 				# debug "ATTACK: ", attack_strength
 				# debug "PREVENT: ", prevent_strength
+
 				# debug "HOLD: ", hold_strength
 				# if opposing_order
 				# 	debug "DEFEND: ", defendStrength(opposing_order)
@@ -95,11 +95,12 @@ Resolver = (board, orders, TEST = false) ->
 				)
 
 			when 'SUPPORT'
-
 				# Support can only be into an adjacent region
 				unless (
-					# Indicates a support hold order
-					!order.to? or
+					(
+						order.to is 'Hold' and
+						! ordersWhere null, 'MOVE', 'EXISTS', from: order.from
+					) or
 					board.canSupport order
 				) and order.actor isnt order.from
 					return 'ILLEGAL'
@@ -169,7 +170,7 @@ Resolver = (board, orders, TEST = false) ->
 		else if !! ordersWhere(null, 'MOVE', 'FAILS', from: region)
 			return 1
 		else
-			supports = ordersWhere 'SUPPORT', 'SUCCEEDS', from: region, type: 'HOLD'
+			supports = ordersWhere null, 'SUPPORT', 'SUCCEEDS', from: region, to: 'Hold'
 
 			return 1 + (supports?.length ? 0)
 
@@ -202,7 +203,7 @@ Resolver = (board, orders, TEST = false) ->
 	preventStrength = (order) ->
 		# For a head to head battle where the other side was successful our
 		# strength is 0
-		if ordersWhere(order, 'MOVE', 'SUCCEEDS', to: order.from)
+		if ordersWhere(order, 'MOVE', 'SUCCEEDS', to: order.from, from: order.to)
 			return 0
 		else
 			return 1 + support(order)
