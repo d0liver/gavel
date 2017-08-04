@@ -24,33 +24,70 @@ Board = (gdata) ->
 	fleets = -> yield from units.bind null, 'Fleet'
 	armies = -> yield from units.bind null, 'Army'
 
-	# Returns the adjacencies available from _from_ to _to_. In the case that a
-	# coast is specified we return the adjacencies for the given coast instead.
-	self.adjacencies = (from, to) ->
-		regions = gdata.map_data.regions
+	self.adjacencies = ({from, from_coast, to, to_coast, utype}) ->
+		region = gdata.map_data.regions[from]
 
-		region = do ->
-			return region for rname,region of regions when rname is from
+		# If no coast is specified then we return all adjacencies (include all
+		# coasts).
+		unless from_coast?
+			adjacencies = region.adjacencies
+			for coast_name, coast of region.coasts
+				adjacencies.push coast.adjacencies...
+		# If the coast was specified then we limit our results to only what's
+		# valid from that coast.
+		else
+			adjacencies = region.coasts[from_coast]
 
+		# We return adjacencies to the destination optionally filtering them by
+		# unit type (utype) and a destination coast (to_coast)
 		adjacencies =
-			if from_coast? then region.coasts[coast].adjacencies
-			else region.adjacencies
+			for adjacency in adjacencies ? [] when adjacency.region is to and
+			(not utype? or utype is adjacency.for) and
+			(not to_coast? or to_coast is adjacency.coast)
+				adjacency
 
-		for adj in adjacencies when adj.region is to
-			# TODO: The logic below is a kind of hack that converts an
-			# adjacency that is from a region to a coast into one that
-			# follows the nc, sc, ec, wc convention. It's necessary because
-			# of the way that the parser works currently which should be
-			# changed.  Putting it here ensures that the Resolver won't
-			# need to change when the parser is updated since it will be
-			# the same from the point of view of the Resolver.
-			unless adj.coast?
-				adj.type
-			else switch adj.coast
-				when 'North' then 'nc'
-				when 'South' then 'sc'
-				when 'East' then 'ec'
-				when 'West' then 'wc'
+		return adjacencies if adjacencies.length > 0
+
+	self.hasCoast = (rname) ->
+		Object.keys(gdata.map_data.regions[rname].coasts).length isnt 0
+
+	# Coasts don't matter because convoys only deal with open water and armies
+	# neither of which deal with coasts.
+	self.canConvoy = ({convoyer, convoyee}) ->
+
+		!! self.adjacencies
+			utype: 'Fleet'
+			from: convoyee
+			to: convoyer
+
+	# The destination coast does not matter (e.g. a fleet adjacent to the south
+	# coast can support a move to the north coast). However, the from_coast
+	# matters because it would be impossible to support into a region that
+	# isn't adjacent to your coast.
+	self.canSupport = ({utype, actor, to, actor_coast}) ->
+		query = {from: actor, utype, to}
+		query.from_coast = actor_coast if self.hasCoast actor
+		!! self.adjacencies query
+
+	self.canMove = ({utype, from, to, from_coast, to_coast}) ->
+
+		# For armies we don't have to worry about coasts
+		if utype is 'Army' and self.adjacencies {utype, from, to}
+			return true
+		# Fleets are different because we have to specify coasts for from and
+		# to if they exist.
+		else if utype is 'Fleet'
+			query = {utype, from, to}
+			# We restrict adjacencies to a coast when the coast is defined in
+			# the query. Thus, we fallback to true when a coast is required but
+			# one was not defined which ensures that no adjacencies will be
+			# returned - this is what will happen when a coast is required but
+			# none was specified.
+			query.from_coast = from_coast ? true if self.hasCoast from
+			query.to_coast = to_coast ? true if self.hasCoast to
+			return !! self.adjacencies query
+
+		return false
 
 	units = (type) ->
 		_.union (

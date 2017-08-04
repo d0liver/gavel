@@ -99,7 +99,7 @@ Resolver = (board, orders, TEST = false) ->
 				unless (
 					# Indicates a support hold order
 					!order.to? or
-					areAdjacent order.utype, order.actor, order.to
+					board.canSupport order
 				) and order.actor isnt order.from
 					return 'ILLEGAL'
 
@@ -122,60 +122,43 @@ Resolver = (board, orders, TEST = false) ->
 				# Same thing with convoy and hold orders (see above)
 				return succ ! ordersWhere order, 'MOVE', 'SUCCEEDS', to: order.actor
 
-	# Uses the board adjacencies to determine if an order can move.
-	# TODO: Deal with from_coast also.
-	areAdjacent = (utype, from, to) ->
+	hasPath = ({utype, from, to, from_coast, to_coast})->
 
-		adjacencies = board.adjacencies from, to
-
-		if utype is 'Fleet'
-			# There's at least some kind of water adjacency between the two
-			# regions. This is enough to say the regions are adjacent (for
-			# purposes of support and convoying an army)
-			_.intersection(adjacencies, ['xc', 'sc', 'nc', 'ec', 'wc']).length > 0
-		else if utype is 'Army'
-			'mv' in adjacencies
-
-	canMove = (utype, from, to, coast) ->
-		are_adj = areAdjacent utype, from, to
-		has_coasts = Object.keys(board.region(to)?.coasts ? {}).length > 0
-
-		# If the two regions are adjacent and the destination region doesn't
-		# have coasts then we are finished.
-		if are_adj and (utype is 'Army' or !has_coasts)
+		# We have a _from_ connected directly to the _to_. This is the normal
+		# case where convoys don't come into play.
+		if board.canMove {utype, from, to, from_coast, to_coast}
 			return true
-		# If the two regions are adjacent and this is a fleet then we need
-		# to make sure that we have access to the destination coast.
-		else if are_adj and utype is 'Fleet'
-			adjacencies = board.adjacencies from, to
-			return coast in adjacencies
-
-		console.log "Falling off..."
-		return false
-
-	hasPath = (order) ->
-		{utype, from, to, actor, to_coast, from_coast} = order
-
-		# We have a _from_ connected to the _to_ so this is the end of the path
-		# and we are finished.
-		if canMove utype, from, to, to_coast
-			return true
-		# We can't convoy a fleet
-		else if utype is 'Fleet'
-			return false
-		else
+		# Convoys are valid when it's an army being convoyed and the
+		# destination is on land.
+		else if utype is 'Army' and board.region(to).type is 'Land'
 			corders = ordersWhere null, 'CONVOY', 'SUCCEEDS', {from, to}
+			return hasConvoyPath {from, to}, corders
 
-			# We don't have a complete path yet, so we have to keep looking for
-			# convoys that can get us there.
-			next_hops = (
-				cord for cord in corders ? [] when \
-				areAdjacent 'Fleet', actor, cord.actor
-			)
+	hasConvoyPath = ({from, to}, corders, visited = []) ->
 
-			# Convoy paths can fork but _.some guarantees that __some__ path to the
-			# destination exists.
-			return _.some(hasPath hop for hop in next_hops)
+		return true if board.canConvoy {convoyer: from, convoyee: to}
+
+		# We don't have a complete path yet, so we have to keep looking for
+		# convoys that can get us there.
+		next_hops = (
+			cord for cord in corders ? [] when \
+			cord.actor not in visited and
+			board.canConvoy {
+				convoyee: from
+				convoyer: cord.actor
+			}
+		)
+
+		# We need to make a note that we've been to this order so that we don't
+		# end up circling between two regions which are both convoying.
+		visited.push from
+
+		# Convoy paths can fork but _.some guarantees that __some__ path to the
+		# destination exists.
+		return _.some(
+			for hop in next_hops
+				hasConvoyPath {from: hop.actor, to}, corders, visited
+		)
 
 	holdStrength = (region) ->
 		region_has_units = !! orders.find (o) -> o.actor is region

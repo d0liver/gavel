@@ -1,4 +1,11 @@
 parseOrder = (order) ->
+	coastName = (abbr) ->
+		map = 
+			nc: 'North'
+			sc: 'South'
+			ec: 'East'
+			wc: 'West'
+		return map[abbr]
 
 	move_re = ///
 		^
@@ -49,29 +56,29 @@ parseOrder = (order) ->
 		country     : matches[1]
 		utype       : matches[2] is 'A' and 'Army' or 'Fleet'
 		actor       : matches[3]
-		actor_coast : matches[4]
+		actor_coast : coastName matches[4]
 		type        : matches[5] is 'Convoys' and 'CONVOY' or 'SUPPORT'
 		from_utype  : matches[6] is 'A' and 'Army' or 'Fleet'
 		from        : matches[7]
-		from_coast  : matches[8]
+		from_coast  : coastName matches[8]
 		to          : matches[9]
-		to_coast    : matches[10]
+		to_coast    : coastName matches[10]
 	else if matches = order.match(move_re)
 		type       : 'MOVE'
 		country    : matches[1]
 		utype      : matches[2] is 'A' and 'Army' or 'Fleet'
 		actor      : matches[3]
 		from       : matches[3]
-		from_coast : matches[4]
+		from_coast : coastName matches[4]
 		to         : matches[5]
-		to_coast   : matches[6]
+		to_coast   : coastName matches[6]
 	else if matches = order.match hold_re
 		type        : 'HOLD'
 		country     : matches[1]
 		utype       : matches[2] is 'A' and 'Army' or 'Fleet'
 		actor       : matches[3]
 		from        : matches[3]
-		actor_coast : matches[4]
-		from_coast  : matches[4]
+		actor_coast : coastName matches[4]
+		from_coast  : coastName matches[4]
 
 module.exports = parseOrder
