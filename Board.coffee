@@ -54,7 +54,6 @@ Board = (gdata) ->
 	# Coasts don't matter because convoys only deal with open water and armies
 	# neither of which deal with coasts.
 	self.canConvoy = ({convoyer, convoyee}) ->
-
 		!! self.adjacencies
 			utype: 'Fleet'
 			from: convoyee

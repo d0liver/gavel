@@ -76,6 +76,7 @@ Resolver = (board, orders, TEST = false) ->
 				) ? []
 
 				hold_strength = holdStrength(order.to)
+				# console.log "Hold strength: ", hold_strength
 
 				# This stuff is useful but debug needs to take a flag
 				# debug "OPPOSING ORDER: ", opposing_order
@@ -113,14 +114,11 @@ Resolver = (board, orders, TEST = false) ->
 						f isnt order.to
 					country: (c) -> c isnt order.country
 
-			when 'CONVOY'
+			when 'CONVOY', 'HOLD'
 				# A convoy succeeds when it's not dislodged. We know that we can't
 				# move and convoy at the same time so it's sufficient to check if
 				# there was a successful move to the convoyer.
-				return succ ! ordersWhere order, 'MOVE', 'SUCCEEDS', to: order.actor
-			when 'HOLD'
-				# Same thing with convoy and hold orders (see above)
-				return succ ! ordersWhere order, 'MOVE', 'SUCCEEDS', to: order.actor
+				return succ ! ordersWhere null, 'MOVE', 'SUCCEEDS', to: order.actor
 
 	hasPath = ({utype, from, to, from_coast, to_coast})->
 

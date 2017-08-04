@@ -134,7 +134,35 @@ datc = (board) ->
 		'Turkey: F Aegean Sea Convoys A Bulgaria - Trieste', 'SUCCEEDS'
 		'Turkey: F Ionian Sea Convoys A Bulgaria - Trieste', 'SUCCEEDS'
 		'Turkey: F Adriatic Sea Convoys A Bulgaria - Trieste', 'SUCCEEDS'
-		'Italy: F Naples - Ionian Sea', 'FAILS'
+
+	t 'Circular movement - Disrupted circular movement due to dislodged convoy',
+		'Austria: A Trieste - Serbia', 'FAILS'
+		'Austria: A Serbia - Bulgaria', 'FAILS'
+		'Turkey: A Bulgaria - Trieste', 'FAILS'
+		'Turkey: F Aegean Sea Convoys A Bulgaria - Trieste', 'SUCCEEDS'
+		'Turkey: F Ionian Sea Convoys A Bulgaria - Trieste', 'FAILS'
+		'Turkey: F Adriatic Sea Convoys A Bulgaria - Trieste', 'SUCCEEDS'
+		'Italy: F Naples - Ionian Sea', 'SUCCEEDS'
+		'Italy: F Tunis Supports F Naples - Ionian Sea', 'SUCCEEDS'
+
+	t 'Convoy swap - Two armies can swap places even when they are not adjacent.',
+		'England: F North Sea Convoys A London - Belgium', 'SUCCEEDS'
+		'England: A London - Belgium', 'SUCCEEDS'
+		'France: F English Channel Convoys A Belgium - London', 'SUCCEEDS'
+		'France: A Belgium - London', 'SUCCEEDS'
+
+	t 'Convoy swap - If in a swap one of the unit bounces, then the swap fails',
+		'England: F North Sea Convoys A London - Belgium', 'SUCCEEDS'
+		'England: A London - Belgium', 'FAILS'
+		'France: F English Channel Convoys A Belgium - London', 'SUCCEEDS'
+		'France: A Belgium - London', 'FAILS'
+		'France: A Burgundy - Belgium', 'FAILS'
+
+	t 'Support to hold - The simplest support to hold order',
+		'Austria: F Adriatic Sea Supports A Trieste - Venice', 'FAILS'
+		'Austria: A Trieste - Venice', 'FAILS'
+		'Italy: A Venice Hold', 'SUCCEEDS'
+		'Italy: A Tyrolia Supports A Venice', 'SUCCEEDS'
 
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"
