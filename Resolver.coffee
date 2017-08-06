@@ -60,7 +60,7 @@ Resolver = (board, orders, TEST = false) ->
 			when 'MOVE'
 				# Preflight checks. Coast must be specified if the region has
 				# coasts. We must have a path to the destination.
-				return 'FAILS' unless hasPath(order)
+				return 'FAILS' unless hasPath order
 
 				# Get the largest prevent strength
 				preventers = ordersWhere(order, 'MOVE', 'EXISTS', to: order.to) ? []
@@ -177,13 +177,18 @@ Resolver = (board, orders, TEST = false) ->
 	attackStrength = (order) ->
 		oW = ordersWhere.bind null, order
 		# TODO: This needs review
-		res = oW 'MOVE', 'SUCCEEDS', from: order.to
-		dest_order = res?[0]
+		dest_order = !! oW 'MOVE', 'SUCCEEDS', from: order.to
+		occupier = orders.find (o) -> o.actor is order.to
 
-		if not board.region(order.to)?.unit? or
-		dest_order? and dest_order.to isnt order.from
-			return 1 + support(order)
-		else if board.region(order.to).unit?.country is order.country
+		# This is NOT a head to head battle. The destination is empty and
+		# therefore we can support against it even if it was our unit that
+		# moved away (because it is now empty). However, if our unit did not
+		# move away successfully then we cannot dislodge it so we fall through
+		# to the second or third situation (depending upon if the unit moving
+		# to the destination is the same nationality as the destination unit)
+		if !occupier? or (dest_order and dest_order.to isnt order.from)
+			return 1 + support order
+		else if occupier?.country is order.country
 			# We can't dislodge our own units
 			return 0
 		else
@@ -191,9 +196,10 @@ Resolver = (board, orders, TEST = false) ->
 			# supporting units (but units can't support against their own).
 			{from, to} = order
 			val = 1 + (oW(
-				'SUPPORT', 'SUCCEEDS', {from, to},
-				country: (c) ->
-					c isnt board.region(order.to).unit?.country
+				'SUPPORT', 'SUCCEEDS', {
+					from, to,
+					country: (c) -> c isnt occupier?.country
+				}
 			)?.length ? 0)
 			return val
 

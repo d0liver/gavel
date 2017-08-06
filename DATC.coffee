@@ -218,10 +218,40 @@ datc = (board) ->
 		'Austria: A Trieste Hold', 'FAILS'
 
 	# TODO: This may be a bit tricky. - through 6.D.15
-	# t 'Illegal dislodge - A unit may not dislodge a unit of the same great power',
-	# 	'Germany: A Berlin Hold', 'SUCCEEDS'
-	# 	'Germany: F Kiel - Berlin', 'FAILS'
-	# 	'Germany: A Munich Supports F Kiel - Berlin', 'FAILS'
+	t 'Illegal dislodge - A unit may not dislodge a unit of the same great power',
+		'Germany: A Berlin Hold', 'SUCCEEDS'
+		'Germany: F Kiel - Berlin', 'FAILS'
+		'Germany: A Munich Supports F Kiel - Berlin', 'SUCCEEDS'
+
+	t '6.D.11. Test case, no self dislodgment of returning unit',
+		'Germany: A Berlin - Prussia', 'FAILS'
+		'Germany: F Kiel - Berlin', 'FAILS'
+		'Germany: A Munich Supports F Kiel - Berlin', 'SUCCEEDS'
+		'Russia: A Warsaw - Prussia', 'FAILS'
+
+	t '6.D.12. Test case, support a foreign unit to dislodge own unit prohibited',
+		'Austria: F Trieste Hold', 'SUCCEEDS'
+		'Austria: A Vienna Supports A Venice - Trieste', 'SUCCEEDS'
+		'Italy: A Venice - Trieste', 'FAILS'
+
+	t '
+		6.D.13. Test case, supporting a foreign unit to dislodge returning own
+		unit prohibited.
+	',
+		'Austria: F Trieste - Adriatic Sea', 'FAILS'
+		'Austria: A Vienna Supports A Venice - Trieste', 'SUCCEEDS'
+		'Italy: A Venice - Trieste', 'FAILS'
+		'Italy: F Apulia - Adriatic Sea', 'FAILS'
+
+	t '
+		6.D.14. Test case, supporting a foreign unit is not enough to prevent
+		dislodgement
+	',
+		'Austria: F Trieste Hold', 'FAILS'
+		'Austria: A Vienna Supports A Venice - Trieste', 'SUCCEEDS'
+		'Italy: A Venice - Trieste', 'SUCCEEDS'
+		'Italy: A Tyrolia Supports A Venice - Trieste', 'SUCCEEDS'
+		'Italy: F Adriatic Sea Supports A Venice - Trieste', 'SUCCEEDS'
 
 	t 'Illegal Support Cut - A unit cannot cut support into its own region',
 		'Russia: F Constantinople Supports F Black Sea - Ankara', 'SUCCEEDS'
