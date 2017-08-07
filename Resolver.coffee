@@ -98,6 +98,9 @@ Resolver = (board, orders, TEST = false) ->
 				# Support can only be into an adjacent region
 				unless (
 					(
+						# TODO: Consider revising this hold stuff. If an army
+						# moves away it shouldn't be illegal because that army
+						# could be an enemy army. It should still fail though.
 						order.to is 'Hold' and
 						! ordersWhere null, 'MOVE', 'EXISTS', from: order.from
 					) or
@@ -105,15 +108,31 @@ Resolver = (board, orders, TEST = false) ->
 				) and order.actor isnt order.from
 					return 'ILLEGAL'
 
-				# If there is a move order moving to the unit that is supporting
-				# that is not the destination of the support (you can't cut a
-				# support that's supporting directly against you) then the support
-				# will be cut (even when the move order failed)
-				return succ ! ordersWhere order, 'MOVE', 'EXISTS',
+				if order.actor is 'Constantinople'
+						to: order.actor
+						from: (f) ->
+							f isnt order.to
+						country: (c) -> c isnt order.country
+
+				cut = ordersWhere order, 'MOVE', 'EXISTS',
 					to: order.actor
 					from: (f) ->
 						f isnt order.to
 					country: (c) -> c isnt order.country
+
+				# We have to do dislodgement as a separate case because it's
+				# possible to have a situation where you can't naively cut
+				# support because the other unit is a unit supporting against
+				# your own region but you can actually dislodge the offending
+				# unit in which case the support is actually cut. See test case
+				# 6.D.17 for an example.
+				dislodged = ordersWhere order, 'MOVE', 'SUCCEEDS', to: order.actor
+
+				# If there is a move order moving to the unit that is supporting
+				# that is not the destination of the support (you can't cut a
+				# support that's supporting directly against you) then the support
+				# will be cut (even when the move order failed)
+				return succ !dislodged and !cut
 
 			when 'CONVOY', 'HOLD'
 				# A convoy succeeds when it's not dislodged. We know that we can't

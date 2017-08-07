@@ -253,12 +253,121 @@ datc = (board) ->
 		'Italy: A Tyrolia Supports A Venice - Trieste', 'SUCCEEDS'
 		'Italy: F Adriatic Sea Supports A Venice - Trieste', 'SUCCEEDS'
 
-	t 'Illegal Support Cut - A unit cannot cut support into its own region',
+	t '6.D.15 Illegal Support Cut - A unit cannot cut support into its own region',
 		'Russia: F Constantinople Supports F Black Sea - Ankara', 'SUCCEEDS'
 		'Russia: F Black Sea - Ankara', 'SUCCEEDS'
 		'Turkey: F Ankara - Constantinople', 'FAILS'
 
-	# 6.D.16
+	t 'Test case, convoying a unit dislodging a unit of same power is allowed',
+		'England: A London Hold', 'FAILS'
+		'England: F North Sea Convoys A Belgium - London', 'SUCCEEDS'
+		'France: F English Channel Supports A Belgium - London', 'SUCCEEDS'
+		'France: A Belgium - London', 'SUCCEEDS'
+
+	t '6.D.17. Test case, dislodgement cuts supports',
+		'Russia: F Constantinople Supports F Black Sea - Ankara', 'FAILS'
+		'Russia: F Black Sea - Ankara', 'FAILS'
+		'Turkey: F Ankara - Constantinople', 'SUCCEEDS'
+		'Turkey: A Smyrna Supports F Ankara - Constantinople', 'SUCCEEDS'
+		'Turkey: A Armenia - Ankara', 'FAILS'
+
+	t '6.D.18. Test case, a surviving unit will sustain support',
+		'Russia: F Constantinople Supports F Black Sea - Ankara', 'SUCCEEDS'
+		'Russia: F Black Sea - Ankara', 'SUCCEEDS'
+		'Russia: A Bulgaria Supports F Constantinople Hold', 'SUCCEEDS'
+		'Turkey: F Ankara - Constantinople', 'FAILS'
+		'Turkey: A Smyrna Supports F Ankara - Constantinople', 'SUCCEEDS'
+		'Turkey: A Armenia - Ankara', 'FAILS'
+
+	t '6.D.19. Test case, even when surviving is in alternative way',
+		'Russia: F Constantinople Supports F Black Sea - Ankara', 'SUCCEEDS'
+		'Russia: F Black Sea - Ankara', 'SUCCEEDS'
+		'Russia: A Smyrna Supports F Ankara - Constantinople', 'SUCCEEDS'
+		'Turkey: F Ankara - Constantinople', 'FAILS'
+
+	t '6.D.20. Test case, unit can not cut support of its own country',
+		'England: F London Supports F North Sea - English Channel', 'SUCCEEDS'
+		'England: F North Sea - English Channel', 'SUCCEEDS'
+		'England: A Yorkshire - London', 'FAILS'
+		'France: F English Channel Hold', 'FAILS'
+
+	t '6.D.21. Test case, dislodging does not cancel a support cut',
+		'Austria: F Trieste Hold', 'SUCCEEDS'
+		'Italy: A Venice - Trieste', 'FAILS'
+		'Italy: A Tyrolia Supports A Venice - Trieste', 'FAILS'
+		'Germany: A Munich - Tyrolia', 'FAILS'
+		'Russia: A Silesia - Munich', 'SUCCEEDS'
+		'Russia: A Berlin Supports A Silesia - Munich', 'SUCCEEDS'
+
+	t '6.D.22. Test case, impossible fleet move can not be supported',
+		'Germany: F Kiel - Munich', 'FAILS'
+		'Germany: A Burgundy Supports F Kiel - Munich', 'SUCCEEDS'
+		'Russia: A Munich - Kiel', 'SUCCEEDS'
+		'Russia: A Berlin Supports A Munich - Kiel', 'SUCCEEDS'
+
+	t '6.D.23. Test case, impossible coast move can not be supported',
+		'Italy: F Gulf of Lyon - Spain(sc)', 'SUCCEEDS'
+		'Italy: F Western Mediterranean Supports F Gulf of Lyon - Spain(sc)', 'SUCCEEDS'
+		'France: F Spain(nc) - Gulf of Lyon', 'FAILS'
+		'France: F Marseilles Supports F Spain(nc) - Gulf of Lyon', 'SUCCEEDS'
+
+	t '6.D.24. Test case, impossible army move can not be supported',
+		'France: A Marseilles - Gulf of Lyon', 'FAILS'
+		'France: F Spain(sc) Supports A Marseilles - Gulf of Lyon', 'ILLEGAL'
+		'Italy: F Gulf of Lyon Hold', 'FAILS'
+		'Turkey: F Western Mediterranean - Gulf of Lyon', 'SUCCEEDS'
+		'Turkey: F Tyrrhenian Sea Supports F Western Mediterranean - Gulf of Lyon', 'SUCCEEDS'
+
+	t '6.D.25. Test case, failing hold support can be supported',
+		'Germany: A Berlin Supports A Prussia Hold', 'ILLEGAL'
+		'Germany: F Kiel Supports A Berlin Hold', 'SUCCEEDS'
+		'Russia: F Baltic Sea Supports A Prussia - Berlin', 'SUCCEEDS'
+		'Russia: A Prussia - Berlin', 'FAILS'
+
+	t '6.D.26. Test case, failing move support can be supported',
+		'Germany: A Berlin Supports A Prussia - Silesia', 'FAILS'
+		'Germany: F Kiel Supports A Berlin Hold', 'SUCCEEDS'
+		'Russia: F Baltic Sea Supports A Prussia - Berlin', 'SUCCEEDS'
+		'Russia: A Prussia - Berlin', 'FAILS'
+
+	t '6.D.27. Test case, failing convoy can be supported',
+		'England: F Sweden - Baltic Sea', 'FAILS'
+		'England: F Denmark Supports F Sweden - Baltic Sea', 'SUCCEEDS'
+		'Germany: A Berlin Hold', 'SUCCEEDS'
+		'Russia: F Baltic Sea Convoys A Berlin - Livonia', 'SUCCEEDS'
+		'Russia: F Prussia Supports F Baltic Sea Hold', 'SUCCEEDS'
+
+	# TODO: This test case is failing according to preferences but technically
+	# still correct and consistent. Special handling could make it a little
+	# more user friendly as suggested in the DATC cases. 6.D.29 and 30 are
+	# similar kinds of things.
+	t '6.D.28. Test case, impossible move and support',
+		'Austria: A Budapest Supports F Rumania Hold', 'ILLEGAL'
+		'Russia: F Rumania - Holland', 'FAILS'
+		'Turkey: F Black Sea - Rumania', 'SUCCEEDS'
+		'Turkey: A Bulgaria Supports F Black Sea - Rumania', 'SUCCEEDS'
+
+	# TODO: This may deserve more attention but it's another one of those
+	# things where it has to do with determining which orders should be
+	# considred illegal and thrown out rather than the correctness of the
+	# adjudicator itself.
+	t '6.D.31. Test case, a tricky impossible support',
+		'Austria: A Rumania - Armenia', 'FAILS'
+		'Turkey: F Black Sea Supports A Rumania - Armenia', 'SUCCEEDS'
+
+	t '6.D.33. Test case, unwanted support allowed',
+		'Austria: A Serbia - Budapest', 'SUCCEEDS'
+		'Austria: A Vienna - Budapest', 'FAILS'
+		'Russia: A Galicia Supports A Serbia - Budapest', 'SUCCEEDS'
+		'Turkey: A Bulgaria - Serbia', 'SUCCEEDS'
+
+	t '6.D.34. Test case, support targeting own area not allowed',
+		'Germany: A Berlin - Prussia', 'SUCCEEDS'
+		'Germany: A Silesia Supports A Berlin - Prussia', 'SUCCEEDS'
+		'Germany: F Baltic Sea Supports A Berlin - Prussia', 'SUCCEEDS'
+		'Italy: A Prussia Supports A Livonia - Prussia', 'ILLEGAL'
+		'Russia: A Warsaw Supports A Livonia - Prussia', 'SUCCEEDS'
+		'Russia: A Livonia - Prussia', 'FAILS'
 
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"
