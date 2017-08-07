@@ -369,11 +369,11 @@ datc = (board) ->
 		'Russia: A Warsaw Supports A Livonia - Prussia', 'SUCCEEDS'
 		'Russia: A Livonia - Prussia', 'FAILS'
 
-	# t '6.E.1. Dislodged unit has no effect on attackers area',
-	# 	'Germany: A Berlin - Prussia', 'SUCCEEDS'
-	# 	'Germany: F Kiel - Berlin', 'SUCCEEDS'
-	# 	'Germany: A Silesia Supports A Berlin - Prussia', 'SUCCEEDS'
-	# 	'Russia: A Prussia - Berlin', 'FAILS'
+	t '6.E.1. Dislodged unit has no effect on attackers area',
+		'Germany: A Berlin - Prussia', 'SUCCEEDS'
+		'Germany: F Kiel - Berlin', 'SUCCEEDS'
+		'Germany: A Silesia Supports A Berlin - Prussia', 'SUCCEEDS'
+		'Russia: A Prussia - Berlin', 'FAILS'
 
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"

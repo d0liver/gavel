@@ -5,7 +5,7 @@ _ = require 'underscore'
 CycleGuard       = require './CycleGuard'
 {CycleException} = require './Exceptions'
 utils            = require './utils'
-DEBUG = true
+# DEBUG = true
 
 # Adapted from "The Math of Adjudication" by Lucas Kruijswijk
 # We assume in the resolver that the map constraints have been satisfied (moves
@@ -82,6 +82,8 @@ Resolver = (board, orders, TEST = false) ->
 					from: order.to
 				) ? []
 
+				head_to_head = opposing_order? and board.canMove opposing_order
+
 				hold_strength = holdStrength(order.to)
 
 				if opposing_order?
@@ -90,11 +92,9 @@ Resolver = (board, orders, TEST = false) ->
 
 				succeeds = succ attack_strength > prevent_strength and (
 						(
-							# Head to head battle
-							opposing_order? and
-							attack_strength > defend_strength
+							head_to_head and attack_strength > defend_strength
 						# NOT a head to head battle
-						) or !opposing_order? and attack_strength > hold_strength
+						) or not head_to_head and attack_strength > hold_strength
 					)
 
 				debug "#{order.country}'s #{order.utype} #{succeeds}"
