@@ -5,7 +5,7 @@ _ = require 'underscore'
 CycleGuard       = require './CycleGuard'
 {CycleException} = require './Exceptions'
 utils            = require './utils'
-debug            = require('./debug') 'Resolver'
+DEBUG = true
 
 # Adapted from "The Math of Adjudication" by Lucas Kruijswijk
 # We assume in the resolver that the map constraints have been satisfied (moves
@@ -56,12 +56,17 @@ Resolver = (board, orders, TEST = false) ->
 		unless (valid_region or TEST) and not hop_move
 			return 'ILLEGAL'
 
+		debug "Resolving #{self.describe order}"
+
 		switch order.type
 			when 'MOVE'
 				# Preflight checks. Coast must be specified if the region has
 				# coasts. We must have a path to the destination.
-				return 'FAILS' unless hasPath order
+				unless hasPath order
+					debug "No path exists for this order"
+					return 'FAILS'
 
+				debug "Finding units attempting to prevent #{self.describe order}"
 				# Get the largest prevent strength
 				preventers = ordersWhere(order, 'MOVE', 'EXISTS', to: order.to) ? []
 
@@ -70,6 +75,8 @@ Resolver = (board, orders, TEST = false) ->
 				, 0
 
 				attack_strength = attackStrength(order)
+				debug "#{self.describe order} with an attack strength of #{attack_strength}"
+
 				[opposing_order] = ordersWhere(order, 'MOVE', 'EXISTS',
 					to: order.from
 					from: order.to
@@ -77,22 +84,21 @@ Resolver = (board, orders, TEST = false) ->
 
 				hold_strength = holdStrength(order.to)
 
-				# This stuff is useful but debug needs to take a flag
-				# debug "OPPOSING ORDER: ", opposing_order
-				# debug "ATTACK: ", attack_strength
-				# debug "PREVENT: ", prevent_strength
+				if opposing_order?
+					defend_strength = defendStrength opposing_order
+					debug "#{opposing_order.country}'s #{opposing_order.utype} defends with a strength of #{defend_strength}"
 
-				# debug "HOLD: ", hold_strength
-				# if opposing_order
-				# 	debug "DEFEND: ", defendStrength(opposing_order)
+				succeeds = succ attack_strength > prevent_strength and (
+						(
+							# Head to head battle
+							opposing_order? and
+							attack_strength > defend_strength
+						# NOT a head to head battle
+						) or !opposing_order? and attack_strength > hold_strength
+					)
 
-				return succ attack_strength > prevent_strength and (
-					(
-						opposing_order? and
-						attack_strength > defendStrength(opposing_order)
-					) or
-					attack_strength > hold_strength
-				)
+				debug "#{order.country}'s #{order.utype} #{succeeds}"
+				return succeeds
 
 			when 'SUPPORT'
 				# Support can only be into an adjacent region
@@ -107,12 +113,6 @@ Resolver = (board, orders, TEST = false) ->
 					board.canSupport order
 				) and order.actor isnt order.from
 					return 'ILLEGAL'
-
-				if order.actor is 'Constantinople'
-						to: order.actor
-						from: (f) ->
-							f isnt order.to
-						country: (c) -> c isnt order.country
 
 				cut = ordersWhere order, 'MOVE', 'EXISTS',
 					to: order.actor
@@ -135,6 +135,7 @@ Resolver = (board, orders, TEST = false) ->
 				return succ !dislodged and !cut
 
 			when 'CONVOY', 'HOLD'
+				debug "CONVOY or HOLD is dislodged?"
 				# A convoy succeeds when it's not dislodged. We know that we can't
 				# move and convoy at the same time so it's sufficient to check if
 				# there was a successful move to the convoyer.
@@ -179,6 +180,7 @@ Resolver = (board, orders, TEST = false) ->
 		)
 
 	holdStrength = (region) ->
+		debug 'Calculating hold strength...'
 		region_has_units = !! orders.find (o) -> o.actor is region
 		# If the region started empty or contains a unit that moved
 		# successfully then hold strength is 0
@@ -194,6 +196,7 @@ Resolver = (board, orders, TEST = false) ->
 			return 1 + (supports?.length ? 0)
 
 	attackStrength = (order) ->
+		debug 'Calculating attack strength...'
 		oW = ordersWhere.bind null, order
 		# TODO: This needs review
 		dest_order = !! oW 'MOVE', 'SUCCEEDS', from: order.to
@@ -223,9 +226,11 @@ Resolver = (board, orders, TEST = false) ->
 			return val
 
 	defendStrength = (order) ->
+		debug 'Calculating defend strength...'
 		return 1 + support(order)
 
 	preventStrength = (order) ->
+		debug 'Calculating prevent strength...'
 		# For a head to head battle where the other side was successful our
 		# strength is 0
 		if ordersWhere(order, 'MOVE', 'SUCCEEDS', to: order.from, from: order.to)
@@ -239,6 +244,7 @@ Resolver = (board, orders, TEST = false) ->
 		return ordersWhere(order, 'SUPPORT', 'SUCCEEDS', {from, to})?.length ? 0
 
 	ordersWhere = (current, type, requires, matches) ->
+		debug "Depends on if #{type} #{requires} #{self.describeMatches matches}"
 		results = []
 		`outer: //`
 		for order in orders when order.type is type and ! _.isEqual order, current
@@ -284,8 +290,12 @@ Resolver = (board, orders, TEST = false) ->
 			"
 		return dscr + "#{pad(order.succeeds, ' ')}"
 
-	showResult = (status) ->
-		debug "ORDER ", status
+	self.describeMatches = (matches) ->
+		result = ""
+		for key, val of matches when typeof val isnt 'function'
+			result += "#{key} #{val} "
+
+		return result
 
 	pad = (str, end = '') -> str and "#{end or ' '}#{str}#{end}" or '' 
 
@@ -336,6 +346,24 @@ Resolver = (board, orders, TEST = false) ->
 			throw new Error 'Unhandleable cycle detected.'
 
 	self.adjudicate = CycleGuard(self.adjudicate, handleCycle).fork()
+
+	depth = -1
+	debug = (message) ->
+		if !! DEBUG?
+			tabs = ('\t' for i in [0...depth]).join ''
+			console.log "#{tabs} #{message}"
+
+	# Increment depth before function call, decrement after.
+	depthWrapper = (fu) -> (args...) -> ++depth; result = fu args...; --depth; result
+
+	# Wrap some of the functions with a wrapper that counts the current depth
+	# level so that we can show debug outputs nicely
+	self.adjudicate = depthWrapper self.adjudicate
+	ordersWhere     = depthWrapper ordersWhere
+	holdStrength    = depthWrapper holdStrength
+	attackStrength  = depthWrapper attackStrength
+	preventStrength = depthWrapper preventStrength
+	defendStrength  = depthWrapper defendStrength
 
 	return self
 

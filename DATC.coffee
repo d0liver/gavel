@@ -151,7 +151,7 @@ datc = (board) ->
 		'France: F English Channel Convoys A Belgium - London', 'SUCCEEDS'
 		'France: A Belgium - London', 'SUCCEEDS'
 
-	t 'Convoy swap - If in a swap one of the unit bounces, then the swap fails',
+	t 'Convoy swap - If in a swap one of the units bounces, then the swap fails',
 		'England: F North Sea Convoys A London - Belgium', 'SUCCEEDS'
 		'England: A London - Belgium', 'FAILS'
 		'France: F English Channel Convoys A Belgium - London', 'SUCCEEDS'
@@ -223,19 +223,19 @@ datc = (board) ->
 		'Germany: F Kiel - Berlin', 'FAILS'
 		'Germany: A Munich Supports F Kiel - Berlin', 'SUCCEEDS'
 
-	t '6.D.11. Test case, no self dislodgment of returning unit',
+	t '6.D.11. No self dislodgment of returning unit',
 		'Germany: A Berlin - Prussia', 'FAILS'
 		'Germany: F Kiel - Berlin', 'FAILS'
 		'Germany: A Munich Supports F Kiel - Berlin', 'SUCCEEDS'
 		'Russia: A Warsaw - Prussia', 'FAILS'
 
-	t '6.D.12. Test case, support a foreign unit to dislodge own unit prohibited',
+	t '6.D.12. Support a foreign unit to dislodge own unit prohibited',
 		'Austria: F Trieste Hold', 'SUCCEEDS'
 		'Austria: A Vienna Supports A Venice - Trieste', 'SUCCEEDS'
 		'Italy: A Venice - Trieste', 'FAILS'
 
 	t '
-		6.D.13. Test case, supporting a foreign unit to dislodge returning own
+		6.D.13. Supporting a foreign unit to dislodge returning own
 		unit prohibited.
 	',
 		'Austria: F Trieste - Adriatic Sea', 'FAILS'
@@ -244,7 +244,7 @@ datc = (board) ->
 		'Italy: F Apulia - Adriatic Sea', 'FAILS'
 
 	t '
-		6.D.14. Test case, supporting a foreign unit is not enough to prevent
+		6.D.14. Supporting a foreign unit is not enough to prevent
 		dislodgement
 	',
 		'Austria: F Trieste Hold', 'FAILS'
@@ -258,20 +258,20 @@ datc = (board) ->
 		'Russia: F Black Sea - Ankara', 'SUCCEEDS'
 		'Turkey: F Ankara - Constantinople', 'FAILS'
 
-	t 'Test case, convoying a unit dislodging a unit of same power is allowed',
+	t 'Convoying a unit dislodging a unit of same power is allowed',
 		'England: A London Hold', 'FAILS'
 		'England: F North Sea Convoys A Belgium - London', 'SUCCEEDS'
 		'France: F English Channel Supports A Belgium - London', 'SUCCEEDS'
 		'France: A Belgium - London', 'SUCCEEDS'
 
-	t '6.D.17. Test case, dislodgement cuts supports',
+	t '6.D.17. Dislodgement cuts supports',
 		'Russia: F Constantinople Supports F Black Sea - Ankara', 'FAILS'
 		'Russia: F Black Sea - Ankara', 'FAILS'
 		'Turkey: F Ankara - Constantinople', 'SUCCEEDS'
 		'Turkey: A Smyrna Supports F Ankara - Constantinople', 'SUCCEEDS'
 		'Turkey: A Armenia - Ankara', 'FAILS'
 
-	t '6.D.18. Test case, a surviving unit will sustain support',
+	t '6.D.18. A surviving unit will sustain support',
 		'Russia: F Constantinople Supports F Black Sea - Ankara', 'SUCCEEDS'
 		'Russia: F Black Sea - Ankara', 'SUCCEEDS'
 		'Russia: A Bulgaria Supports F Constantinople Hold', 'SUCCEEDS'
@@ -279,19 +279,19 @@ datc = (board) ->
 		'Turkey: A Smyrna Supports F Ankara - Constantinople', 'SUCCEEDS'
 		'Turkey: A Armenia - Ankara', 'FAILS'
 
-	t '6.D.19. Test case, even when surviving is in alternative way',
+	t '6.D.19. Even when surviving is in alternative way',
 		'Russia: F Constantinople Supports F Black Sea - Ankara', 'SUCCEEDS'
 		'Russia: F Black Sea - Ankara', 'SUCCEEDS'
 		'Russia: A Smyrna Supports F Ankara - Constantinople', 'SUCCEEDS'
 		'Turkey: F Ankara - Constantinople', 'FAILS'
 
-	t '6.D.20. Test case, unit can not cut support of its own country',
+	t '6.D.20. Unit can not cut support of its own country',
 		'England: F London Supports F North Sea - English Channel', 'SUCCEEDS'
 		'England: F North Sea - English Channel', 'SUCCEEDS'
 		'England: A Yorkshire - London', 'FAILS'
 		'France: F English Channel Hold', 'FAILS'
 
-	t '6.D.21. Test case, dislodging does not cancel a support cut',
+	t '6.D.21. Dislodging does not cancel a support cut',
 		'Austria: F Trieste Hold', 'SUCCEEDS'
 		'Italy: A Venice - Trieste', 'FAILS'
 		'Italy: A Tyrolia Supports A Venice - Trieste', 'FAILS'
@@ -299,38 +299,38 @@ datc = (board) ->
 		'Russia: A Silesia - Munich', 'SUCCEEDS'
 		'Russia: A Berlin Supports A Silesia - Munich', 'SUCCEEDS'
 
-	t '6.D.22. Test case, impossible fleet move can not be supported',
+	t '6.D.22. Impossible fleet move can not be supported',
 		'Germany: F Kiel - Munich', 'FAILS'
 		'Germany: A Burgundy Supports F Kiel - Munich', 'SUCCEEDS'
 		'Russia: A Munich - Kiel', 'SUCCEEDS'
 		'Russia: A Berlin Supports A Munich - Kiel', 'SUCCEEDS'
 
-	t '6.D.23. Test case, impossible coast move can not be supported',
+	t '6.D.23. Impossible coast move can not be supported',
 		'Italy: F Gulf of Lyon - Spain(sc)', 'SUCCEEDS'
 		'Italy: F Western Mediterranean Supports F Gulf of Lyon - Spain(sc)', 'SUCCEEDS'
 		'France: F Spain(nc) - Gulf of Lyon', 'FAILS'
 		'France: F Marseilles Supports F Spain(nc) - Gulf of Lyon', 'SUCCEEDS'
 
-	t '6.D.24. Test case, impossible army move can not be supported',
+	t '6.D.24. Impossible army move can not be supported',
 		'France: A Marseilles - Gulf of Lyon', 'FAILS'
 		'France: F Spain(sc) Supports A Marseilles - Gulf of Lyon', 'ILLEGAL'
 		'Italy: F Gulf of Lyon Hold', 'FAILS'
 		'Turkey: F Western Mediterranean - Gulf of Lyon', 'SUCCEEDS'
 		'Turkey: F Tyrrhenian Sea Supports F Western Mediterranean - Gulf of Lyon', 'SUCCEEDS'
 
-	t '6.D.25. Test case, failing hold support can be supported',
+	t '6.D.25. Failing hold support can be supported',
 		'Germany: A Berlin Supports A Prussia Hold', 'ILLEGAL'
 		'Germany: F Kiel Supports A Berlin Hold', 'SUCCEEDS'
 		'Russia: F Baltic Sea Supports A Prussia - Berlin', 'SUCCEEDS'
 		'Russia: A Prussia - Berlin', 'FAILS'
 
-	t '6.D.26. Test case, failing move support can be supported',
+	t '6.D.26. Failing move support can be supported',
 		'Germany: A Berlin Supports A Prussia - Silesia', 'FAILS'
 		'Germany: F Kiel Supports A Berlin Hold', 'SUCCEEDS'
 		'Russia: F Baltic Sea Supports A Prussia - Berlin', 'SUCCEEDS'
 		'Russia: A Prussia - Berlin', 'FAILS'
 
-	t '6.D.27. Test case, failing convoy can be supported',
+	t '6.D.27. Failing convoy can be supported',
 		'England: F Sweden - Baltic Sea', 'FAILS'
 		'England: F Denmark Supports F Sweden - Baltic Sea', 'SUCCEEDS'
 		'Germany: A Berlin Hold', 'SUCCEEDS'
@@ -341,7 +341,7 @@ datc = (board) ->
 	# still correct and consistent. Special handling could make it a little
 	# more user friendly as suggested in the DATC cases. 6.D.29 and 30 are
 	# similar kinds of things.
-	t '6.D.28. Test case, impossible move and support',
+	t '6.D.28. Impossible move and support',
 		'Austria: A Budapest Supports F Rumania Hold', 'ILLEGAL'
 		'Russia: F Rumania - Holland', 'FAILS'
 		'Turkey: F Black Sea - Rumania', 'SUCCEEDS'
@@ -351,23 +351,29 @@ datc = (board) ->
 	# things where it has to do with determining which orders should be
 	# considred illegal and thrown out rather than the correctness of the
 	# adjudicator itself.
-	t '6.D.31. Test case, a tricky impossible support',
+	t '6.D.31. A tricky impossible support',
 		'Austria: A Rumania - Armenia', 'FAILS'
 		'Turkey: F Black Sea Supports A Rumania - Armenia', 'SUCCEEDS'
 
-	t '6.D.33. Test case, unwanted support allowed',
+	t '6.D.33. Unwanted support allowed',
 		'Austria: A Serbia - Budapest', 'SUCCEEDS'
 		'Austria: A Vienna - Budapest', 'FAILS'
 		'Russia: A Galicia Supports A Serbia - Budapest', 'SUCCEEDS'
 		'Turkey: A Bulgaria - Serbia', 'SUCCEEDS'
 
-	t '6.D.34. Test case, support targeting own area not allowed',
+	t '6.D.34. Support targeting own area not allowed',
 		'Germany: A Berlin - Prussia', 'SUCCEEDS'
 		'Germany: A Silesia Supports A Berlin - Prussia', 'SUCCEEDS'
 		'Germany: F Baltic Sea Supports A Berlin - Prussia', 'SUCCEEDS'
 		'Italy: A Prussia Supports A Livonia - Prussia', 'ILLEGAL'
 		'Russia: A Warsaw Supports A Livonia - Prussia', 'SUCCEEDS'
 		'Russia: A Livonia - Prussia', 'FAILS'
+
+	# t '6.E.1. Dislodged unit has no effect on attackers area',
+	# 	'Germany: A Berlin - Prussia', 'SUCCEEDS'
+	# 	'Germany: F Kiel - Berlin', 'SUCCEEDS'
+	# 	'Germany: A Silesia Supports A Berlin - Prussia', 'SUCCEEDS'
+	# 	'Russia: A Prussia - Berlin', 'FAILS'
 
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"
