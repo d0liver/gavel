@@ -5,16 +5,16 @@ _ = require 'underscore'
 CycleGuard       = require './CycleGuard'
 {CycleException} = require './Exceptions'
 utils            = require './utils'
-# DEBUG = true
+depth = -1
 
 # Adapted from "The Math of Adjudication" by Lucas Kruijswijk
 # We assume in the resolver that the map constraints have been satisfied (moves
 # are to valid locations, etc.)
-Resolver = (board, orders, TEST = false) ->
+Resolver = (board, orders, options) ->
 	self = {}
+	{TEST = false, DEBUG = false} = options
 
 	self.resolve = (order) ->
-
 		try
 			order.succeeds = self.adjudicate order
 		catch err
@@ -28,7 +28,6 @@ Resolver = (board, orders, TEST = false) ->
 	# nr - The number of the order to be resolved.
 	# Returns the resolution for that order.
 	self.adjudicate = (order) ->
-
 		# If we already have a resolution then we just spit that out. Normally
 		# memoization would prevent this from happening but breakCycles will
 		# insert its own resolutions from time to time that occur outside of
@@ -66,16 +65,17 @@ Resolver = (board, orders, TEST = false) ->
 					debug "No path exists for this order"
 					return 'FAILS'
 
-				debug "Finding units attempting to prevent #{self.describe order}"
+				debug "Checking for preventers..."
 				# Get the largest prevent strength
 				preventers = ordersWhere(order, 'MOVE', 'EXISTS', to: order.to) ? []
 
 				prevent_strength = preventers.reduce (max, preventer) ->
 					Math.max max, preventStrength preventer
 				, 0
+				debug "Prevent strength is: #{prevent_strength}"
 
 				attack_strength = attackStrength(order)
-				debug "#{self.describe order} with an attack strength of #{attack_strength}"
+				debug "Attack strength is: #{attack_strength}"
 
 				[opposing_order] = ordersWhere(order, 'MOVE', 'EXISTS',
 					to: order.from
@@ -330,26 +330,30 @@ Resolver = (board, orders, TEST = false) ->
 
 	handleCycle = ({cycle}, order) ->
 
-		# debug 'FIRST'
+		# Reset the depth counter since we broke out of the stack.
+		depth = -1
+
+		debug 'CYCLE OCCURRED -- Attempting to find a consistent resolution.'
+		debug 'CYCLE OCCURRED -- First, replay with a guess of SUCCEEDS'
 		first = cycle.replay 'SUCCEEDS'
 
-		# debug 'SECOND'
+		debug 'CYCLE OCCURRED -- Now, replay with a guess of FAILS'
 		second = cycle.replay 'FAILS'
 
 		# Same result so it doesn't matter which decision we use.
 		if first is second
-			# debug 'CONSISTENT OUTCOME'
-			cycle.remember(first)
-			return first
+			debug 'CYCLE OCCURRED -- Consistent outcome'
+			cycle.remember first
+			return self.adjudicate order
 		else
+			debug 'CYCLE OCCURRED -- Attempting to break circular movement'
 			breakCircularMovement(order) or
 			throw new Error 'Unhandleable cycle detected.'
 
 	self.adjudicate = CycleGuard(self.adjudicate, handleCycle).fork()
 
-	depth = -1
 	debug = (message) ->
-		if !! DEBUG?
+		if DEBUG ? false
 			tabs = ('\t' for i in [0...depth]).join ''
 			console.log "#{tabs} #{message}"
 

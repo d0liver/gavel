@@ -22,11 +22,16 @@ CycleGuard = (fu, bak, parent) ->
 			# recursion)
 			cycle = !! previous_args.find (pargs) -> arrayEq pargs, args
 
+			# Cycle started and no cbreak was specified so we throw the
+			# exception and let the caller set it up.
 			if cycle and not cbreak?
 				repeat = args
-				throw new CycleException self
+				throw new CycleException self, args
+			# We hit the bottom of the cycle again but we have a way to resolve
+			# it this time.
 			else if cycle and cbreak?
 				return cbreak
+			# Normal call with memoization
 			else
 				mem = memo.find ((call) -> arrayEq call.args, args)
 				# Check and see if we have memoized these args

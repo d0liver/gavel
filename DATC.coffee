@@ -379,7 +379,8 @@ test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"
 
 	orders = (parseOrder arg for arg in args by 2)
-	resolver = Resolver board, orders, true
+	resolver = Resolver board, orders, TEST: true
+	dbg_resolver = Resolver board, orders, {TEST: true, DEBUG: true}
 
 	for order, i in orders
 		# Expected results are given after each order in the args.
@@ -387,6 +388,9 @@ test = (board, test_name, args...) ->
 		result = resolver.resolve order
 
 		if result isnt expect
+			debug 'Test failed, rerunning in debug mode'
+			delete order.succeeds
+			dbg_resolver.resolve order
 			debug 'Evaluated order: ', args[2*i]
 			debug "Expect: #{expect}, Actual: #{result}"
 			console.log "Test failed\n"
