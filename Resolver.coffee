@@ -67,7 +67,7 @@ Resolver = (board, orders, options) ->
 
 				debug "Checking for preventers..."
 				# Get the largest prevent strength
-				preventers = ordersWhere(order, 'MOVE', 'EXISTS', to: order.to) ? []
+				preventers = (ordersWhere(order, 'MOVE', 'EXISTS', to: order.to) ? []).filter hasPath
 
 				prevent_strength = preventers.reduce (max, preventer) ->
 					Math.max max, preventStrength preventer
@@ -114,11 +114,17 @@ Resolver = (board, orders, options) ->
 				) and order.actor isnt order.from
 					return 'ILLEGAL'
 
-				cut = ordersWhere order, 'MOVE', 'EXISTS',
+				debug "Checking if support order was cut..."
+				[cut] = ordersWhere(
+					order, 'MOVE', 'EXISTS',
 					to: order.actor
 					from: (f) ->
 						f isnt order.to
 					country: (c) -> c isnt order.country
+				) ? []
+
+				# A support cut isn't valid if the path fails
+				cut = cut? and hasPath cut
 
 				# We have to do dislodgement as a separate case because it's
 				# possible to have a situation where you can't naively cut

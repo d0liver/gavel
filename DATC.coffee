@@ -510,6 +510,61 @@ datc = (board) ->
 		'Turkey: F Constantinople Convoys A Greece - Sevastopol', 'SUCCEEDS'
 		'Turkey: F Black Sea Convoys A Greece - Sevastopol', 'SUCCEEDS'
 
+	t '6.F.2. An army being convoyed can bounce as normal',
+		'England: F English Channel Convoys A London - Brest', 'SUCCEEDS'
+		'England: A London - Brest', 'FAILS'
+		'France: A Paris - Brest', 'FAILS'
+
+	t '6.F.3. An army being convoyed can receive support',
+		'England: F English Channel Convoys A London - Brest', 'SUCCEEDS'
+		'England: A London - Brest', 'SUCCEEDS'
+		'England: F Mid-Atlantic Ocean Supports A London - Brest', 'SUCCEEDS'
+		'France: A Paris - Brest', 'FAILS'
+
+	t '6.F.4. An attacked convoy is not disrupted',
+		'England: F North Sea Convoys A London - Holland', 'SUCCEEDS'
+		'England: A London - Holland', 'SUCCEEDS'
+		'Germany: F Skagerrak - North Sea', 'FAILS'
+
+	t '6.F.5. A beleaguered convoy is not disrupted',
+		'England: F North Sea Convoys A London - Holland', 'SUCCEEDS'
+		'England: A London - Holland', 'SUCCEEDS'
+		'France: F English Channel - North Sea', 'FAILS'
+		'France: F Belgium Supports F English Channel - North Sea', 'SUCCEEDS'
+		'Germany: F Skagerrak - North Sea', 'FAILS'
+		'Germany: F Denmark Supports F Skagerrak - North Sea', 'SUCCEEDS'
+
+	t '6.F.6. Dislodged convoy does not cut support',
+		'England: F North Sea Convoys A London - Holland', 'FAILS'
+		'England: A London - Holland', 'FAILS'
+		'Germany: A Holland Supports A Belgium Hold', 'SUCCEEDS'
+		'Germany: A Belgium Supports A Holland Hold', 'FAILS'
+		'Germany: F Helgoland Bight Supports F Skagerrak - North Sea', 'SUCCEEDS'
+		'Germany: F Skagerrak - North Sea', 'SUCCEEDS'
+		'France: A Picardy - Belgium', 'FAILS'
+		'France: A Burgundy Supports A Picardy - Belgium', 'SUCCEEDS'
+
+	# TODO: Retreats - Dislodged English fleet can retreat to Holland
+	# t '6.F.7. Dislodged convoy does not cause contested area',
+	# 	'England: F North Sea Convoys A London - Holland'
+	# 	'England: A London - Holland'
+	# 	'Germany: F Helgoland Bight Supports F Skagerrak - North Sea'
+	# 	'Germany: F Skagerrak - North Sea'
+
+	t '6.F.8. Dislodged convoy does not cause a bounce',
+		'England: F North Sea Convoys A London - Holland', 'FAILS'
+		'England: A London - Holland', 'FAILS'
+		'Germany: F Helgoland Bight Supports F Skagerrak - North Sea', 'SUCCEEDS'
+		'Germany: F Skagerrak - North Sea', 'SUCCEEDS'
+		'Germany: A Belgium - Holland', 'SUCCEEDS'
+
+	t '6.F.9. Dislodge of multi-route convoy',
+		'England: F English Channel Convoys A London - Belgium', 'FAILS'
+		'England: F North Sea Convoys A London - Belgium', 'SUCCEEDS'
+		'England: A London - Belgium', 'SUCCEEDS'
+		'France: F Brest Supports F Mid-Atlantic Ocean - English Channel', 'SUCCEEDS'
+		'France: F Mid-Atlantic Ocean - English Channel', 'SUCCEEDS'
+
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"
 
