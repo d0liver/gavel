@@ -616,6 +616,15 @@ datc = (board) ->
 		'Germany: F North Sea Supports F Belgium - English Channel', 'SUCCEEDS'
 		'Germany: F Belgium - English Channel', 'FAILS'
 
+	t '6.F.17. Pandin\'s extended paradox',
+		'England: F London Supports F Wales - English Channel', 'SUCCEEDS'
+		'England: F Wales - English Channel', 'FAILS'
+		'France: A Brest - London', 'FAILS'
+		'France: F English Channel Convoys A Brest - London', 'FAILS'
+		'France: F Yorkshire Supports A Brest - London', 'SUCCEEDS'
+		'Germany: F North Sea Supports F Belgium - English Channel', 'SUCCEEDS'
+		'Germany: F Belgium - English Channel', 'FAILS'
+
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"
 
