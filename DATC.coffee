@@ -625,6 +625,29 @@ datc = (board) ->
 		'Germany: F North Sea Supports F Belgium - English Channel', 'SUCCEEDS'
 		'Germany: F Belgium - English Channel', 'FAILS'
 
+	t '6.F.18 Betrayl paradox',
+		'England: F North Sea Convoys A London - Belgium', 'FAILS'
+		'England: A London - Belgium', 'FAILS'
+		'England: F English Channel Supports A London - Belgium', 'SUCCEEDS'
+		'France: F Belgium Supports F North Sea Hold', 'SUCCEEDS'
+		'Germany: F Helgoland Bight Supports F Skagerrak - North Sea', 'SUCCEEDS'
+		'Germany: F Skagerrak - North Sea', 'FAILS'
+
+	t '6.F.19. Multi-route convoy disruption paradox',
+		'France: A Tunis - Naples', 'FAILS'
+		'France: F Tyrrhenian Sea Convoys A Tunis - Naples', 'SUCCEEDS'
+		'France: F Ionian Sea Convoys A Tunis - Naples', 'SUCCEEDS'
+		'Italy: F Naples Supports F Rome - Tyrrhenian Sea', 'FAILS'
+		'Italy: F Rome - Tyrrhenian Sea', 'FAILS'
+
+	t '6.F.20. Unwanted multi-route convoy paradox',
+		'France: A Tunis - Naples', 'FAILS'
+		'France: F Tyrrhenian Sea Convoys A Tunis - Naples', 'SUCCEEDS'
+		'Italy: F Naples Supports F Ionian Sea Hold', 'FAILS'
+		'Italy: F Ionian Sea Convoys A Tunis - Naples', 'FAILS'
+		'Turkey: F Aegean Sea Supports F Eastern Mediterranean - Ionian Sea', 'SUCCEEDS'
+		'Turkey: F Eastern Mediterranean - Ionian Sea', 'SUCCEEDS'
+
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"
 
@@ -639,7 +662,7 @@ test = (board, test_name, args...) ->
 
 		if result isnt expect
 			debug 'Test failed, rerunning in debug mode'
-			dbg_resolver.resolve()
+			dbg_resolver.resolve order
 			delete order.succeeds
 			debug 'Evaluated order: ', args[2*i]
 			debug "Expect: #{expect}, Actual: #{result}"
