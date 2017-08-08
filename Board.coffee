@@ -54,10 +54,11 @@ Board = (gdata) ->
 	# Coasts don't matter because convoys only deal with open water and armies
 	# neither of which deal with coasts.
 	self.canConvoy = ({convoyer, convoyee}) ->
-		!! self.adjacencies
+		!! self.adjacencies(
 			utype: 'Fleet'
 			from: convoyee
 			to: convoyer
+		) and self.region(convoyer).type is 'Water'
 
 	# The destination coast does not matter (e.g. a fleet adjacent to the south
 	# coast can support a move to the north coast). However, the from_coast

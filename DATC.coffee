@@ -452,6 +452,64 @@ datc = (board) ->
 		'Russia: F Skagerrak Supports F Norway - North Sea', 'SUCCEEDS'
 		'Russia: F Norway - North Sea', 'FAILS'
 
+	# TODO: via convoy
+	# t '
+	# 	6.E.11. No self dislodgement with beleaguered garrison, unit swap with
+	# 	adjacent convoying and two coasts
+	# '
+# Similar to the previous test case, but now the beleaguered fleet is in a unit swap with the
+# stronger attacker. So, the unit swap succeeds. To make the situation more complex, the swap is
+# on an area with two coasts.
+	# 	'France: A Spain - Portugal via Convoy'
+	# 	'France: F Mid-Atlantic Ocean Convoys A Spain - Portugal'
+	# 	'France: F Gulf of Lyon Supports F Portugal - Spain(nc)'
+	# 	'Germany: A Marseilles Supports A Gascony - Spain'
+	# 	'Germany: A Gascony - Spain'
+	# 	'Italy: F Portugal - Spain(nc)'
+	# 	'Italy: F Western Mediterranean Supports F Portugal - Spain(nc)'
+# The unit swap succeeds. Note that due to the success of the swap, there is no beleaguered
+# garrison anymore.
+
+	t '6.E.12. Support on attack on own unit can be used for other means',
+		'Austria: A Budapest - Rumania', 'FAILS'
+		'Austria: A Serbia Supports A Vienna - Budapest', 'SUCCEEDS'
+		'Italy: A Vienna - Budapest', 'FAILS'
+		'Russia: A Galicia - Budapest', 'FAILS'
+		'Russia: A Rumania Supports A Galicia - Budapest', 'SUCCEEDS'
+
+	t '6.E.13. Three way beleaguered garrison',
+		'England: F Edinburgh Supports F Yorkshire - North Sea', 'SUCCEEDS'
+		'England: F Yorkshire - North Sea', 'FAILS'
+		'France: F Belgium - North Sea', 'FAILS'
+		'France: F English Channel Supports F Belgium - North Sea', 'SUCCEEDS'
+		'Germany: F North Sea Hold', 'SUCCEEDS'
+		'Russia: F Norwegian Sea - North Sea', 'FAILS'
+		'Russia: F Norway Supports F Norwegian Sea - North Sea', 'SUCCEEDS'
+
+	t '6.E.14. Illegal head to head battle can still defend',
+		'England: A Liverpool - Edinburgh', 'FAILS'
+		'Russia: F Edinburgh - Liverpool', 'FAILS'
+
+	t '6.E.15. The friendly head to head battle',
+		'England: F Holland Supports A Ruhr - Kiel', 'SUCCEEDS'
+		'England: A Ruhr - Kiel', 'FAILS'
+		'France: A Kiel - Berlin', 'FAILS'
+		'France: A Munich Supports A Kiel - Berlin', 'SUCCEEDS'
+		'France: A Silesia Supports A Kiel - Berlin', 'SUCCEEDS'
+		'Germany: A Berlin - Kiel', 'FAILS'
+		'Germany: F Denmark Supports A Berlin - Kiel', 'SUCCEEDS'
+		'Germany: F Helgoland Bight Supports A Berlin - Kiel', 'SUCCEEDS'
+		'Russia: F Baltic Sea Supports A Prussia - Berlin', 'SUCCEEDS'
+		'Russia: A Prussia - Berlin', 'FAILS'
+
+	t '6.F.1. No convoy in coastal areas',
+		'Turkey: A Greece - Sevastopol', 'FAILS'
+		'Turkey: F Aegean Sea Convoys A Greece - Sevastopol', 'SUCCEEDS'
+		# TODO: This should probably come back as 'ILLEGAL' although it's
+		# handled correctly by hasPath so there's no tangible impact
+		'Turkey: F Constantinople Convoys A Greece - Sevastopol', 'SUCCEEDS'
+		'Turkey: F Black Sea Convoys A Greece - Sevastopol', 'SUCCEEDS'
+
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"
 

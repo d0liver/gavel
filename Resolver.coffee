@@ -5,12 +5,12 @@ _ = require 'underscore'
 CycleGuard       = require './CycleGuard'
 {CycleException} = require './Exceptions'
 utils            = require './utils'
-depth = -1
 
 # Adapted from "The Math of Adjudication" by Lucas Kruijswijk
 # We assume in the resolver that the map constraints have been satisfied (moves
 # are to valid locations, etc.)
 Resolver = (board, orders, options) ->
+	depth = -1
 	self = {}
 	{TEST = false, DEBUG = false} = options
 
