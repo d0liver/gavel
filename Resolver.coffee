@@ -1,4 +1,4 @@
-# 3rd Party
+# 3rd Party,
 _ = require 'underscore'
 
 # Local
@@ -331,7 +331,7 @@ Resolver = (board, orders, options) ->
 	handleCycle = ({cycle}, order) ->
 
 		# Reset the depth counter since we broke out of the stack.
-		depth = -1
+		depth = 0
 
 		debug 'CYCLE OCCURRED -- Attempting to find a consistent resolution.'
 		debug 'CYCLE OCCURRED -- First, replay with a guess of SUCCEEDS'

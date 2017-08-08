@@ -34,8 +34,12 @@ CycleGuard = (fu, bak, parent) ->
 			# Normal call with memoization
 			else
 				mem = memo.find ((call) -> arrayEq call.args, args)
-				# Check and see if we have memoized these args
-				if mem?
+				# Check and see if we have memoized these args. The check for
+				# mem.result? is in case we started the memoize before but
+				# ended up breaking out because a cycle was detected. In that
+				# case we need to run it again with a proper result for the
+				# cycle which will have been stored by now.
+				if mem? and mem.result?
 					return mem.result
 
 				try

@@ -375,6 +375,83 @@ datc = (board) ->
 		'Germany: A Silesia Supports A Berlin - Prussia', 'SUCCEEDS'
 		'Russia: A Prussia - Berlin', 'FAILS'
 
+	t '6.E.2. No self dislodgement in head to head battle',
+		'Germany: A Berlin - Kiel', 'FAILS'
+		'Germany: F Kiel - Berlin', 'FAILS'
+		'Germany: A Munich Supports A Berlin - Kiel', 'SUCCEEDS'
+
+	t '6.E.3. No help in dislodging own unit',
+		'Germany: A Berlin - Kiel', 'FAILS'
+		'Germany: A Munich Supports F Kiel - Berlin', 'SUCCEEDS'
+		'England: F Kiel - Berlin', 'FAILS'
+
+	t '6.E.4. Non-dislodged loser has still effect',
+		'Germany: F Holland - North Sea', 'FAILS'
+		'Germany: F Helgoland Bight Supports F Holland - North Sea', 'SUCCEEDS'
+		'Germany: F Skagerrak Supports F Holland - North Sea', 'SUCCEEDS'
+		'France: F North Sea - Holland', 'FAILS'
+		'France: F Belgium Supports F North Sea - Holland', 'SUCCEEDS'
+		'England: F Edinburgh Supports F Norwegian Sea - North Sea', 'SUCCEEDS'
+		'England: F Yorkshire Supports F Norwegian Sea - North Sea', 'SUCCEEDS'
+		'England: F Norwegian Sea - North Sea', 'FAILS'
+		'Austria: A Kiel Supports A Ruhr - Holland', 'SUCCEEDS'
+		'Austria: A Ruhr - Holland', 'FAILS'
+
+	t '6.E.5. Loser dislodged by another army has still effect',
+		'Germany: F Holland - North Sea', 'FAILS'
+		'Germany: F Helgoland Bight Supports F Holland - North Sea', 'SUCCEEDS'
+		'Germany: F Skagerrak Supports F Holland - North Sea', 'SUCCEEDS'
+		'France: F North Sea - Holland', 'FAILS'
+		'France: F Belgium Supports F North Sea - Holland', 'SUCCEEDS'
+		'England: F Edinburgh Supports F Norwegian Sea - North Sea', 'SUCCEEDS'
+		'England: F Yorkshire Supports F Norwegian Sea - North Sea', 'SUCCEEDS'
+		'England: F Norwegian Sea - North Sea', 'SUCCEEDS'
+		'England: F London Supports F Norwegian Sea - North Sea', 'SUCCEEDS'
+		'Austria: A Kiel Supports A Ruhr - Holland', 'SUCCEEDS'
+		'Austria: A Ruhr - Holland', 'FAILS'
+
+	t '6.E.6. Not dislodge because of own support has still effect',
+		'Germany: F Holland - North Sea', 'FAILS'
+		'Germany: F Helgoland Bight Supports F Holland - North Sea', 'SUCCEEDS'
+		'France: F North Sea - Holland', 'FAILS'
+		'France: F Belgium Supports F North Sea - Holland', 'SUCCEEDS'
+		'France: F English Channel Supports F Holland - North Sea', 'SUCCEEDS'
+		'Austria: A Kiel Supports A Ruhr - Holland', 'SUCCEEDS'
+		'Austria: A Ruhr - Holland', 'FAILS'
+
+	t '6.E.7. No self dislodgement with beleaguered garrison',
+		'England: F North Sea Hold', 'SUCCEEDS'
+		'England: F Yorkshire Supports F Norway - North Sea', 'SUCCEEDS'
+		'Germany: F Holland Supports F Helgoland Bight - North Sea', 'SUCCEEDS'
+		'Germany: F Helgoland Bight - North Sea', 'FAILS'
+		'Russia: F Skagerrak Supports F Norway - North Sea', 'SUCCEEDS'
+		'Russia: F Norway - North Sea', 'FAILS'
+
+	t '6.E.8. Test case, no self dislodgement with beleaguered garrison and head to head battle',
+		'England: F North Sea - Norway', 'FAILS'
+		'England: F Yorkshire Supports F Norway - North Sea', 'SUCCEEDS'
+		'Germany: F Holland Supports F Helgoland Bight - North Sea', 'SUCCEEDS'
+		'Germany: F Helgoland Bight - North Sea', 'FAILS'
+		'Russia: F Skagerrak Supports F Norway - North Sea', 'SUCCEEDS'
+		'Russia: F Norway - North Sea', 'FAILS'
+
+	t '6.E.9. Almost self dislodgement with beleaguered garrison',
+		'England: F North Sea - Norwegian Sea', 'SUCCEEDS'
+		'England: F Yorkshire Supports F Norway - North Sea', 'SUCCEEDS'
+		'Germany: F Helgoland Bight - North Sea', 'FAILS'
+		'Germany: F Holland Supports F Helgoland Bight - North Sea', 'SUCCEEDS'
+		'Russia: F Norway - North Sea', 'SUCCEEDS'
+		'Russia: F Skagerrak Supports F Norway - North Sea', 'SUCCEEDS'
+
+	t '6.E.10. Almost circular movement with no self dislodgement with beleaguered garrison',
+		'England: F North Sea - Denmark', 'FAILS'
+		'England: F Yorkshire Supports F Norway - North Sea', 'SUCCEEDS'
+		'Germany: F Holland Supports F Helgoland Bight - North Sea', 'SUCCEEDS'
+		'Germany: F Helgoland Bight - North Sea', 'FAILS'
+		'Germany: F Denmark - Helgoland Bight', 'FAILS'
+		'Russia: F Skagerrak Supports F Norway - North Sea', 'SUCCEEDS'
+		'Russia: F Norway - North Sea', 'FAILS'
+
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"
 
