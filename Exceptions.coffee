@@ -1,5 +1,5 @@
 exports.CycleException = class CycleException extends Error
-	constructor: (@cycle, @args) ->
+	constructor: (@cycle, @dependencies) ->
 
 exports.NotImplementedException = class NotImplementedException extends Error
 	constructor: (@cycle) ->

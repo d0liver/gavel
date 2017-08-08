@@ -305,14 +305,10 @@ Resolver = (board, orders, options) ->
 
 	pad = (str, end = '') -> str and "#{end or ' '}#{str}#{end}" or '' 
 
-	# This corresponds to the fallbacks that are discussed in MOA. The
-	# difference is that we just go ahead and address these first so that we
-	# don't have to readjudicate afterwards. Anything not handled preemptively
-	# by this should be handleable by the handleCycle method.
-	breakCycles = ->
-		breakCircularMovement()
+	breakCircularMovement = (dependencies) ->
+		# The first order will be the one that started the cycle.
+		order = dependencies[0]
 
-	breakCircularMovement = (order) ->
 		# Obviously circular movements can only occur when the order itself is
 		# a move
 		return false if order.type isnt 'MOVE'
@@ -331,10 +327,15 @@ Resolver = (board, orders, options) ->
 		# success to break the cycle. A chain of length 2 is simply a head
 		# to head so we ignore those.
 		if order? and !order.succeeds
-			# debug 'Breaking cycle...'
-			return 'SUCCEEDS'
+			order.succeeds = 'SUCCEEDS'
 
-	handleCycle = ({cycle}, order) ->
+	# Szykman rule for resolving convoy paradoxes. The rule says that if a
+	# paradox results from a convoy then we treat the convoy as disrupted.
+	convoyParadox = (dependencies) ->
+		for order in dependencies when order.type is 'CONVOY'
+			order.succeeds = 'FAILS'
+
+	handleCycle = ({cycle, dependencies}, order) ->
 
 		# Reset the depth counter since we broke out of the stack.
 		depth = 0
@@ -350,11 +351,14 @@ Resolver = (board, orders, options) ->
 		if first is second
 			debug 'CYCLE OCCURRED -- Consistent outcome'
 			cycle.remember first
-			return self.adjudicate order
 		else
+			dependencies = (order for {args: [order]} in dependencies)
 			debug 'CYCLE OCCURRED -- Attempting to break circular movement'
-			breakCircularMovement(order) or
+			breakCircularMovement(dependencies) or
+			convoyParadox(dependencies) or
 			throw new Error 'Unhandleable cycle detected.'
+
+		return self.adjudicate order
 
 	self.adjudicate = CycleGuard(self.adjudicate, handleCycle).fork()
 

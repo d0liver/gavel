@@ -26,7 +26,7 @@ CycleGuard = (fu, bak, parent) ->
 			# exception and let the caller set it up.
 			if cycle and not cbreak?
 				repeat = args
-				throw new CycleException self, args
+				throw new CycleException self, cycleDependencies()
 			# We hit the bottom of the cycle again but we have a way to resolve
 			# it this time.
 			else if cycle and cbreak?
@@ -85,6 +85,11 @@ CycleGuard = (fu, bak, parent) ->
 		# so we have to remove the memos for all the calls involved in the
 		# cycle.
 		memo = memo.slice 0, (memo.findIndex ({args}) -> arrayEq(repeat, args))
+
+	# We hand off the dependencies as part of the exception so that they can be
+	# used in the resolution
+	cycleDependencies = ->
+		memo.slice (memo.findIndex ({args}) -> arrayEq(repeat, args))
 
 	self.replay = (cbrk) ->
 

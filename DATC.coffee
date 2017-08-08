@@ -565,6 +565,40 @@ datc = (board) ->
 		'France: F Brest Supports F Mid-Atlantic Ocean - English Channel', 'SUCCEEDS'
 		'France: F Mid-Atlantic Ocean - English Channel', 'SUCCEEDS'
 
+	t '6.F.10. Dislodge of multi-route convoy with foreign fleet',
+		'England: F North Sea Convoys A London - Belgium', 'SUCCEEDS'
+		'England: A London - Belgium', 'SUCCEEDS'
+		'Germany: F English Channel Convoys A London - Belgium', 'FAILS'
+		'France: F Brest Supports F Mid-Atlantic Ocean - English Channel', 'SUCCEEDS'
+		'France: F Mid-Atlantic Ocean - English Channel', 'SUCCEEDS'
+
+	t '6.F.11. Dislodge of multi-route convoy with only foreign fleets',
+		'England: A London - Belgium', 'SUCCEEDS'
+		'Germany: F English Channel Convoys A London - Belgium', 'FAILS'
+		'Russia: F North Sea Convoys A London - Belgium', 'SUCCEEDS'
+		'France: F Brest Supports F Mid-Atlantic Ocean - English Channel', 'SUCCEEDS'
+		'France: F Mid-Atlantic Ocean - English Channel', 'SUCCEEDS'
+
+	t '6.F.12. Dislodged convoying fleet not on route',
+		'England: F English Channel Convoys A London - Belgium', 'SUCCEEDS'
+		'England: A London - Belgium', 'SUCCEEDS'
+		'England: F Irish Sea Convoys A London - Belgium', 'FAILS'
+		'France: F North Atlantic Ocean Supports F Mid-Atlantic Ocean - Irish Sea', 'SUCCEEDS'
+		'France: F Mid-Atlantic Ocean - Irish Sea', 'SUCCEEDS'
+
+	t '6.F.13. The unwanted alternative',
+		'England: A London - Belgium', 'SUCCEEDS'
+		'England: F North Sea Convoys A London - Belgium', 'FAILS'
+		'France: F English Channel Convoys A London - Belgium', 'SUCCEEDS'
+		'Germany: F Holland Supports F Denmark - North Sea', 'SUCCEEDS'
+		'Germany: F Denmark - North Sea', 'SUCCEEDS'
+
+	t '6.F.14. Simple convoy paradox',
+		'England: F London Supports F Wales - English Channel', 'SUCCEEDS'
+		'England: F Wales - English Channel', 'SUCCEEDS'
+		'France: A Brest - London', 'FAILS'
+		'France: F English Channel Convoys A Brest - London', 'FAILS'
+
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"
 
