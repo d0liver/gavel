@@ -26,7 +26,9 @@ CycleGuard = (fu, bak, parent) ->
 			# exception and let the caller set it up.
 			if cycle and not cbreak?
 				repeat = args
-				throw new CycleException self, cycleDependencies()
+				# Capture the dependencies before we clean out the memo (below)
+				dependencies = cycleDependencies()
+				throw new CycleException self, dependencies
 			# We hit the bottom of the cycle again but we have a way to resolve
 			# it this time.
 			else if cycle and cbreak?
@@ -81,15 +83,13 @@ CycleGuard = (fu, bak, parent) ->
 
 	# Remove a memoized cycle
 	clearCycle = ->
-		# When we replay we need to make sure that we get non memoized results
-		# so we have to remove the memos for all the calls involved in the
-		# cycle.
-		memo = memo.slice 0, (memo.findIndex ({args}) -> arrayEq(repeat, args))
+		memo = memo.slice 0, memo.findIndex ({args}) -> arrayEq(repeat, args)
 
 	# We hand off the dependencies as part of the exception so that they can be
 	# used in the resolution
 	cycleDependencies = ->
-		memo.slice (memo.findIndex ({args}) -> arrayEq(repeat, args))
+		dep_memos = memo.slice memo.findIndex ({args}) -> arrayEq repeat, args
+		dependency for {args: dependency} in dep_memos
 
 	self.replay = (cbrk) ->
 
@@ -100,7 +100,7 @@ CycleGuard = (fu, bak, parent) ->
 		clearCycle()
 
 		return res
-
+	
 	# The user of this module gets to determine how things play out based on
 	# the _cbreak_ (cycle break) value that they supplied. Therefore, we let
 	# them notify us of their decision so that we can memoize it and prevent

@@ -599,6 +599,23 @@ datc = (board) ->
 		'France: A Brest - London', 'FAILS'
 		'France: F English Channel Convoys A Brest - London', 'FAILS'
 
+	t '6.F.15. Simple convoy paradox with additional convoy',
+		'England: F London Supports F Wales - English Channel', 'SUCCEEDS'
+		'England: F Wales - English Channel', 'SUCCEEDS'
+		'France: A Brest - London', 'FAILS'
+		'France: F English Channel Convoys A Brest - London', 'FAILS'
+		'Italy: F Irish Sea Convoys A North Africa - Wales', 'SUCCEEDS'
+		'Italy: F Mid-Atlantic Ocean Convoys A North Africa - Wales', 'SUCCEEDS'
+		'Italy: A North Africa - Wales', 'SUCCEEDS'
+
+	t '6.F.16. Pandin\'s paradox',
+		'England: F London Supports F Wales - English Channel', 'SUCCEEDS'
+		'England: F Wales - English Channel', 'FAILS'
+		'France: A Brest - London', 'FAILS'
+		'France: F English Channel Convoys A Brest - London', 'FAILS'
+		'Germany: F North Sea Supports F Belgium - English Channel', 'SUCCEEDS'
+		'Germany: F Belgium - English Channel', 'FAILS'
+
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"
 
@@ -613,8 +630,8 @@ test = (board, test_name, args...) ->
 
 		if result isnt expect
 			debug 'Test failed, rerunning in debug mode'
+			dbg_resolver.resolve()
 			delete order.succeeds
-			dbg_resolver.resolve order
 			debug 'Evaluated order: ', args[2*i]
 			debug "Expect: #{expect}, Actual: #{result}"
 			console.log "Test failed\n"

@@ -4,7 +4,6 @@ _ = require 'underscore'
 # Local
 CycleGuard       = require './CycleGuard'
 {CycleException} = require './Exceptions'
-utils            = require './utils'
 
 # Adapted from "The Math of Adjudication" by Lucas Kruijswijk
 # We assume in the resolver that the map constraints have been satisfied (moves
@@ -22,6 +21,8 @@ Resolver = (board, orders, options) ->
 				order.succeeds = handleCycle err, order
 			else
 				throw err
+
+		return order.succeeds
 
 	succ = (result) -> (result and 'SUCCEEDS') or (! result and 'FAILS')
 
@@ -85,6 +86,7 @@ Resolver = (board, orders, options) ->
 				head_to_head = opposing_order? and board.canMove opposing_order
 
 				hold_strength = holdStrength(order.to)
+				debug "Hold strength is: #{hold_strength}"
 
 				if opposing_order?
 					defend_strength = defendStrength opposing_order
@@ -352,13 +354,16 @@ Resolver = (board, orders, options) ->
 			debug 'CYCLE OCCURRED -- Consistent outcome'
 			cycle.remember first
 		else
-			dependencies = (order for {args: [order]} in dependencies)
+			# NOTE: DO NOT USE _order_ for the dependency name here. That name
+			# is already taken and it will mess things up in a way that's
+			# difficult to find.
+			dependencies = (dep for [dep] in dependencies)
 			debug 'CYCLE OCCURRED -- Attempting to break circular movement'
 			breakCircularMovement(dependencies) or
 			convoyParadox(dependencies) or
 			throw new Error 'Unhandleable cycle detected.'
 
-		return self.adjudicate order
+		return self.resolve order
 
 	self.adjudicate = CycleGuard(self.adjudicate, handleCycle).fork()
 
