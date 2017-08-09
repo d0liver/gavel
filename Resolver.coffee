@@ -259,7 +259,9 @@ Resolver = (board, orders, options) ->
 		debug "Opposing order: #{JSON.stringify opposing_order, null, 4}"
 		# For a head to head battle where the other side was successful our
 		# strength is 0
-		if opposing_order? and hasPath(opposing_order) isnt 'CONVOY'
+		if opposing_order? and
+		hasPath(opposing_order) isnt 'CONVOY' and
+		hasPath(order) isnt 'CONVOY'
 			return 0
 		else
 			return 1 + support(order)

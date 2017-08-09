@@ -759,6 +759,39 @@ datc = (board) ->
 		'France: F Norwegian Sea - Norway', 'FAILS'
 		'France: F North Sea Supports F Norwegian Sea - Norway', 'SUCCEEDS'
 
+	t '6.G.11. A convoy to an adjacent place with a paradox',
+		'England: F Norway Supports F North Sea - Skagerrak', 'SUCCEEDS'
+		'England: F North Sea - Skagerrak', 'SUCCEEDS'
+		'Russia: A Sweden - Norway', 'FAILS'
+		'Russia: F Skagerrak Convoys A Sweden - Norway', 'FAILS'
+		'Russia: F Barents Sea Supports A Sweden - Norway', 'SUCCEEDS'
+
+	t '6.G.12. Swapping two units with two convoys',
+		'England: A Liverpool - Edinburgh via Convoy', 'SUCCEEDS'
+		'England: F North Atlantic Ocean Convoys A Liverpool - Edinburgh', 'SUCCEEDS'
+		'England: F Norwegian Sea Convoys A Liverpool - Edinburgh', 'SUCCEEDS'
+		'Germany: A Edinburgh - Liverpool via Convoy', 'SUCCEEDS'
+		'Germany: F North Sea Convoys A Edinburgh - Liverpool', 'SUCCEEDS'
+		'Germany: F English Channel Convoys A Edinburgh - Liverpool', 'SUCCEEDS'
+		'Germany: F Irish Sea Convoys A Edinburgh - Liverpool', 'SUCCEEDS'
+
+	# TODO: Public opinion?
+	t '6.G.13. Support cut on attack on itself via convoy',
+		'Austria: F Adriatic Sea Convoys A Trieste - Venice', 'SUCCEEDS'
+		'Austria: A Trieste - Venice via Convoy', 'FAILS'
+		'Italy: A Venice Supports F Albania - Trieste', 'SUCCEEDS'
+		'Italy: F Albania - Trieste', 'SUCCEEDS'
+
+	t '6.G.14. Bounce by convoy to adjacent place',
+		'England: A Norway - Sweden', 'SUCCEEDS'
+		'England: F Denmark Supports A Norway - Sweden', 'SUCCEEDS'
+		'England: F Finland Supports A Norway - Sweden', 'SUCCEEDS'
+		'France: F Norwegian Sea - Norway', 'FAILS'
+		'France: F North Sea Supports F Norwegian Sea - Norway', 'SUCCEEDS'
+		'Germany: F Skagerrak Convoys A Sweden - Norway', 'SUCCEEDS'
+		'Russia: A Sweden - Norway via Convoy', 'FAILS'
+		'Russia: F Barents Sea Supports A Sweden - Norway', 'SUCCEEDS'
+
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"
 
