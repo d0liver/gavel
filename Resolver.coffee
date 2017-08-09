@@ -4,6 +4,7 @@ _ = require 'underscore'
 # Local
 CycleGuard       = require './CycleGuard'
 {CycleException} = require './Exceptions'
+describeOrder    = require './describeOrder'
 
 # Adapted from "The Math of Adjudication" by Lucas Kruijswijk
 # We assume in the resolver that the map constraints have been satisfied (moves
@@ -56,7 +57,7 @@ Resolver = (board, orders, options) ->
 		unless (valid_region or TEST) and not hop_move
 			return 'ILLEGAL'
 
-		debug "Resolving #{self.describe order}"
+		debug "Resolving #{describeOrder order}"
 
 		switch order.type
 			when 'MOVE'
@@ -298,33 +299,12 @@ Resolver = (board, orders, options) ->
 		# actual results which is convenient.
 		return results if results?.length
 
-	self.describe = (order) ->
-
-		region = (order) -> board.region order.actor
-		dscr = switch order.type
-			when 'CONVOY' then "
-				#{order.country}'s Fleet in
-				#{order.actor} convoys #{order.from} to #{order.to}
-			"
-			when 'SUPPORT' then "
-				#{order.country}'s
-				#{order.utype} in #{order.actor} supports
-				#{order.utype} in #{order.from} to #{order.to}
-			"
-			when 'MOVE' then "
-				#{order.country}'s
-				#{order.utype} in #{order.from} moves to #{order.to}
-			"
-		return dscr + "#{pad(order.succeeds, ' ')}"
-
 	self.describeMatches = (matches) ->
 		result = ""
 		for key, val of matches when typeof val isnt 'function'
 			result += "#{key} #{val} "
 
 		return result
-
-	pad = (str, end = '') -> str and "#{end or ' '}#{str}#{end}" or '' 
 
 	breakCircularMovement = (dependencies) ->
 		# The first order will be the one that started the cycle.

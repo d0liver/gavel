@@ -6,12 +6,14 @@ Resolver                           = require './Resolver'
 {UserException, ResolverException} = require './Exceptions'
 debug                              = require('./debug') 'DATC'
 Board                              = require './Board'
-parseOrder                         = require './parseOrder'
+Engine = require './Engine'
 
 DB_URI = "mongodb://localhost:27017/deadpotato"
 
 datc = (board) ->
-	t = test.bind null, board
+	engine = Engine board
+	t = engine.testMoves.bind engine
+
 	console.log "Running DATC tests....\n"
 
 	# Fails but not 'ILLEGAL' because we don't explicitly check for a convoy path
@@ -827,30 +829,6 @@ datc = (board) ->
 		'France: F English Channel Convoys A Belgium - London', 'SUCCEEDS'
 		'France: A Belgium - London', 'SUCCEEDS'
 		'France: A Wales Supports A Belgium - London', 'SUCCEEDS'
-
-test = (board, test_name, args...) ->
-	console.log "Test: #{test_name}"
-
-	orders = (parseOrder arg for arg in args by 2)
-	resolver = Resolver board, orders, TEST: true
-	dbg_resolver = Resolver board, orders, {TEST: true, DEBUG: true}
-
-	for order, i in orders
-		# Expected results are given after each order in the args.
-		expect = args[2*i+1]
-		result = resolver.resolve order
-
-		if result isnt expect
-			debug 'Test failed, rerunning in debug mode'
-			delete order.succeeds
-			dbg_resolver.resolve order
-			debug 'Evaluated order: ', args[2*i]
-			debug "Expect: #{expect}, Actual: #{result}"
-			console.log "Test failed\n"
-			return false
-
-	console.log "Test succeeded\n"
-	return true
 
 # Catch failed promises
 process.on 'unhandledRejection', (reason, p) ->
