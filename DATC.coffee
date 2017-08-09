@@ -792,6 +792,42 @@ datc = (board) ->
 		'Russia: A Sweden - Norway via Convoy', 'FAILS'
 		'Russia: F Barents Sea Supports A Sweden - Norway', 'SUCCEEDS'
 
+	t '6.G.15. Bounce and dislodge with double convoy',
+		'England: F North Sea Convoys A London - Belgium', 'SUCCEEDS'
+		'England: A Holland Supports A London - Belgium', 'SUCCEEDS'
+		'England: A Yorkshire - London', 'FAILS'
+		'England: A London - Belgium via Convoy', 'SUCCEEDS'
+		'France: F English Channel Convoys A Belgium - London', 'SUCCEEDS'
+		'France: A Belgium - London via Convoy', 'FAILS'
+
+	t '6.G.16. The two unit in one area bug, moving by convoy',
+		'England: A Norway - Sweden', 'SUCCEEDS'
+		'England: A Denmark Supports A Norway - Sweden', 'SUCCEEDS'
+		'England: F Baltic Sea Supports A Norway - Sweden', 'SUCCEEDS'
+		'England: F North Sea - Norway', 'FAILS'
+		'Russia: A Sweden - Norway via Convoy', 'SUCCEEDS'
+		'Russia: F Skagerrak Convoys A Sweden - Norway', 'SUCCEEDS'
+		'Russia: F Norwegian Sea Supports A Sweden - Norway', 'SUCCEEDS'
+
+	t '6.G.17. The two unit in one area bug, moving over land',
+		'England: A Norway - Sweden via Convoy', 'SUCCEEDS'
+		'England: A Denmark Supports A Norway - Sweden', 'SUCCEEDS'
+		'England: F Baltic Sea Supports A Norway - Sweden', 'SUCCEEDS'
+		'England: F Skagerrak Convoys A Norway - Sweden', 'SUCCEEDS'
+		'England: F North Sea - Norway', 'FAILS'
+		'Russia: A Sweden - Norway', 'SUCCEEDS'
+		'Russia: F Norwegian Sea Supports A Sweden - Norway', 'SUCCEEDS'
+
+	t '6.G.18. The two unit in one area bug, with double convoy',
+		'England: F North Sea Convoys A London - Belgium', 'SUCCEEDS'
+		'England: A Holland Supports A London - Belgium', 'SUCCEEDS'
+		'England: A Yorkshire - London', 'FAILS'
+		'England: A London - Belgium', 'SUCCEEDS'
+		'England: A Ruhr Supports A London - Belgium', 'SUCCEEDS'
+		'France: F English Channel Convoys A Belgium - London', 'SUCCEEDS'
+		'France: A Belgium - London', 'SUCCEEDS'
+		'France: A Wales Supports A Belgium - London', 'SUCCEEDS'
+
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"
 
