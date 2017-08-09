@@ -16,6 +16,7 @@ parseOrder = (order) ->
 		\s+\-
 		\s+((?:[\w-]+\s+)*(?:[\w-]+)) # Move to
 		(?:\(([\w-]+)\))?             # Optional coast
+		(?:\s+(via convoy))?
 		$
 	///
 
@@ -72,6 +73,7 @@ parseOrder = (order) ->
 		from_coast : coastName matches[4]
 		to         : matches[5]
 		to_coast   : coastName matches[6]
+		via_convoy : matches[7]?
 	else if matches = order.match hold_re
 		type        : 'HOLD'
 		country     : matches[1]

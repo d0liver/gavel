@@ -11,7 +11,7 @@ CycleGuard       = require './CycleGuard'
 Resolver = (board, orders, options) ->
 	depth = -1
 	self = {}
-	{TEST = false, DEBUG = false} = options
+	{TEST = false, DEBUG = true} = options
 
 	self.resolve = (order) ->
 		try
@@ -83,14 +83,19 @@ Resolver = (board, orders, options) ->
 					from: order.to
 				) ? []
 
-				head_to_head = opposing_order? and board.canMove opposing_order
+				head_to_head = opposing_order? and (
+					hasPath(order) is 'OVERLAND' and
+					hasPath(opposing_order) is 'OVERLAND'
+				)
 
 				hold_strength = holdStrength(order.to)
 				debug "Hold strength is: #{hold_strength}"
 
-				if opposing_order?
+				if head_to_head
 					defend_strength = defendStrength opposing_order
 					debug "#{opposing_order.country}'s #{opposing_order.utype} defends with a strength of #{defend_strength}"
+
+				debug "Is head to head? #{head_to_head}"
 
 				succeeds = succ attack_strength > prevent_strength and (
 						(
@@ -149,17 +154,21 @@ Resolver = (board, orders, options) ->
 				# there was a successful move to the convoyer.
 				return succ ! ordersWhere null, 'MOVE', 'SUCCEEDS', to: order.actor
 
-	hasPath = ({utype, from, to, from_coast, to_coast})->
+	hasPath = (order)->
+		{country, utype, from, to, from_coast, to_coast, via_convoy} = order
+		has_convoy_intent =
+			!! ordersWhere null, 'CONVOY', 'EXISTS', {from, to, country: (c) -> c is country}
 
 		# We have a _from_ connected directly to the _to_. This is the normal
 		# case where convoys don't come into play.
-		if board.canMove {utype, from, to, from_coast, to_coast}
-			return true
+		if !via_convoy and !has_convoy_intent and
+		board.canMove {utype, from, to, from_coast, to_coast}
+			return 'OVERLAND'
 		# Convoys are valid when it's an army being convoyed and the
 		# destination is on land.
 		else if utype is 'Army' and board.region(to).type is 'Land'
 			corders = ordersWhere null, 'CONVOY', 'SUCCEEDS', {from, to}
-			return hasConvoyPath {from, to}, corders
+			return 'CONVOY' if hasConvoyPath {from, to}, corders
 
 	hasConvoyPath = ({from, to}, corders, visited = []) ->
 
@@ -216,7 +225,10 @@ Resolver = (board, orders, options) ->
 		# move away successfully then we cannot dislodge it so we fall through
 		# to the second or third situation (depending upon if the unit moving
 		# to the destination is the same nationality as the destination unit)
-		if !occupier? or (dest_order and dest_order.to isnt order.from)
+		if !occupier? or (
+			dest_order and
+			(dest_order.to isnt order.from or hasPath destOrder is 'CONVOY')
+		)
 			return 1 + support order
 		else if occupier?.country is order.country
 			# We can't dislodge our own units
