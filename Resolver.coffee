@@ -11,7 +11,7 @@ CycleGuard       = require './CycleGuard'
 Resolver = (board, orders, options) ->
 	depth = -1
 	self = {}
-	{TEST = false, DEBUG = true} = options
+	{TEST = false, DEBUG = false} = options
 
 	self.resolve = (order) ->
 		try
@@ -65,6 +65,8 @@ Resolver = (board, orders, options) ->
 				unless hasPath order
 					debug "No path exists for this order"
 					return 'FAILS'
+				else
+					debug "Path: #{hasPath order}"
 
 				debug "Checking for preventers..."
 				# Get the largest prevent strength

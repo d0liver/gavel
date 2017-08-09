@@ -16,7 +16,6 @@ parseOrder = (order) ->
 		\s+\-
 		\s+((?:[\w-]+\s+)*(?:[\w-]+)) # Move to
 		(?:\(([\w-]+)\))?             # Optional coast
-		(?:\s+(via convoy))?
 		$
 	///
 
@@ -65,6 +64,15 @@ parseOrder = (order) ->
 		to          : matches[9] ? matches[11] # Either a dest region or 'Hold'
 		to_coast    : coastName matches[10]
 	else if matches = order.match(move_re)
+		# via convoy can't be easily distinguished from the destination name
+		# using regular expressions. Instead, we just check for it here and
+		# strip it out if necessary.
+		if match = / (by|via) [Cc]onvoy/.exec matches[5]
+			via_convoy = true
+			matches[5] = matches[5].slice 0, match.index
+		else
+			via_convoy = false
+
 		type       : 'MOVE'
 		country    : matches[1]
 		utype      : matches[2] is 'A' and 'Army' or 'Fleet'
@@ -73,7 +81,7 @@ parseOrder = (order) ->
 		from_coast : coastName matches[4]
 		to         : matches[5]
 		to_coast   : coastName matches[6]
-		via_convoy : matches[7]?
+		via_convoy : via_convoy
 	else if matches = order.match hold_re
 		type        : 'HOLD'
 		country     : matches[1]
