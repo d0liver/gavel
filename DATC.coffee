@@ -749,6 +749,16 @@ datc = (board) ->
 		'England: F Finland Supports A Norway - Sweden', 'SUCCEEDS'
 		'Russia: A Sweden - Norway', 'SUCCEEDS'
 
+	t '6.G.10. Swapped or an head to head battle?',
+		'England: A Norway - Sweden via Convoy', 'SUCCEEDS'
+		'England: F Denmark Supports A Norway - Sweden', 'SUCCEEDS'
+		'England: F Finland Supports A Norway - Sweden', 'SUCCEEDS'
+		'Germany: F Skagerrak Convoys A Norway - Sweden', 'SUCCEEDS'
+		'Russia: A Sweden - Norway', 'FAILS'
+		'Russia: F Barents Sea Supports A Sweden - Norway', 'SUCCEEDS'
+		'France: F Norwegian Sea - Norway', 'FAILS'
+		'France: F North Sea Supports F Norwegian Sea - Norway', 'SUCCEEDS'
+
 test = (board, test_name, args...) ->
 	console.log "Test: #{test_name}"
 

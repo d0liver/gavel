@@ -253,9 +253,13 @@ Resolver = (board, orders, options) ->
 
 	preventStrength = (order) ->
 		debug 'Calculating prevent strength...'
+		# TODO: We may want to consolidate all of the head to head checks
+		[opposing_order] =
+			ordersWhere(order, 'MOVE', 'SUCCEEDS', to: order.from, from: order.to) ? []
+		debug "Opposing order: #{JSON.stringify opposing_order, null, 4}"
 		# For a head to head battle where the other side was successful our
 		# strength is 0
-		if ordersWhere(order, 'MOVE', 'SUCCEEDS', to: order.from, from: order.to)
+		if opposing_order? and hasPath(opposing_order) isnt 'CONVOY'
 			return 0
 		else
 			return 1 + support(order)
@@ -266,7 +270,6 @@ Resolver = (board, orders, options) ->
 		return ordersWhere(order, 'SUPPORT', 'SUCCEEDS', {from, to})?.length ? 0
 
 	ordersWhere = (current, type, requires, matches) ->
-		debug "Depends on if #{type} #{requires} #{self.describeMatches matches}"
 		results = []
 		`outer: //`
 		for order in orders when order.type is type and ! _.isEqual order, current
