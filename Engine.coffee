@@ -59,6 +59,8 @@ Engine = (board) ->
 				console.log "Test failed\n"
 				return
 
+	self.testRetreat = (test_name, {moves, retreats}) ->
+
 		console.log "Test succeeded\n"
 
 	return self
