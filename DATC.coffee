@@ -836,6 +836,7 @@ datc = (board) ->
 
 	console.log "Testing Retreats"
 	console.log "----------------"
+
 	r '6.H.1. No supports during retreat',
 		moves: [
 			'Austria: F Trieste Hold'
@@ -850,6 +851,115 @@ datc = (board) ->
 			'Austria: F Trieste - Albania', FAILS
 			'Austria: A Serbia Supports F Trieste - Albania', FAILS
 			'Turkey: F Greece - Albania', FAILS
+		]
+
+	r '6.H.2. No supports from retreating unit',
+		moves: [
+			'England: A Liverpool - Edinburgh'
+			'England: F Yorkshire Supports A Liverpool - Edinburgh'
+			'England: F Norway Hold'
+			'Germany: A Kiel Supports A Ruhr - Holland'
+			'Germany: A Ruhr - Holland'
+			'Russia: F Edinburgh Hold'
+			'Russia: A Sweden Supports A Finland - Norway'
+			'Russia: A Finland - Norway'
+			'Russia: F Holland Hold'
+		]
+		retreats: [
+			'England: F Norway - North Sea', FAILS
+			'Russia: F Edinburgh - North Sea', FAILS
+			'Russia: F Holland Supports F Edinburgh - North Sea', FAILS
+		]
+
+	r '6.H.3. No convoy during retreat',
+		moves: [
+			'England: F North Sea Hold'
+			'England: A Holland Hold'
+			'Germany: F Kiel Supports A Ruhr - Holland'
+			'Germany: A Ruhr - Holland'
+		]
+		retreats: [
+			'England: A Holland - Yorkshire', FAILS
+			'England: F North Sea Convoys A Holland - Yorkshire', FAILS
+		]
+
+	r '6.H.4. No other moves during retreat',
+		moves: [
+			'England: F North Sea Hold'
+			'England: A Holland Hold'
+			'Germany: F Kiel Supports A Ruhr - Holland'
+			'Germany: A Ruhr - Holland'
+		]
+		retreats: [
+			'England: A Holland - Belgium', SUCCEEDS
+			'England: F North Sea - Norwegian Sea', FAILS
+		]
+
+	r '6.H.5. A unit may not retreat to the area from which it is attacked',
+		moves: [
+			'Russia: F Constantinople Supports F Black Sea - Ankara'
+			'Russia: F Black Sea - Ankara'
+			'Turkey: F Ankara Hold'
+		]
+		retreats: [
+			'Turkey: F Ankara - Black Sea', FAILS
+		]
+
+	r '6.H.6. Unit may not retreat to a contested area',
+		moves: [
+			'Austria: A Budapest Supports A Trieste - Vienna'
+			'Austria: A Trieste - Vienna'
+			'Germany: A Munich - Bohemia'
+			'Germany: A Silesia - Bohemia'
+			'Italy: A Vienna Hold'
+		]
+		retreats: [
+			'Italy: A Vienna - Bohemia', FAILS
+		]
+
+	r '6.H.7. Multiple retreat to same area will disband units',
+		moves: [
+			'Austria: A Budapest Supports A Trieste - Vienna'
+			'Austria: A Trieste - Vienna'
+			'Germany: A Munich Supports A Silesia - Bohemia'
+			'Germany: A Silesia - Bohemia'
+			'Italy: A Vienna Hold'
+			'Italy: A Bohemia Hold'
+		]
+		retreats: [
+			'Italy: A Bohemia - Tyrolia', FAILS
+			'Italy: A Vienna - Tyrolia', FAILS
+		]
+
+	r '6.H.8. Triple retreat to same area will disband units',
+		moves: [
+			'England: A Liverpool - Edinburgh'
+			'England: F Yorkshire Supports A Liverpool - Edinburgh'
+			'England: F Norway Hold'
+			'Germany: A Kiel Supports A Ruhr - Holland'
+			'Germany: A Ruhr - Holland'
+			'Russia: F Edinburgh Hold'
+			'Russia: A Sweden Supports A Finland - Norway'
+			'Russia: A Finland - Norway'
+			'Russia: F Holland Hold'
+		]
+		retreats: [
+			'England: F Norway - North Sea', FAILS
+			'Russia: F Edinburgh - North Sea', FAILS
+			'Russia: F Holland - North Sea', FAILS
+		]
+
+	r '6.H.9. Dislodged unit will not make attackers area contested',
+		moves: [
+			'England: F Helgoland Bight - Kiel'
+			'England: F Denmark Supports F Helgoland Bight - Kiel'
+			'Germany: A Berlin - Prussia'
+			'Germany: F Kiel Hold'
+			'Germany: A Silesia Supports A Berlin - Prussia'
+			'Russia: A Prussia - Berlin'
+		]
+		retreats: [
+			'Germany: F Kiel - Berlin', SUCCEEDS
 		]
 
 # Catch failed promises
