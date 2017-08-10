@@ -13,9 +13,12 @@ DB_URI = "mongodb://localhost:27017/deadpotato"
 datc = (board) ->
 	engine = Engine board
 	t = engine.testMoves.bind engine
-	r = engine.testRetreat.bind engine
+	r = engine.testRetreats.bind engine
 
 	console.log "Running DATC tests....\n"
+
+	console.log "Testing Moves"
+	console.log "-------------"
 
 	# Fails but not 'ILLEGAL' because we don't explicitly check for a convoy path
 	# before the order is resolved.
@@ -831,6 +834,8 @@ datc = (board) ->
 		'France: A Belgium - London', 'SUCCEEDS'
 		'France: A Wales Supports A Belgium - London', 'SUCCEEDS'
 
+	console.log "Testing Retreats"
+	console.log "----------------"
 	r '6.H.1. No supports during retreat',
 		moves: [
 			'Austria: F Trieste Hold'
@@ -842,9 +847,9 @@ datc = (board) ->
 			'Italy: F Aegean Sea Supports F Ionian Sea - Greece'
 		]
 		retreats: [
-			'Austria: F Trieste - Albania'
-			'Austria: A Serbia Supports F Trieste - Albania'
-			'Turkey: F Greece - Albania'
+			'Austria: F Trieste - Albania', 'FAILS'
+			'Austria: A Serbia Supports F Trieste - Albania', 'FAILS'
+			'Turkey: F Greece - Albania', 'FAILS'
 		]
 
 # Catch failed promises
