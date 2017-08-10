@@ -834,23 +834,23 @@ datc = (board) ->
 		'France: A Belgium - London', SUCCEEDS
 		'France: A Wales Supports A Belgium - London', SUCCEEDS
 
-	# console.log "Testing Retreats"
-	# console.log "----------------"
-	# r '6.H.1. No supports during retreat',
-	# 	moves: [
-	# 		'Austria: F Trieste Hold'
-	# 		'Austria: A Serbia Hold'
-	# 		'Turkey: F Greece Hold'
-	# 		'Italy: A Venice Supports A Tyrolia - Trieste'
-	# 		'Italy: A Tyrolia - Trieste'
-	# 		'Italy: F Ionian Sea - Greece'
-	# 		'Italy: F Aegean Sea Supports F Ionian Sea - Greece'
-	# 	]
-	# 	retreats: [
-	# 		'Austria: F Trieste - Albania', FAILS
-	# 		'Austria: A Serbia Supports F Trieste - Albania', FAILS
-	# 		'Turkey: F Greece - Albania', FAILS
-	# 	]
+	console.log "Testing Retreats"
+	console.log "----------------"
+	r '6.H.1. No supports during retreat',
+		moves: [
+			'Austria: F Trieste Hold'
+			'Austria: A Serbia Hold'
+			'Turkey: F Greece Hold'
+			'Italy: A Venice Supports A Tyrolia - Trieste'
+			'Italy: A Tyrolia - Trieste'
+			'Italy: F Ionian Sea - Greece'
+			'Italy: F Aegean Sea Supports F Ionian Sea - Greece'
+		]
+		retreats: [
+			'Austria: F Trieste - Albania', FAILS
+			'Austria: A Serbia Supports F Trieste - Albania', FAILS
+			'Turkey: F Greece - Albania', FAILS
+		]
 
 # Catch failed promises
 process.on 'unhandledRejection', (reason, p) ->

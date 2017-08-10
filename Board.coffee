@@ -105,7 +105,12 @@ Board = (gdata) ->
 			for unit,i in country.units when unit.dislodger?
 				country.units.splice i, 1
 
-	self.setUnit = (region) ->
+	self.addUnit = (country, unit) ->
+		country = gdata.countries.find (c) -> c.name is country
+		country.units.push unit
+
+	self.clearUnits = ->
+		country.units = [] for country in gdata.countries
 
 	units = (type) ->
 		_.union (
