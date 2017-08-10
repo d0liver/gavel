@@ -18,11 +18,8 @@ Board = (gdata) ->
 		return unless rname of gdata.map_data.regions
 
 		region = utils.copy gdata.map_data.regions[rname]
-		region.unit = _.findWhere units(), region: rname
+		region.unit = _.findWhere self.units(), region: rname
 		return region
-
-	fleets = -> yield from units.bind null, 'Fleet'
-	armies = -> yield from units.bind null, 'Army'
 
 	self.adjacencies = ({from, from_coast, to, to_coast, utype}) ->
 		region = gdata.map_data.regions[from]
@@ -93,8 +90,13 @@ Board = (gdata) ->
 	self.setContested = (region) ->
 		gdata.map_data.regions[region].contested = true
 
+	self.dislodgedUnits = ->
+		unit for unit in self.units() when unit.dislodger?
+
 	self.setDislodger = ({region, dislodger}) ->
-		gdata.map_data.regions[region].dislodger = dislodger
+		for country in gdata.countries
+			for unit,i in country.units when unit.region is region
+				unit.dislodger = dislodger
 
 	self.removeDislodger =  (region) ->
 		delete gdata.map_data.regions[region].dislodger
@@ -112,7 +114,7 @@ Board = (gdata) ->
 	self.clearUnits = ->
 		country.units = [] for country in gdata.countries
 
-	units = (type) ->
+	self.units = (type) ->
 		_.union (
 			for country in gdata.countries
 				for unit in country.units when not type? or unit.type is type

@@ -3,10 +3,10 @@ describeOrder   = require './describeOrder'
 Resolver        = require './Resolver'
 RetreatResolver = require './RetreatResolver'
 
-{english, outcomes, orders, paths} = require './enums'
+{english, outcomes, orders: eorders, paths} = require './enums'
 
 {OVERLAND, OVERSEA}                = paths
-{MOVE, SUPPORT, CONVOY, HOLD}      = orders
+{MOVE, SUPPORT, CONVOY, HOLD}      = eorders
 {SUCCEEDS, FAILS, ILLEGAL, EXISTS} = outcomes
 
 Engine = (board) ->
@@ -66,16 +66,16 @@ Engine = (board) ->
 
 	self.testRetreats = (test_name, {moves, retreats}) ->
 		moves = (parseOrder move for move in moves)
+		retreats = extractTestOrders retreats
+
 		# First resolve the moves.
+		board.clearUnits()
 		self.setUnitsForTest moves
-		self.resolve move for move in moves
+		self.apply moves
 
 		# Build up the retreat orders and the resolver for them
-		retreats = extractTestOrders retreats
-		resolver = retreatResolver moves, retreats, TEST: true
-		dbg_resolver = retreatResolver moves, retreats, DEBUG: true, TEST: true
-
-		# Kick off the retreat tests
+		resolver = retreatResolver retreats, TEST: true
+		dbg_resolver = retreatResolver retreats, DEBUG: true, TEST: true
 		self.test test_name, retreats, resolver, dbg_resolver
 
 	self.test = (test_name, orders, resolver, dbg_resolver) ->

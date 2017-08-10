@@ -5,10 +5,10 @@ _ = require 'underscore'
 CycleGuard       = require './CycleGuard'
 {CycleException} = require './Exceptions'
 describeOrder    = require './describeOrder'
-{english, outcomes, orders, paths} = require './enums'
+{english, outcomes, orders: eorders, paths} = require './enums'
 
 {VIA_ADJACENCY, VIA_CONVOY}                = paths
-{MOVE, SUPPORT, CONVOY, HOLD}      = orders
+{MOVE, SUPPORT, CONVOY, HOLD}      = eorders
 {SUCCEEDS, FAILS, ILLEGAL, EXISTS} = outcomes
 
 # Adapted from "The Math of Adjudication" by Lucas Kruijswijk

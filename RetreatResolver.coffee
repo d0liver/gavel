@@ -1,19 +1,21 @@
 _ = require 'underscore'
 
-RetreatResolver = (retreat_orders, options) ->
+describeOrder = require './describeOrder'
+
+{english, outcomes, orders: eorders, paths} = require './enums'
+{MOVE, SUPPORT, CONVOY, HOLD}      = eorders
+{SUCCEEDS, FAILS, ILLEGAL, EXISTS} = outcomes
+
+RetreatResolver = (board, orders, options) ->
 	self = {}
 
 	self.resolve = (order) ->
-		# # If this unit retreats to the same space as another one then it fails
-		# # and is destroyed.
-		# if (retreat_orders.filter (o) -> o.to is order.to).length > 1 or
-		# retreat_orders.find (o) -> o.actor is order.to
-		# 	order.succeeds = 'DESTROY'
-		# else
-		# 	# Retreats succeed by default
-		# 	order.succeeds = 'SUCCEEDS'
+		# Only move orders are allowed during retreat
+		FAILS if order.type isnt MOVE
 
-		# return order
+		# Find other retreat orders to the same destination. TODO: Make sure
+		# the other retreat orders are to a valid destination.
+		FAILS if orders.find (o) -> o.to is order.to
 
 	return self
 
