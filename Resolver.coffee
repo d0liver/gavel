@@ -5,6 +5,11 @@ _ = require 'underscore'
 CycleGuard       = require './CycleGuard'
 {CycleException} = require './Exceptions'
 describeOrder    = require './describeOrder'
+{english, outcomes, orders, paths} = require './enums'
+
+{VIA_ADJACENCY, VIA_CONVOY}                = paths
+{MOVE, SUPPORT, CONVOY, HOLD}      = orders
+{SUCCEEDS, FAILS, ILLEGAL, EXISTS} = outcomes
 
 # Adapted from "The Math of Adjudication" by Lucas Kruijswijk
 # We assume in the resolver that the map constraints have been satisfied (moves
@@ -25,7 +30,7 @@ Resolver = (board, orders, options) ->
 
 		return order.succeeds
 
-	succ = (result) -> (result and 'SUCCEEDS') or (! result and 'FAILS')
+	succ = (result) -> (result and SUCCEEDS) or (!result and FAILS)
 
 	# nr - The number of the order to be resolved.
 	# Returns the resolution for that order.
@@ -45,33 +50,37 @@ Resolver = (board, orders, options) ->
 		no_coast = Object.keys(board.region(order.to)?.coasts ? {}).length is 0
 		# TODO: If a fleet doesn't specify a coast then the order will simply
 		# fail because the adjacencies are set on the coasts and not the
-		# region. We probably need to consider getting rid of the 'ILLEGAL'
+		# region. We probably need to consider getting rid of the ILLEGAL
 		# result and just returning fails because ILLEGAL can get really
 		# complicated.
 		# If the destination has coasts then we _must_ specify one or the order
 		# is illegal. If it ends up that we can't actually move to a coast then
 		# hasPath will return false and the order will fail but we're not
 		# considering it illegal.
-		specified_coast = order.type isnt 'MOVE' or no_coast or order?.to_coast?
+		specified_coast = order.type isnt MOVE or no_coast or order?.to_coast?
 
 		unless (valid_region or TEST) and not hop_move
-			return 'ILLEGAL'
+			return ILLEGAL
 
 		debug "Resolving #{describeOrder order}"
 
 		switch order.type
-			when 'MOVE'
+			when MOVE
 				# Preflight checks. Coast must be specified if the region has
 				# coasts. We must have a path to the destination.
-				unless hasPath order
+				unless hasPath(order)?
 					debug "No path exists for this order"
-					return 'FAILS'
+					return FAILS
 				else
-					debug "Path: #{hasPath order}"
+					debug "Path: #{english paths, hasPath order}"
 
 				debug "Checking for preventers..."
 				# Get the largest prevent strength
-				preventers = (ordersWhere(order, 'MOVE', 'EXISTS', to: order.to) ? []).filter hasPath
+				preventers = (ordersWhere(order, MOVE, EXISTS, to: order.to) ? [])
+				.filter (o) -> hasPath(o)?
+
+				debug "TO: #{order.to}"
+				debug "Number of preventers: #{preventers.length}"
 
 				prevent_strength = preventers.reduce (max, preventer) ->
 					Math.max max, preventStrength preventer
@@ -81,14 +90,14 @@ Resolver = (board, orders, options) ->
 				attack_strength = attackStrength(order)
 				debug "Attack strength is: #{attack_strength}"
 
-				[opposing_order] = ordersWhere(order, 'MOVE', 'EXISTS',
+				[opposing_order] = ordersWhere(order, MOVE, EXISTS,
 					to: order.from
 					from: order.to
 				) ? []
 
 				head_to_head = opposing_order? and (
-					hasPath(order) is 'OVERLAND' and
-					hasPath(opposing_order) is 'OVERLAND'
+					hasPath(order) is VIA_ADJACENCY and
+					hasPath(opposing_order) is VIA_ADJACENCY
 				)
 
 				hold_strength = holdStrength(order.to)
@@ -107,10 +116,10 @@ Resolver = (board, orders, options) ->
 						) or not head_to_head and attack_strength > hold_strength
 					)
 
-				debug "#{order.country}'s #{order.utype} #{succeeds}"
+				debug "#{order.country}'s #{order.utype} #{english outcomes, succeeds}"
 				return succeeds
 
-			when 'SUPPORT'
+			when SUPPORT
 				# Support can only be into an adjacent region
 				unless (
 					(
@@ -118,15 +127,15 @@ Resolver = (board, orders, options) ->
 						# moves away it shouldn't be illegal because that army
 						# could be an enemy army. It should still fail though.
 						order.to is 'Hold' and
-						! ordersWhere null, 'MOVE', 'EXISTS', from: order.from
+						! ordersWhere null, MOVE, EXISTS, from: order.from
 					) or
 					board.canSupport order
 				) and order.actor isnt order.from
-					return 'ILLEGAL'
+					return ILLEGAL
 
 				debug "Checking if support order was cut..."
 				[cut] = ordersWhere(
-					order, 'MOVE', 'EXISTS',
+					order, MOVE, EXISTS,
 					to: order.actor
 					from: (f) ->
 						f isnt order.to
@@ -134,7 +143,7 @@ Resolver = (board, orders, options) ->
 				) ? []
 
 				# A support cut isn't valid if the path fails
-				cut = cut? and hasPath cut
+				cut = cut? and hasPath(cut)?
 
 				# We have to do dislodgement as a separate case because it's
 				# possible to have a situation where you can't naively cut
@@ -142,7 +151,7 @@ Resolver = (board, orders, options) ->
 				# your own region but you can actually dislodge the offending
 				# unit in which case the support is actually cut. See test case
 				# 6.D.17 for an example.
-				dislodged = ordersWhere order, 'MOVE', 'SUCCEEDS', to: order.actor
+				dislodged = ordersWhere order, MOVE, SUCCEEDS, to: order.actor
 
 				# If there is a move order moving to the unit that is supporting
 				# that is not the destination of the support (you can't cut a
@@ -150,28 +159,31 @@ Resolver = (board, orders, options) ->
 				# will be cut (even when the move order failed)
 				return succ !dislodged and !cut
 
-			when 'CONVOY', 'HOLD'
+			when CONVOY, HOLD
 				debug "CONVOY or HOLD is dislodged?"
 				# A convoy succeeds when it's not dislodged. We know that we can't
 				# move and convoy at the same time so it's sufficient to check if
 				# there was a successful move to the convoyer.
-				return succ ! ordersWhere null, 'MOVE', 'SUCCEEDS', to: order.actor
+				return succ ! ordersWhere null, MOVE, SUCCEEDS, to: order.actor
 
 	hasPath = (order)->
 		{country, utype, from, to, from_coast, to_coast, via_convoy} = order
 		has_convoy_intent =
-			!! ordersWhere null, 'CONVOY', 'EXISTS', {from, to, country: (c) -> c is country}
+			!! ordersWhere null, CONVOY, EXISTS, {from, to, country: (c) -> c is country}
+
+		debug "Via convoy? #{via_convoy}"
+		debug "Convoy intent? #{has_convoy_intent}"
 
 		# We have a _from_ connected directly to the _to_. This is the normal
 		# case where convoys don't come into play.
 		if !via_convoy and !has_convoy_intent and
 		board.canMove {utype, from, to, from_coast, to_coast}
-			return 'OVERLAND'
+			return VIA_ADJACENCY
 		# Convoys are valid when it's an army being convoyed and the
 		# destination is on land.
 		else if utype is 'Army' and board.region(to).type is 'Land'
-			corders = ordersWhere null, 'CONVOY', 'SUCCEEDS', {from, to}
-			return 'CONVOY' if hasConvoyPath {from, to}, corders
+			corders = ordersWhere null, CONVOY, SUCCEEDS, {from, to}
+			return VIA_CONVOY if hasConvoyPath {from, to}, corders
 
 	hasConvoyPath = ({from, to}, corders, visited = []) ->
 
@@ -204,14 +216,14 @@ Resolver = (board, orders, options) ->
 		region_has_units = !! orders.find (o) -> o.actor is region
 		# If the region started empty or contains a unit that moved
 		# successfully then hold strength is 0
-		if !region_has_units or ordersWhere(null, 'MOVE', 'SUCCEEDS', from: region)
+		if !region_has_units or ordersWhere(null, MOVE, SUCCEEDS, from: region)
 			return 0
 		# If a unit tried to move from this region and failed then hold strength is
 		# 1.
-		else if !! ordersWhere(null, 'MOVE', 'FAILS', from: region)
+		else if !! ordersWhere(null, MOVE, FAILS, from: region)
 			return 1
 		else
-			supports = ordersWhere null, 'SUPPORT', 'SUCCEEDS', from: region, to: 'Hold'
+			supports = ordersWhere null, SUPPORT, SUCCEEDS, from: region, to: 'Hold'
 
 			return 1 + (supports?.length ? 0)
 
@@ -219,7 +231,7 @@ Resolver = (board, orders, options) ->
 		debug 'Calculating attack strength...'
 		oW = ordersWhere.bind null, order
 		# TODO: This needs review
-		dest_order = !! oW 'MOVE', 'SUCCEEDS', from: order.to
+		dest_order = !! oW MOVE, SUCCEEDS, from: order.to
 		occupier = orders.find (o) -> o.actor is order.to
 
 		# This is NOT a head to head battle. The destination is empty and
@@ -230,7 +242,7 @@ Resolver = (board, orders, options) ->
 		# to the destination is the same nationality as the destination unit)
 		if !occupier? or (
 			dest_order and
-			(dest_order.to isnt order.from or hasPath destOrder is 'CONVOY')
+			(dest_order.to isnt order.from or hasPath destOrder is VIA_CONVOY)
 		)
 			return 1 + support order
 		else if occupier?.country is order.country
@@ -241,7 +253,7 @@ Resolver = (board, orders, options) ->
 			# supporting units (but units can't support against their own).
 			{from, to} = order
 			val = 1 + (oW(
-				'SUPPORT', 'SUCCEEDS', {
+				SUPPORT, SUCCEEDS, {
 					from, to,
 					country: (c) -> c isnt occupier?.country
 				}
@@ -256,13 +268,15 @@ Resolver = (board, orders, options) ->
 		debug 'Calculating prevent strength...'
 		# TODO: We may want to consolidate all of the head to head checks
 		[opposing_order] =
-			ordersWhere(order, 'MOVE', 'SUCCEEDS', to: order.from, from: order.to) ? []
-		debug "Opposing order: #{JSON.stringify opposing_order, null, 4}"
+			ordersWhere(order, MOVE, SUCCEEDS, to: order.from, from: order.to) ? []
+		if opposing_order?
+			debug "Opposing order: #{describeOrder opposing_order}"
+			debug "Opposing order path: #{english paths, hasPath opposing_order}"
 		# For a head to head battle where the other side was successful our
 		# strength is 0
 		if opposing_order? and
-		hasPath(opposing_order) isnt 'CONVOY' and
-		hasPath(order) isnt 'CONVOY'
+		hasPath(opposing_order) isnt VIA_CONVOY and
+		hasPath(order) isnt VIA_CONVOY
 			return 0
 		else
 			return 1 + support(order)
@@ -270,7 +284,7 @@ Resolver = (board, orders, options) ->
 	# Get the number of supports for an order
 	support = (order) ->
 		{from, to} = order
-		return ordersWhere(order, 'SUPPORT', 'SUCCEEDS', {from, to})?.length ? 0
+		return ordersWhere(order, SUPPORT, SUCCEEDS, {from, to})?.length ? 0
 
 	ordersWhere = (current, type, requires, matches) ->
 		results = []
@@ -291,8 +305,8 @@ Resolver = (board, orders, options) ->
 			# these cases one can set _succeeds_ and only orders which match that
 			# criterion will be returned.
 			result = self.adjudicate order
-			if result isnt 'ILLEGAL' and
-			(requires is 'EXISTS' or result is requires)
+			if result isnt ILLEGAL and
+			(requires is EXISTS or result is requires)
 				results.push order
 
 		# This makes it so that we can use the results as a boolean or use the
@@ -306,17 +320,36 @@ Resolver = (board, orders, options) ->
 
 		return result
 
+	# Go through the resolved orders and apply the changes to the board
+	# (including contests, etc.). This has been done in a separate function
+	# rather than in adjudicate because I'm still not sure how I feel about
+	# this. The rest of the resolver is pure and doesn't have side effects so
+	# I'm not sure that I want to go littering everything with the added
+	# complexity of extra side effects. Calling apply explicitly feels better
+	# for now.
+	self.apply = ->
+		# Set dislodged units.
+		for dislodger in ordersWhere null, MOVE, SUCCEEDS
+			board.setDislodger
+				dislodger: dislodger.actor
+				region: dislodger.to
+
+		# Set contested regions
+		morders = ordersWhere null, MOVE, EXISTS
+		for order in morders when preventStrength(order) > 0
+			board.setContested order.to
+
 	breakCircularMovement = (dependencies) ->
 		# The first order will be the one that started the cycle.
 		order = dependencies[0]
 
 		# Obviously circular movements can only occur when the order itself is
 		# a move
-		return false if order.type isnt 'MOVE'
+		return false if order.type isnt MOVE
 
 		# List of moves that have been seen so far in this chain
 		chain = []
-		morders = _.where orders, type: 'MOVE'
+		morders = _.where orders, type: MOVE
 
 		while order? and order.from not in chain and !order.succeeds?
 			chain.push order.from
@@ -328,13 +361,13 @@ Resolver = (board, orders, options) ->
 		# success to break the cycle. A chain of length 2 is simply a head
 		# to head so we ignore those.
 		if order? and !order.succeeds
-			order.succeeds = 'SUCCEEDS'
+			order.succeeds = SUCCEEDS
 
 	# Szykman rule for resolving convoy paradoxes. The rule says that if a
 	# paradox results from a convoy then we treat the convoy as disrupted.
 	convoyParadox = (dependencies) ->
-		for order in dependencies when order.type is 'CONVOY'
-			order.succeeds = 'FAILS'
+		for order in dependencies when order.type is CONVOY
+			order.succeeds = FAILS
 
 	handleCycle = ({cycle, dependencies}, order) ->
 
@@ -343,10 +376,10 @@ Resolver = (board, orders, options) ->
 
 		debug 'CYCLE OCCURRED -- Attempting to find a consistent resolution.'
 		debug 'CYCLE OCCURRED -- First, replay with a guess of SUCCEEDS'
-		first = cycle.replay 'SUCCEEDS'
+		first = cycle.replay SUCCEEDS
 
 		debug 'CYCLE OCCURRED -- Now, replay with a guess of FAILS'
-		second = cycle.replay 'FAILS'
+		second = cycle.replay FAILS
 
 		# Same result so it doesn't matter which decision we use.
 		if first is second

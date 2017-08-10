@@ -1,3 +1,5 @@
+{orders: {MOVE, SUPPORT, CONVOY, HOLD}} = require './enums.coffee'
+
 parseOrder = (order) ->
 	coastName = (abbr) ->
 		map = 
@@ -57,7 +59,7 @@ parseOrder = (order) ->
 		utype       : matches[2] is 'A' and 'Army' or 'Fleet'
 		actor       : matches[3]
 		actor_coast : coastName matches[4]
-		type        : matches[5] is 'Convoys' and 'CONVOY' or 'SUPPORT'
+		type        : matches[5] is 'Convoys' and CONVOY or SUPPORT
 		from_utype  : matches[6] is 'A' and 'Army' or 'Fleet'
 		from        : matches[7]
 		from_coast  : coastName matches[8]
@@ -73,7 +75,7 @@ parseOrder = (order) ->
 		else
 			via_convoy = false
 
-		type       : 'MOVE'
+		type       : MOVE
 		country    : matches[1]
 		utype      : matches[2] is 'A' and 'Army' or 'Fleet'
 		actor      : matches[3]
@@ -83,7 +85,7 @@ parseOrder = (order) ->
 		to_coast   : coastName matches[6]
 		via_convoy : via_convoy
 	else if matches = order.match hold_re
-		type        : 'HOLD'
+		type        : HOLD
 		country     : matches[1]
 		utype       : matches[2] is 'A' and 'Army' or 'Fleet'
 		actor       : matches[3]

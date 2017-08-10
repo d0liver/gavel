@@ -3,6 +3,12 @@ describeOrder   = require './describeOrder'
 Resolver        = require './Resolver'
 RetreatResolver = require './RetreatResolver'
 
+{english, outcomes, orders, paths} = require './enums'
+
+{OVERLAND, OVERSEA}                = paths
+{MOVE, SUPPORT, CONVOY, HOLD}      = orders
+{SUCCEEDS, FAILS, ILLEGAL, EXISTS} = outcomes
+
 Engine = (board) ->
 	self = {}
 	phases = [
@@ -70,7 +76,10 @@ Engine = (board) ->
 				# lower cased.
 				dbg_resolver.resolve order
 				console.log 'Evaluated order: ', describeOrder order
-				console.log "Expect: #{order.expects}, Actual: #{result}"
+				console.log "
+					Expect: #{english outcomes, order.expects},
+					Actual: #{english outcomes, result}
+				"
 				console.log "Test failed\n"
 				return
 

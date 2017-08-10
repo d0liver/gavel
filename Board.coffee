@@ -89,6 +89,24 @@ Board = (gdata) ->
 
 		return false
 
+	# Resolvers use these methods to update the board during resolution.
+	self.setContested = (region) ->
+		gdata.map_data.regions[region].contested = true
+
+	self.setDislodger = ({region, dislodger}) ->
+		gdata.map_data.regions[region].dislodger = dislodger
+
+	self.removeDislodger =  (region) ->
+		delete gdata.map_data.regions[region].dislodger
+
+	# Remove a dislodged unit in a region.
+	self.removeUnit = (region) ->
+		for country in gdata.countries
+			for unit,i in country.units when unit.dislodger?
+				country.units.splice i, 1
+
+	self.setUnit = (region) ->
+
 	units = (type) ->
 		_.union (
 			for country in gdata.countries
