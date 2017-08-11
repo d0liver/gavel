@@ -27,7 +27,7 @@ RetreatResolver = (board, orders, options) ->
 		# Try to retreat to the region of the unit that dislodged
 		board.dislodgedUnits().find((u) -> u.region is order.actor and order.to is u.dislodger) or
 		# Try to retreat to contested region
-		board.region(order.actor).contested ? false
+		board.region(order.to).contested ? false
 			FAILS
 		else
 			SUCCEEDS
