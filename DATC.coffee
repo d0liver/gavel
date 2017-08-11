@@ -962,6 +962,20 @@ datc = (board) ->
 			'Germany: F Kiel - Berlin', SUCCEEDS
 		]
 
+	r '6.H.10. Not retreating to attacker does not mean contested',
+		moves: [
+			'England: A Kiel Hold'
+			'Germany: A Berlin - Kiel'
+			'Germany: A Munich Supports A Berlin - Kiel'
+			'Germany: A Prussia Hold'
+			'Russia: A Warsaw - Prussia'
+			'Russia: A Silesia Supports A Warsaw - Prussia'
+		]
+		retreats: [
+			'England: A Kiel - Berlin', FAILS
+			'Germany: A Prussia - Berlin', SUCCEEDS
+		]
+
 # Catch failed promises
 process.on 'unhandledRejection', (reason, p) ->
   debug 'Unhandled Rejection at: ', p, 'reason: ', reason
