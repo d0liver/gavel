@@ -2,7 +2,8 @@ parseOrder      = require './parseOrder'
 describeOrder   = require './describeOrder'
 Resolver        = require './Resolver'
 RetreatResolver = require './RetreatResolver'
-BuildResolver = require './BuildResolver'
+BuildResolver   = require './BuildResolver'
+StubBoard       = require './StubBoard'
 
 {english, outcomes, orders: eorders, paths} = require './enums'
 
@@ -45,7 +46,8 @@ Engine = (board) ->
 
 	moveResolver = (orders, options) -> Resolver board, orders, options
 	retreatResolver = (orders, options) -> RetreatResolver board, orders, options
-	buildResolver = (orders) -> BuildResolver board, orders, options
+	buildResolver = (orders, adjustments, options) ->
+		BuildResolver StubBoard(board, adjustments), orders, options
 
 	# Clear all of the existing units off of the board and set it up so that
 	# each unit which was given an order is actually on the board.
@@ -78,9 +80,9 @@ Engine = (board) ->
 		dbg_resolver = retreatResolver retreats, DEBUG: true, TEST: true
 		self.test test_name, retreats, resolver, dbg_resolver
 
-	self.testBuilds = (test_name, args...) ->
+	self.testBuilds = (test_name, adjustments, args...) ->
 		orders = extractTestOrders args
-		resolver = buildResolver orders, TEST: true
+		resolver = buildResolver orders, adjustments, TEST: true
 		dbg_resolver = buildResolver orders, DEBUG: true, TEST: true
 
 		self.test test_name, orders, resolver, dbg_resolver

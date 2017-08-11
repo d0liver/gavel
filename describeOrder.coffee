@@ -1,6 +1,6 @@
 {
 	english
-	orders: {MOVE, SUPPORT, CONVOY, HOLD}
+	orders: {MOVE, SUPPORT, CONVOY, HOLD, BUILD}
 	outcomes
 } = require './enums'
 
@@ -20,6 +20,10 @@ describeOrder = (order) ->
 		when MOVE then "
 			#{order.country}'s
 			#{order.utype} in #{order.from} moves to #{order.to}
+		"
+		when BUILD then "
+			#{order.country} builds #{if order.utype is 'Army' then 'an' else 'a'}
+			#{order.utype} in #{order.region}
 		"
 	return dscr + "#{pad english(outcomes, order.succeeds), ' '}"
 

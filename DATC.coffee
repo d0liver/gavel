@@ -1058,28 +1058,37 @@ datc = (board) ->
 	console.log "Testing builds"
 	console.log "--------------\n"
 
-	b '6.I.1. Too many build orders',
-		'Germany: Build A Warsaw', SUCCEEDS
-		'Germany: Build A Kiel', FAILS
+	b '6.I.1. Too many build orders', Germany: 1,
+		'Germany: Build A Warsaw', FAILS
+		'Germany: Build A Kiel', SUCCEEDS
 		'Germany: Build A Munich', FAILS
 
-	b '6.I.2. Fleets can not be build in land areas',
+	b '6.I.2. Fleets can not be build in land areas', Russia: 1,
 		'Russia: Build F Moscow', FAILS
 
-	b '6.I.3. Supply center must be empty for building'
+	# Add the unit to the board
+	board.addUnit 'Germany', {type: 'Army', region: 'Berlin'}
+	b '6.I.3. Supply center must be empty for building', Germany: 1,
 		'Germany: Build A Berlin', FAILS
+	# Clean up afterwards
+	board.clearUnits()
 
-	b '6.I.4. Both coasts must be empty for building',
+	board.addUnit 'Russia', {type: 'Army', region: 'St Petersburg', coast: 'South'}
+	b '6.I.4. Both coasts must be empty for building', Russia: 1,
 		'Russia: Build A St Petersburg(nc)', FAILS
+	board.clearUnits()
 
-	b '6.I.5. Building in home supply center that is not owned'
-		'Germany: Build A Berlin', FAILS
+	# __NOTE__: This isn't checked here. It's illegal to input an order for a
+	# country other than your own via the UI. The resolver itself has no notion
+	# of who owns what.
+	# b '6.I.5. Building in home supply center that is not owned', Germany: 1,
+	# 	'Germany: Build A Berlin', FAILS
 
-	b '6.I.6. Building in owned supply center that is not a home supply center'
+	b '6.I.6. Building in owned supply center that is not a home supply center', Germany: 1,
 		'Germany: Build A Warsaw', FAILS
 
-	b '6.I.7. Only one build in a home supply center'
-		'Russia: Build A Moscow', SUCCEEDS
+	b '6.I.7. Only one build in a home supply center', Russia: 2,
+		'Russia: Build A Moscow', FAILS
 		'Russia: Build A Moscow', FAILS
 
 # Catch failed promises

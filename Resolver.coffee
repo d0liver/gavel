@@ -11,6 +11,8 @@ describeOrder    = require './describeOrder'
 {MOVE, SUPPORT, CONVOY, HOLD}      = eorders
 {SUCCEEDS, FAILS, ILLEGAL, EXISTS} = outcomes
 
+# TODO: Test valid units check
+# TODO: Add coasts to self.apply unit results
 # Adapted from "The Math of Adjudication" by Lucas Kruijswijk
 # We assume in the resolver that the map constraints have been satisfied (moves
 # are to valid locations, etc.)

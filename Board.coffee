@@ -4,6 +4,8 @@ _ = require 'underscore'
 # Local
 utils = require './utils'
 
+# TODO: Make sure that board is handing out copies or read only references for
+# everything.
 # gdata = Game data. Consult the docs for the format (or look at the sample
 # data for the test cases)
 Board = (gdata) ->
@@ -44,6 +46,10 @@ Board = (gdata) ->
 				adjacency
 
 		return adjacencies if adjacencies.length > 0
+
+	self.homeCenters = (country) ->
+		country = gdata.countries.find (c) -> c.name is country
+		utils.copy country.supply_centers
 
 	self.hasCoast = (rname) ->
 		Object.keys(gdata.map_data.regions[rname].coasts).length isnt 0

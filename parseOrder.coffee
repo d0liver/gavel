@@ -1,4 +1,4 @@
-{orders: {MOVE, SUPPORT, CONVOY, HOLD}} = require './enums.coffee'
+{orders: {BUILD, MOVE, SUPPORT, CONVOY, HOLD}} = require './enums.coffee'
 
 parseOrder = (order) ->
 	coastName = (abbr) ->
@@ -103,7 +103,7 @@ parseOrder = (order) ->
 	else if matches = order.match build_re
 		type: BUILD
 		country: matches[1]
-		utype: matches[2]
+		utype: matches[2] is 'A' and 'Army' or 'Fleet'
 		region: matches[3]
 		region_coast: matches[4]
 
