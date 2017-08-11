@@ -2,6 +2,7 @@ parseOrder      = require './parseOrder'
 describeOrder   = require './describeOrder'
 Resolver        = require './Resolver'
 RetreatResolver = require './RetreatResolver'
+BuildResolver = require './BuildResolver'
 
 {english, outcomes, orders: eorders, paths} = require './enums'
 
@@ -43,9 +44,8 @@ Engine = (board) ->
 	parseOrders = (orders) -> parseOrder order for order in orders
 
 	moveResolver = (orders, options) -> Resolver board, orders, options
-
-	retreatResolver = (retreat_orders, options) ->
-		RetreatResolver board, retreat_orders, options
+	retreatResolver = (orders, options) -> RetreatResolver board, orders, options
+	buildResolver = (orders) -> BuildResolver board, orders, options
 
 	# Clear all of the existing units off of the board and set it up so that
 	# each unit which was given an order is actually on the board.
@@ -77,6 +77,13 @@ Engine = (board) ->
 		resolver = retreatResolver retreats, TEST: true
 		dbg_resolver = retreatResolver retreats, DEBUG: true, TEST: true
 		self.test test_name, retreats, resolver, dbg_resolver
+
+	self.testBuilds = (test_name, args...) ->
+		orders = extractTestOrders args
+		resolver = buildResolver orders, TEST: true
+		dbg_resolver = buildResolver orders, DEBUG: true, TEST: true
+
+		self.test test_name, orders, resolver, dbg_resolver
 
 	self.test = (test_name, orders, resolver, dbg_resolver) ->
 		console.log "Test: #{test_name}"

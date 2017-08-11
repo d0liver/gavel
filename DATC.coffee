@@ -14,6 +14,7 @@ datc = (board) ->
 	engine = Engine board
 	t = engine.testMoves.bind engine
 	r = engine.testRetreats.bind engine
+	b = engine.testBuilds.bind engine
 
 	console.log "Running DATC tests....\n"
 
@@ -1053,6 +1054,33 @@ datc = (board) ->
 		retreats: [
 			'France: F Spain(nc) - Spain(sc)', FAILS
 		]
+
+	console.log "Testing builds"
+	console.log "--------------\n"
+
+	b '6.I.1. Too many build orders',
+		'Germany: Build A Warsaw', SUCCEEDS
+		'Germany: Build A Kiel', FAILS
+		'Germany: Build A Munich', FAILS
+
+	b '6.I.2. Fleets can not be build in land areas',
+		'Russia: Build F Moscow', FAILS
+
+	b '6.I.3. Supply center must be empty for building'
+		'Germany: Build A Berlin', FAILS
+
+	b '6.I.4. Both coasts must be empty for building',
+		'Russia: Build A St Petersburg(nc)', FAILS
+
+	b '6.I.5. Building in home supply center that is not owned'
+		'Germany: Build A Berlin', FAILS
+
+	b '6.I.6. Building in owned supply center that is not a home supply center'
+		'Germany: Build A Warsaw', FAILS
+
+	b '6.I.7. Only one build in a home supply center'
+		'Russia: Build A Moscow', SUCCEEDS
+		'Russia: Build A Moscow', FAILS
 
 # Catch failed promises
 process.on 'unhandledRejection', (reason, p) ->

@@ -50,6 +50,14 @@ parseOrder = (order) ->
 		$
 	///
 
+	build_re = ///
+		([A-Za-z]+)\:                 # Country
+		\s+Build
+		\s+(A|F)
+		\s+((?:[\w-]+\s+)*(?:[\w-]+)) # Build region
+		(?:\(([\w-]+)\))?             # Optional coast
+	///
+
 	# When we do the parsing we want to parse the longer order formats first
 	# otherwise the shorter order formats (like move and hold) will eat the
 	# order assuming it's part of the name and claim it has a match. Support
@@ -92,5 +100,11 @@ parseOrder = (order) ->
 		from        : matches[3]
 		actor_coast : coastName matches[4]
 		from_coast  : coastName matches[4]
+	else if matches = order.match build_re
+		type: BUILD
+		country: matches[1]
+		utype: matches[2]
+		region: matches[3]
+		region_coast: matches[4]
 
 module.exports = parseOrder
