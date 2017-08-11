@@ -976,6 +976,19 @@ datc = (board) ->
 			'Germany: A Prussia - Berlin', SUCCEEDS
 		]
 
+	r '6.H.11. Retreat when dislodged by adjacent convoy',
+		moves: [
+			'France: A Gascony - Marseilles via Convoy'
+			'France: A Burgundy Supports A Gascony - Marseilles'
+			'France: F Mid-Atlantic Ocean Convoys A Gascony - Marseilles'
+			'France: F Western Mediterranean Convoys A Gascony - Marseilles'
+			'France: F Gulf of Lyon Convoys A Gascony - Marseilles'
+			'Italy: A Marseilles Hold'
+		]
+		retreats: [
+			'Italy: A Marseilles - Gascony', SUCCEEDS
+		]
+
 # Catch failed promises
 process.on 'unhandledRejection', (reason, p) ->
   debug 'Unhandled Rejection at: ', p, 'reason: ', reason

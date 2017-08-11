@@ -328,10 +328,16 @@ Resolver = (board, orders, options) ->
 	# complexity of extra side effects. Calling apply explicitly feels better
 	# for now.
 	self.apply = ->
-		# Set dislodged units.
-		for dislodger in ordersWhere null, MOVE, SUCCEEDS
+		# Set dislodged units. We're careful not to set 
+		for dislodger in ordersWhere(null, MOVE, SUCCEEDS)
 			board.setDislodger
-				dislodger: dislodger.actor
+				# If the dislodger came over sea then it's okay actually to
+				# retreat to their region but the unit is still dislodged so we
+				# just let the dislodger be undefined in that case (test case
+				# 6.H.11)
+				dislodger:
+					if hasPath(dislodger) is VIA_ADJACENCY then dislodger.actor
+					else true
 				region: dislodger.to
 
 		# Set contested regions
