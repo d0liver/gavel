@@ -329,7 +329,7 @@ Resolver = (board, orders, options) ->
 	# for now.
 	self.apply = ->
 		# Set dislodged units. We're careful not to set 
-		for dislodger in ordersWhere(null, MOVE, SUCCEEDS)
+		for dislodger in ordersWhere(null, MOVE, SUCCEEDS) ? []
 			board.setDislodger
 				# If the dislodger came over sea then it's okay actually to
 				# retreat to their region but the unit is still dislodged so we
@@ -342,8 +342,22 @@ Resolver = (board, orders, options) ->
 
 		# Set contested regions
 		morders = ordersWhere null, MOVE, EXISTS
-		for order in morders when preventStrength(order) > 0
-			board.setContested order.to
+		for order in morders
+			# If we just check the preventStrength on each order it won't work
+			# because it will assume that we are actually preventing something
+			# (preventStrength gets the strength of a preventer). Thus, we have
+			# to first determine the preventers on our own and then decide if
+			# the region is contested. I.e. if a move only comes from one side
+			# (no contest) you will get a preventStrength for that move if you
+			# check because it assumes some other move is being prevented by
+			# that one.
+			preventers = (ordersWhere(order, MOVE, EXISTS, to: order.to) ? [])
+			.filter (o) -> hasPath(o)?
+			prevent_strength = preventers.reduce (max, preventer) ->
+				Math.max max, preventStrength preventer
+			, 0
+			if prevent_strength > 0
+				board.setContested order.to
 
 	breakCircularMovement = (dependencies) ->
 		# The first order will be the one that started the cycle.

@@ -37,6 +37,8 @@ RetreatResolver = (board, orders, options) ->
 		# Only move orders are allowed during retreat
 		order.type is MOVE and
 		order in orders and
+		# We don't need to check for convoys during retreats so this should suffice.
+		board.canMove(order) and
 		# Try to retreat to the region of the unit that dislodged
 		! board.dislodgedUnits().find(
 			(u) -> u.region is order.actor and order.to is u.dislodger

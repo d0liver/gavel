@@ -989,6 +989,71 @@ datc = (board) ->
 			'Italy: A Marseilles - Gascony', SUCCEEDS
 		]
 
+	r '6.H.12. Retreat when dislodged by adjacent convoy while trying to do the same',
+		moves: [
+			'England: A Liverpool - Edinburgh via Convoy'
+			'England: F Irish Sea Convoys A Liverpool - Edinburgh'
+			'England: F English Channel Convoys A Liverpool - Edinburgh'
+			'England: F North Sea Convoys A Liverpool - Edinburgh'
+			'France: F Brest - English Channel'
+			'France: F Mid-Atlantic Ocean Supports F Brest - English Channel'
+			'Russia: A Edinburgh - Liverpool via Convoy'
+			'Russia: F Norwegian Sea Convoys A Edinburgh - Liverpool'
+			'Russia: F North Atlantic Ocean Convoys A Edinburgh - Liverpool'
+			'Russia: A Clyde Supports A Edinburgh - Liverpool'
+		]
+		retreats: [
+			'England: A Liverpool - Edinburgh', SUCCEEDS
+		]
+
+	r '6.H.13. No retreat with convoy in main phase',
+		moves: [
+			'England: A Picardy Hold'
+			'England: F English Channel Convoys A Picardy - London'
+			'France: A Paris - Picardy'
+			'France: A Brest Supports A Paris - Picardy'
+		]
+		retreats: [
+			'England: A Picardy - London', FAILS
+		]
+
+	r '6.H.14. No retreat with support in main phase',
+		moves: [
+			'England: A Picardy Hold'
+			'England: F English Channel Supports A Picardy - Belgium'
+			'France: A Paris - Picardy'
+			'France: A Brest Supports A Paris - Picardy'
+			'France: A Burgundy Hold'
+			'Germany: A Munich Supports A Marseilles - Burgundy'
+			'Germany: A Marseilles - Burgundy'
+		]
+		retreats: [
+			'England: A Picardy - Belgium', FAILS
+			'France: A Burgundy - Belgium', FAILS
+		]
+
+	r '6.H.15. No coastal crawl in retreat',
+		moves: [
+			'England: F Portugal Hold'
+			'France: F Spain(sc) - Portugal'
+			'France: F Mid-Atlantic Ocean Supports F Spain(sc) - Portugal'
+		]
+		retreats: [
+			'France: F Spain(sc) - Spain(nc)', FAILS
+		]
+
+	r '6.H.16. Contested for both coasts',
+		moves: [
+			'France: F Mid-Atlantic Ocean - Spain(nc)'
+			'France: F Gascony - Spain(nc)'
+			'France: F Western Mediterranean Hold'
+			'Italy: F Tunis Supports F Tyrrhenian Sea - Western Mediterranean'
+			'Italy: F Tyrrhenian Sea - Western Mediterranean'
+		]
+		retreats: [
+			'France: F Spain(nc) - Spain(sc)', FAILS
+		]
+
 # Catch failed promises
 process.on 'unhandledRejection', (reason, p) ->
   debug 'Unhandled Rejection at: ', p, 'reason: ', reason
