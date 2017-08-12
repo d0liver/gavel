@@ -1,0 +1,24 @@
+{
+  "name": "gavel.js",
+  "version": "0.0.9",
+  "description": "An adjudicator for the rules of the Diplomacy board game implemented in coffee script.",
+  "main": "index.coffee",
+  "dependencies": {
+    "underscore": "^1.8.3",
+    "yamljs": "^0.2.10"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "coffee DATC.coffee"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/d0liver/gavel.git"
+  },
+  "author": "David Oliver",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/d0liver/gavel/issues"
+  },
+  "homepage": "https://github.com/d0liver/gavel#readme"
+}
