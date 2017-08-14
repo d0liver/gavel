@@ -6,12 +6,13 @@ Resolver                           = require './Resolver'
 {UserException, ResolverException} = require './Exceptions'
 debug                              = require('./debug') 'DATC'
 Board                              = require './Board'
-Engine = require './Engine'
+PathFinder                         = require './PathFinder'
+Engine                             = require './Engine'
 
 {outcomes: {SUCCEEDS, FAILS, ILLEGAL, EXISTS}} = require './enums'
 
-datc = (board) ->
-	engine = Engine board
+datc = (board, pfinder) ->
+	engine = Engine board, pfinder
 	t = engine.testMoves.bind engine
 	r = engine.testRetreats.bind engine
 	b = engine.testBuilds.bind engine
@@ -1104,4 +1105,6 @@ catch e
 	debug e
 	process.exit 1
 
-datc Board gdata
+board = Board gdata
+pfinder = PathFinder Board gdata
+datc board, pfinder

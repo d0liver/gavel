@@ -8,7 +8,7 @@ utils = require './utils'
 # everything.
 # gdata = Game data. Consult the docs for the format (or look at the sample
 # data for the test cases)
-Board = (gdata) ->
+Board = (gdata, vdata) ->
 	self = {}; orders = {}
 
 	self.addOrder = (order) -> orders[utils.actor(order)] = order
@@ -17,14 +17,14 @@ Board = (gdata) ->
 	# from the game data but with the unit added to it (because units are
 	# attached to the country in the incoming data).
 	self.region = (rname) ->
-		return unless rname of gdata.map_data.regions
+		return unless rname of vdata.map_data.regions
 
-		region = utils.copy gdata.map_data.regions[rname]
+		region = utils.copy vdata.map_data.regions[rname]
 		region.unit = _.findWhere self.units(), region: rname
 		return region
 
 	self.adjacencies = ({from, from_coast, to, to_coast, utype}) ->
-		region = gdata.map_data.regions[from]
+		region = vdata.map_data.regions[from]
 
 		# If no coast is specified then we return all adjacencies (include all
 		# coasts).
@@ -52,7 +52,7 @@ Board = (gdata) ->
 		utils.copy country.supply_centers
 
 	self.hasCoast = (rname) ->
-		Object.keys(gdata.map_data.regions[rname].coasts).length isnt 0
+		Object.keys(vdata.map_data.regions[rname].coasts).length isnt 0
 
 	# Coasts don't matter because convoys only deal with open water and armies
 	# neither of which deal with coasts.
@@ -94,7 +94,7 @@ Board = (gdata) ->
 
 	# Resolvers use these methods to update the board during resolution.
 	self.setContested = (region) ->
-		gdata.map_data.regions[region].contested = true
+		vdata.map_data.regions[region].contested = true
 
 	self.dislodgedUnits = ->
 		unit for unit in self.units() when unit.dislodger?
@@ -105,7 +105,7 @@ Board = (gdata) ->
 				unit.dislodger = dislodger
 
 	self.removeDislodger =  (region) ->
-		delete gdata.map_data.regions[region].dislodger
+		delete vdata.map_data.regions[region].dislodger
 
 	# Remove a dislodged unit in a region.
 	self.removeUnit = (region) ->

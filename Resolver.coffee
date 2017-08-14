@@ -16,7 +16,8 @@ describeOrder    = require './describeOrder'
 # Adapted from "The Math of Adjudication" by Lucas Kruijswijk
 # We assume in the resolver that the map constraints have been satisfied (moves
 # are to valid locations, etc.)
-Resolver = (board, orders, options) ->
+# pfinder = PathFinder instance
+Resolver = (board, pfinder, orders, options) ->
 	depth = -1
 	self = {}
 	{TEST = false, DEBUG = false} = options
@@ -184,34 +185,11 @@ Resolver = (board, orders, options) ->
 		# Convoys are valid when it's an army being convoyed and the
 		# destination is on land.
 		else if utype is 'Army' and board.region(to).type is 'Land'
-			corders = ordersWhere null, CONVOY, SUCCEEDS, {from, to}
-			return VIA_CONVOY if hasConvoyPath {from, to}, corders
-
-	hasConvoyPath = ({from, to}, corders, visited = []) ->
-
-		return true if board.canConvoy {convoyer: from, convoyee: to}
-
-		# We don't have a complete path yet, so we have to keep looking for
-		# convoys that can get us there.
-		next_hops = (
-			cord for cord in corders ? [] when \
-			cord.actor not in visited and
-			board.canConvoy {
-				convoyee: from
-				convoyer: cord.actor
-			}
-		)
-
-		# We need to make a note that we've been to this order so that we don't
-		# end up circling between two regions which are both convoying.
-		visited.push from
-
-		# Convoy paths can fork but _.some guarantees that __some__ path to the
-		# destination exists.
-		return _.some(
-			for hop in next_hops
-				hasConvoyPath {from: hop.actor, to}, corders, visited
-		)
+			corders = ordersWhere(null, CONVOY, SUCCEEDS, {from, to}) ? []
+			# convoyPath expects which units, rather than which orders should
+			# be considered for the convoy path.
+			units = (board.region(corder.actor).unit for corder in corders)
+			return VIA_CONVOY if pfinder.convoyPath({from, to}, units).length isnt 0
 
 	holdStrength = (region) ->
 		debug 'Calculating hold strength...'

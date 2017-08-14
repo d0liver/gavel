@@ -1,1 +1,5 @@
-module.exports = Engine
+exports.Gavel      = require './Engine'
+exports.Board      = require './Board'
+exports.parseOrder = require './parseOrder'
+exports.enums      = require './enums'
+exports.PathFinder = require './PathFinder'

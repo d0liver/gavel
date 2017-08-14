@@ -11,7 +11,7 @@ StubBoard       = require './StubBoard'
 {MOVE, SUPPORT, CONVOY, HOLD}      = eorders
 {SUCCEEDS, FAILS, ILLEGAL, EXISTS} = outcomes
 
-Engine = (board) ->
+Engine = (board, pfinder) ->
 	self = {}
 	phases = [
 		SPRING = 0
@@ -44,7 +44,7 @@ Engine = (board) ->
 
 	parseOrders = (orders) -> parseOrder order for order in orders
 
-	moveResolver = (orders, options) -> Resolver board, orders, options
+	moveResolver = (orders, options) -> Resolver board, pfinder, orders, options
 	retreatResolver = (orders, options) -> RetreatResolver board, orders, options
 	buildResolver = (orders, adjustments, options) ->
 		BuildResolver StubBoard(board, adjustments), orders, options
