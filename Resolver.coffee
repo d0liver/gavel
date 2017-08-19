@@ -266,7 +266,7 @@ Resolver = (board, pfinder, orders, options) ->
 		{from, to} = order
 		return ordersWhere(order, SUPPORT, SUCCEEDS, {from, to})?.length ? 0
 
-	ordersWhere = (current, type, requires, matches) ->
+	ordersWhere = (current, type, requires, matches = {}) ->
 		results = []
 		`outer: //`
 		for order in orders when order.type is type and ! _.isEqual order, current
@@ -308,8 +308,14 @@ Resolver = (board, pfinder, orders, options) ->
 	# complexity of extra side effects. Calling apply explicitly feels better
 	# for now.
 	self.apply = ->
+		# FIXME: When we do things with ordersWhere it is producing cycle
+		# exceptions (which are not handled by us) so we don't use ordersWhere.
+		# However, by the time apply is called all orders should have been
+		# resolved and so further calls to adjudicate should only produced
+		# canned responses but this isn't the case.
+		morders = orders.filter (o) -> o.type is MOVE and o.succeeds is true
 		# Set dislodged units. We're careful not to set 
-		for dislodger in ordersWhere(null, MOVE, SUCCEEDS) ? []
+		for dislodger in morders
 			board.setDislodger
 				# If the dislodger came over sea then it's okay actually to
 				# retreat to their region but the unit is still dislodged so we
@@ -321,7 +327,7 @@ Resolver = (board, pfinder, orders, options) ->
 				region: dislodger.to
 
 		# Set contested regions
-		morders = ordersWhere null, MOVE, EXISTS
+		morders = orders.filter (o) -> o.type is MOVE
 		for order in morders
 			# If we just check the preventStrength on each order it won't work
 			# because it will assume that we are actually preventing something
@@ -331,13 +337,24 @@ Resolver = (board, pfinder, orders, options) ->
 			# (no contest) you will get a preventStrength for that move if you
 			# check because it assumes some other move is being prevented by
 			# that one.
-			preventers = (ordersWhere(order, MOVE, EXISTS, to: order.to) ? [])
-			.filter (o) -> hasPath(o)?
+			preventers = orders.filter (o) ->
+				o.type is MOVE and
+				o.to is order.to and
+				hasPath(o)?
+
 			prevent_strength = preventers.reduce (max, preventer) ->
 				Math.max max, preventStrength preventer
 			, 0
 			if prevent_strength > 0
 				board.setContested order.to
+
+		# Go ahead and move the units where orders succeeded
+		morders = orders.filter (o) -> o.type is MOVE and o.succeeds is SUCCEEDS
+		for order in morders
+			# TODO: This actually should happen in the RetreatResolver
+			board.removeUnit order.to
+			board.removeUnit order.from
+			board.addUnit order.country, {type: order.utype, region: order.to}
 
 	breakCircularMovement = (dependencies) ->
 		# The first order will be the one that started the cycle.

@@ -13,34 +13,34 @@ StubBoard       = require './StubBoard'
 
 Engine = (board, pfinder) ->
 	self = {}
-	phases = [
-		SPRING = 0
-		RETREAT = 1
-		FALL = 2
-		RETREAT
-		WINTER = 3
-	]
-	phase = SPRING; year = 1901
+	phase = 'Spring'; year = 1901
 
 	self.resolve = (orders, options, apply = false) ->
+		orders = (parseOrder order for order in orders)
+
 		resolver = (
 			switch phase
-				when SPRING, FALL
+				when 'Spring', 'Fall'
 					moveResolver
-				when RETREAT
+				when 'Retreat'
 					retreatResolver
-				when WINTER
+				when 'Winter'
 					buildResolver
 		) orders, TEST: false
 
-		order.succeeds = resolver.resolve order for order in orders
-		resolver.apply() if apply
+		resolver.resolve order for order in orders
+
+		if apply
+			resolver.apply()
 
 		return orders
 
 	# Like resolve but tells the resolver to apply the resolution to the board
 	# (mark dislodged units, conflict areas, etc.)
 	self.apply = (orders, options) -> self.resolve orders, options, true
+
+	self.setPhase = (p) -> phase = p
+	self.setYear = (y) -> year = y
 
 	parseOrders = (orders) -> parseOrder order for order in orders
 

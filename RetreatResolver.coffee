@@ -25,9 +25,14 @@ RetreatResolver = (board, orders, options) ->
 		if canRetreat(order) and preventers.length is 0
 		# Find other retreat orders to the same destination. TODO: Make sure
 		# the other retreat orders are to a valid destination.
-			SUCCEEDS
+			order.succeeds = SUCCEEDS
 		else
-			FAILS
+			order.succeeds = FAILS
+
+	# self.apply = ->
+	# 	for order in orders when order.succeeds is SUCCEEDS
+	# 		console.log "Applying order: ", describeOrder order
+	# 		board.removeUnit order.
 
 	# Determine if an order can retreat to the area it's trying to retreat to.
 	# This is separate from the resolver because before we fail an order for
