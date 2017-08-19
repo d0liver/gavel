@@ -1098,13 +1098,14 @@ process.on 'unhandledRejection', (reason, p) ->
 
 try
 	gdata = JSON.parse fs.readFileSync './test_game_data.json'
-	gdata.map_data = JSON.parse gdata.map_data
+	vdata = JSON.parse fs.readFileSync './test_variant_data.json'
+	vdata.map_data = JSON.parse vdata.map_data
 catch e
 	console.log 'Failed to read sample game from test_game_data.json'
 
 	debug e
 	process.exit 1
 
-board = Board gdata
-pfinder = PathFinder Board gdata
+board = Board gdata, vdata
+pfinder = PathFinder board
 datc board, pfinder
