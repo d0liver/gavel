@@ -110,18 +110,15 @@ Board = (gdata, vdata) ->
 
 	# Remove a dislodged unit in a region.
 	self.removeUnit = (region) ->
-		console.log "Remove: ", region
 		for country in gdata.countries
 			for i,unit in country.units when unit.region is region
 				country.units.splice i, 1
 
 	self.addUnit = (country, unit) ->
-		console.log "Add #{country}, #{unit}"
 		country = gdata.countries.find (c) -> c.name is country
 		country.units.push unit
 
 	self.clearUnits = ->
-		console.log "Clear units..."
 		country.units = [] for country in gdata.countries
 
 	self.units = (type) ->

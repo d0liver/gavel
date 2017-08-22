@@ -67,13 +67,12 @@ Engine = (board, pfinder) ->
 		self.test test_name, orders, resolver, dbg_resolver
 
 	self.testRetreats = (test_name, {moves, retreats}) ->
-		moves = (parseOrder move for move in moves)
+		self.apply moves
 		retreats = extractTestOrders retreats
 
 		# First resolve the moves.
 		board.clearUnits()
-		self.setUnitsForTest moves
-		self.apply moves
+		self.setUnitsForTest parseOrder move for move in moves
 
 		# Build up the retreat orders and the resolver for them
 		resolver = retreatResolver retreats, TEST: true

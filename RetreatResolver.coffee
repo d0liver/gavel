@@ -31,7 +31,6 @@ RetreatResolver = (board, orders, options) ->
 
 	# self.apply = ->
 	# 	for order in orders when order.succeeds is SUCCEEDS
-	# 		console.log "Applying order: ", describeOrder order
 	# 		board.removeUnit order.
 
 	# Determine if an order can retreat to the area it's trying to retreat to.

@@ -56,11 +56,6 @@ Resolver = (board, pfinder, orders, options) ->
 		# region. We probably need to consider getting rid of the ILLEGAL
 		# result and just returning fails because ILLEGAL can get really
 		# complicated.
-		# If the destination has coasts then we _must_ specify one or the order
-		# is illegal. If it ends up that we can't actually move to a coast then
-		# hasPath will return false and the order will fail but we're not
-		# considering it illegal.
-		specified_coast = order.type isnt MOVE or no_coast or order?.to_coast?
 
 		unless (valid_region or TEST) and not hop_move
 			return ILLEGAL
@@ -313,7 +308,7 @@ Resolver = (board, pfinder, orders, options) ->
 		# However, by the time apply is called all orders should have been
 		# resolved and so further calls to adjudicate should only produced
 		# canned responses but this isn't the case.
-		morders = orders.filter (o) -> o.type is MOVE and o.succeeds is true
+		morders = orders.filter (o) -> o.type is MOVE and o.succeeds is SUCCEEDS
 		# Set dislodged units. We're careful not to set 
 		for dislodger in morders
 			board.setDislodger
