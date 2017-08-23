@@ -57,7 +57,7 @@ Resolver = (board, pfinder, orders, options) ->
 		# result and just returning fails because ILLEGAL can get really
 		# complicated.
 
-		unless (valid_region or TEST) and not hop_move
+		unless valid_region and not hop_move
 			return ILLEGAL
 
 		debug "Resolving #{describeOrder order}"
