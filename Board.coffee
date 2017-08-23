@@ -102,7 +102,7 @@ Board = (gdata, vdata) ->
 
 	self.setDislodger = ({region, dislodger}) ->
 		for country in gdata.countries
-			for unit,i in country.units when unit.region is region
+			for unit in country.units when unit.region is region
 				unit.dislodger = dislodger
 
 	self.removeDislodger =  (region) ->
