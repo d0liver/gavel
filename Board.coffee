@@ -48,7 +48,7 @@ Board = (gdata, vdata) ->
 		return adjacencies if adjacencies.length > 0
 
 	self.homeCenters = (country) ->
-		country = gdata.countries.find (c) -> c.name is country
+		country = gdata.phase.countries.find (c) -> c.name is country
 		utils.copy country.supply_centers
 
 	self.hasCoast = (rname) ->
@@ -101,7 +101,7 @@ Board = (gdata, vdata) ->
 		unit for unit in self.units() when unit.dislodger?
 
 	self.setDislodger = ({region, dislodger}) ->
-		for country in gdata.countries
+		for country in gdata.phase.countries
 			for unit in country.units when unit.region is region
 				unit.dislodger = dislodger
 
@@ -110,20 +110,20 @@ Board = (gdata, vdata) ->
 
 	# Remove a dislodged unit in a region.
 	self.removeUnit = (region) ->
-		for country in gdata.countries
+		for country in gdata.phase.countries
 			for i,unit in country.units when unit.region is region
 				country.units.splice i, 1
 
 	self.addUnit = (country, unit) ->
-		country = gdata.countries.find (c) -> c.name is country
+		country = gdata.phase.countries.find (c) -> c.name is country
 		country.units.push unit
 
 	self.clearUnits = ->
-		country.units = [] for country in gdata.countries
+		country.units = [] for country in gdata.phase.countries
 
 	self.units = (type) ->
 		_.union (
-			for country in gdata.countries
+			for country in gdata.phase.countries
 				for unit in country.units when not type? or unit.type is type
 					_.extend {}, unit, {country}
 		)...
