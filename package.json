@@ -1,6 +1,6 @@
 {
   "name": "gavel.js",
-  "version": "0.0.9",
+  "version": "0.9.1",
   "description": "An adjudicator for the rules of the Diplomacy board game implemented in coffee script.",
   "dependencies": {
     "underscore": "^1.8.3",
