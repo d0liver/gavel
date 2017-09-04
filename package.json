@@ -2,7 +2,6 @@
   "name": "gavel.js",
   "version": "0.0.9",
   "description": "An adjudicator for the rules of the Diplomacy board game implemented in coffee script.",
-  "main": "index.coffee",
   "dependencies": {
     "underscore": "^1.8.3",
     "yamljs": "^0.2.10"
@@ -20,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/d0liver/gavel/issues"
   },
-  "homepage": "https://github.com/d0liver/gavel#readme"
+  "homepage": "https://github.com/d0liver/gavel#readme",
+  "browserify": {
+    "transform": ["coffeeify"]
+  }
 }

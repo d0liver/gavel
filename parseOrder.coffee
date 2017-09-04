@@ -1,4 +1,4 @@
-{orders: {BUILD, MOVE, SUPPORT, CONVOY, HOLD}} = require './enums.coffee'
+{orders: {BUILD, MOVE, SUPPORT, CONVOY, HOLD}} = require './enums'
 
 parseOrder = (order) ->
 	coastName = (abbr) ->
