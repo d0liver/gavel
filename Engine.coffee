@@ -4,6 +4,7 @@ Resolver        = require './Resolver'
 RetreatResolver = require './RetreatResolver'
 BuildResolver   = require './BuildResolver'
 StubBoard       = require './StubBoard'
+{incPhase, parsePhase}      = require './phaseIncrement'
 
 {english, outcomes, orders: eorders, paths} = require './enums'
 
@@ -11,18 +12,23 @@ StubBoard       = require './StubBoard'
 {MOVE, SUPPORT, CONVOY, HOLD}      = eorders
 {SUCCEEDS, FAILS, ILLEGAL, EXISTS} = outcomes
 
-Engine = (board, pfinder) ->
+Engine = (board, pfinder, phase) ->
 	self = {}
-	phase = 'Spring'; year = 1901
+
+	Object.defineProperty self, 'phase',
+		configurable: false
+		enumerable: true
+		get: -> phase
 
 	self.resolve = (orders, options, apply = false) ->
 		orders = (parseOrder order for order in orders)
 
 		resolver = (
-			switch phase
+			[season, ...] = parsePhase phase
+			switch season
 				when 'Spring', 'Fall'
 					moveResolver
-				when 'Retreat'
+				when 'Spring Retreat', 'Fall Retreat'
 					retreatResolver
 				when 'Winter'
 					buildResolver
@@ -35,12 +41,27 @@ Engine = (board, pfinder) ->
 
 		return orders
 
-	# Like resolve but tells the resolver to apply the resolution to the board
-	# (mark dislodged units, conflict areas, etc.)
-	self.apply = (orders, options) -> self.resolve orders, options, true
+	self.roll = (orders, options) ->
 
-	self.setPhase = (p) -> phase = p
-	self.setYear = (y) -> year = y
+		[season, year] = parsePhase phase
+
+		# Resolve orders and apply them to the board.
+		self.resolve orders, options, true
+
+		# If the season was spring or fall then we're headed into the retreat
+		# phase and it's possible that we can skip it.
+		if season in ['Spring', 'Fall'] and board.dislodgedUnits().length is 0
+			phase = incPhase phase
+			if season is 'Fall'
+				# If the season was Fall then we need to resolve to have the
+				# retreat resolver apply the adjustments. We know that there
+				# are no actual retreats needed since the number of dislodged
+				# units is 0.
+				self.resolve orders, options, true
+
+		phase = incPhase phase
+
+		return
 
 	parseOrders = (orders) -> parseOrder order for order in orders
 

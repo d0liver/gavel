@@ -303,6 +303,7 @@ Resolver = (board, pfinder, orders, options) ->
 	# complexity of extra side effects. Calling apply explicitly feels better
 	# for now.
 	self.apply = ->
+		console.log "APPLY"
 		# FIXME: When we do things with ordersWhere it is producing cycle
 		# exceptions (which are not handled by us) so we don't use ordersWhere.
 		# However, by the time apply is called all orders should have been
@@ -311,6 +312,7 @@ Resolver = (board, pfinder, orders, options) ->
 		morders = orders.filter (o) -> o.type is MOVE and o.succeeds is SUCCEEDS
 		# Set dislodged units. We're careful not to set 
 		for dislodger in morders
+			console.log "SET DISLODGER"
 			board.setDislodger
 				# If the dislodger came over sea then it's okay actually to
 				# retreat to their region but the unit is still dislodged so we
@@ -324,6 +326,7 @@ Resolver = (board, pfinder, orders, options) ->
 		# Set contested regions
 		morders = orders.filter (o) -> o.type is MOVE
 		for order in morders
+			console.log "CONTESTED"
 			# If we just check the preventStrength on each order it won't work
 			# because it will assume that we are actually preventing something
 			# (preventStrength gets the strength of a preventer). Thus, we have
@@ -346,10 +349,9 @@ Resolver = (board, pfinder, orders, options) ->
 		# Go ahead and move the units where orders succeeded
 		morders = orders.filter (o) -> o.type is MOVE and o.succeeds is SUCCEEDS
 		for order in morders
-			# TODO: This actually should happen in the RetreatResolver
-			board.removeUnit order.to
-			board.removeUnit order.from
-			board.addUnit order.country, {type: order.utype, region: order.to}
+			unit = board.regions(order.actor).unit
+			console.log "MOVE SUCCEEDED"
+			board.moveUnit unit, order.to
 
 	breakCircularMovement = (dependencies) ->
 		# The first order will be the one that started the cycle.
@@ -381,7 +383,8 @@ Resolver = (board, pfinder, orders, options) ->
 		for order in dependencies when order.type is CONVOY
 			order.succeeds = FAILS
 
-	handleCycle = ({cycle, dependencies}, order) ->
+	handleCycle = (err, order) ->
+		{cycle, dependencies} = err
 
 		# Reset the depth counter since we broke out of the stack.
 		depth = 0

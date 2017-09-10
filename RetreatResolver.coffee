@@ -6,17 +6,18 @@ describeOrder = require './describeOrder'
 {MOVE, SUPPORT, CONVOY, HOLD}      = eorders
 {SUCCEEDS, FAILS, ILLEGAL, EXISTS} = outcomes
 
-RetreatResolver = (board, orders, options) ->
-	self = {}
+class RetreatResolver
+	board = null; orders = null
 
-	# Filter out orders for units that weren't dislodged.
-	orders = orders.filter (order) ->
-		!! board.dislodgedUnits().find (u) ->
-			order.actor is u.region and
-			order.country is u.country.name and
-			u.dislodger?
+	constructor: (board, orders, options) ->
+		# Filter out orders for units that weren't dislodged.
+		orders = orders.filter (order) ->
+			!! board.dislodgedUnits().find (u) ->
+				order.actor is u.region and
+				order.country is u.country.name and
+				u.dislodger?
 
-	self.resolve = (order) ->
+	resolve: (order) ->
 		preventers = orders.filter (o) ->
 			o.to is order.to and
 			!_.isEqual(o, order) and
@@ -29,9 +30,26 @@ RetreatResolver = (board, orders, options) ->
 		else
 			order.succeeds = FAILS
 
-	# self.apply = ->
-	# 	for order in orders when order.succeeds is SUCCEEDS
-	# 		board.removeUnit order.
+	apply: ->
+		adjustments = {}
+
+		for order in orders when order.succeeds is SUCCEEDS
+			unit = board.region(order.actor).unit
+			console.log "Retreating unit: ", unit.region
+			board.moveUnit unit, order.to
+
+		for order in orders when order.succeeds is FAILS
+			console.log "Removing failed retreat: ", order.actor
+			board.removeUnit order.actor
+
+		# If this is the end of fall then we need to apply adjustments for
+		# centers taken.
+		if options.take_centers
+			for unit in board.units() when \
+			unit.region not in unit.country.supply_centers
+				board.incAdjustments unit.country.name, 1
+				taken_from = board.countries().find (c) -> unit.region in c.supply_centers
+				board.incAdjustments taken_from, -1
 
 	# Determine if an order can retreat to the area it's trying to retreat to.
 	# This is separate from the resolver because before we fail an order for
@@ -49,7 +67,5 @@ RetreatResolver = (board, orders, options) ->
 		) and
 		# Try to retreat to contested region
 		! (board.region(order.to).contested ? false)
-
-	return self
 
 module.exports = RetreatResolver

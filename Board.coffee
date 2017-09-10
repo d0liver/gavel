@@ -110,9 +110,14 @@ Board = (gdata, vdata) ->
 
 	# Remove a dislodged unit in a region.
 	self.removeUnit = (region) ->
+		console.log "Attempt to remove unit from regin: ", region
 		for country in gdata.phase.countries
-			for i,unit in country.units when unit.region is region
+			console.log "Units: ", country.units
+			for unit,i in country.units when unit.region is region
 				country.units.splice i, 1
+				return
+
+		return
 
 	self.addUnit = (country, unit) ->
 		country = gdata.phase.countries.find (c) -> c.name is country
@@ -127,6 +132,33 @@ Board = (gdata, vdata) ->
 				for unit in country.units when not type? or unit.type is type
 					_.extend {}, unit, {country}
 		)...
+
+	self.adjustments = (country, num) ->
+		country = gdata.phase.countries.find (c) -> c.name is country
+
+		if num?
+			country.adjustments = num
+
+		return country.adjustments
+
+	self.country = (country) ->
+		utils.copy gdata.phase.countries.find (c) -> c.name is country
+
+	self.countries = 
+		utils.copy gdata.phase.countries
+
+	self.incAdjustments = (country, byy) ->
+		adjustments = self.adjustments country
+		self.adjustments country, adjustments + byy
+
+	self.supplyCenters = (country) ->
+		country = gdata.phase.countries.find (c) -> c.name is country
+		return country.supply_centers?.length ? 0
+
+	self.moveUnit (unit, to) ->
+		self.removeUnit unit.region
+		unit.region = to
+		self.addUnit unit.country, unit
 
 	return self
 

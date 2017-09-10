@@ -1,199 +1,114 @@
 {
-	"title" : "Welcome to Jurassic Park",
-	"countries" : [
-		{
-			"name" : "Austria",
-			"adjective" : "Austrian",
-			"pattern" : "Random",
-			"color" : "red",
-			"supply_centers" : [
-				"Budapest",
-				"Trieste",
-				"Vienna"
-			],
-			"units" : [
-				{
-					"type" : "Army",
-					"region" : "Budapest"
-				},
-				{
-					"type" : "Fleet",
-					"region" : "Trieste"
-				},
-				{
-					"type" : "Army",
-					"region" : "Vienna"
-				}
-			]
-		},
-		{
-			"name" : "England",
-			"adjective" : "English",
-			"pattern" : "ThinDiag",
-			"color" : "blue",
-			"supply_centers" : [
-				"London",
-				"Liverpool",
-				"Edinburgh"
-			],
-			"units" : [
-				{
-					"type" : "Fleet",
-					"region" : "London"
-				},
-				{
-					"type" : "Army",
-					"region" : "Liverpool"
-				},
-				{
-					"type" : "Fleet",
-					"region" : "Edinburgh"
-				}
-			]
-		},
-		{
-			"name" : "France",
-			"adjective" : "French",
-			"pattern" : "Hash",
-			"color" : "cyan",
-			"supply_centers" : [
-				"Brest",
-				"Marseilles",
-				"Paris"
-			],
-			"units" : [
-				{
-					"type" : "Fleet",
-					"region" : "Brest"
-				},
-				{
-					"type" : "Army",
-					"region" : "Marseilles"
-				},
-				{
-					"type" : "Army",
-					"region" : "Paris"
-				}
-			]
-		},
-		{
-			"name" : "Germany",
-			"adjective" : "German",
-			"pattern" : "Gray",
-			"color" : "black",
-			"supply_centers" : [
-				"Munich",
-				"Berlin",
-				"Kiel"
-			],
-			"units" : [
-				{
-					"type" : "Army",
-					"region" : "Munich"
-				},
-				{
-					"type" : "Army",
-					"region" : "Berlin"
-				},
-				{
-					"type" : "Fleet",
-					"region" : "Kiel"
-				}
-			]
-		},
-		{
-			"name" : "Italy",
-			"adjective" : "Italian",
-			"pattern" : "Quilt",
-			"color" : "green",
-			"supply_centers" : [
-				"Naples",
-				"Rome",
-				"Venice"
-			],
-			"units" : [
-				{
-					"type" : "Fleet",
-					"region" : "Naples"
-				},
-				{
-					"type" : "Army",
-					"region" : "Rome"
-				},
-				{
-					"type" : "Army",
-					"region" : "Venice"
-				}
-			]
-		},
-		{
-			"name" : "Russia",
-			"adjective" : "Russian",
-			"pattern" : "Sparse",
-			"color" : "white",
-			"supply_centers" : [
-				"St Petersburg",
-				"Moscow",
-				"Sevastopol",
-				"Warsaw"
-			],
-			"units" : [
-				{
-					"type" : "Fleet",
-					"coast" : "South",
-					"region" : "St Petersburg"
-				},
-				{
-					"type" : "Army",
-					"region" : "Moscow"
-				},
-				{
-					"type" : "Fleet",
-					"region" : "Sevastopol"
-				},
-				{
-					"type" : "Army",
-					"region" : "Warsaw"
-				}
-			]
-		},
-		{
-			"name" : "Turkey",
-			"adjective" : "Turkish",
-			"pattern" : "Diag",
-			"color" : "yellow",
-			"supply_centers" : [
-				"Constantinople",
-				"Ankara",
-				"Smyrna"
-			],
-			"units" : [
-				{
-					"type" : "Army",
-					"region" : "Constantinople"
-				},
-				{
-					"type" : "Fleet",
-					"region" : "Ankara"
-				},
-				{
-					"type" : "Army",
-					"region" : "Smyrna"
-				}
-			]
-		}
-	],
-	"season_year" : "Spring 1901",
-	"template" : true,
-	"orders" : [
-		"Russia: A Warsaw - Livonia",
-		"Russia: A Moscow Supports A Warsaw - Livonia",
-		"Austria: A Vienna - Galicia",
-		"Austria: A Budapest Supports A Vienna - Galicia",
-		"Turkey: A Constantinople - Bulgaria",
-		"Italy: F Naples - Tyrrhenian Sea",
-		"France: F Brest - Mid-Atlantic Ocean",
-		"England: F London - North Sea",
-		"Germany: A Berlin - Prussia"
-	]
+    "orders": [
+        "Russia: A Warsaw - Livonia",
+        "Russia: A Moscow Supports A Warsaw - Livonia",
+        "Austria: A Vienna - Galicia",
+        "Austria: A Budapest Supports A Vienna - Galicia",
+        "Turkey: A Constantinople - Bulgaria",
+        "Italy: F Naples - Tyrrhenian Sea",
+        "France: F Brest - Mid-Atlantic Ocean",
+        "England: F London - North Sea",
+        "Germany: A Berlin - Prussia"
+    ],
+    "phase": {
+        "countries": [
+            {
+                "adjective": "Austrian",
+                "color": "red",
+                "name": "Austria",
+                "pattern": "Random",
+                "supply_centers": ["Budapest", "Trieste", "Vienna"],
+                "units": [
+                    {"region": "Budapest", "type": "Army"},
+                    {"region": "Trieste", "type": "Fleet"},
+                    {"region": "Vienna", "type": "Army"}
+                ]
+            },
+            {
+                "adjective": "English",
+                "color": "blue",
+                "name": "England",
+                "pattern": "ThinDiag",
+                "supply_centers": ["London", "Liverpool", "Edinburgh"],
+                "units": [
+                    {"region": "London", "type": "Fleet"},
+                    {"region": "Liverpool", "type": "Army"},
+                    {"region": "Edinburgh", "type": "Fleet"}
+                ]
+            },
+            {
+                "adjective": "French",
+                "color": "cyan",
+                "name": "France",
+                "pattern": "Hash",
+                "supply_centers": ["Brest", "Marseilles", "Paris"],
+                "units": [
+                    {"region": "Brest", "type": "Fleet"},
+                    {"region": "Marseilles", "type": "Army"},
+                    {"region": "Paris", "type": "Army"}
+                ]
+            },
+            {
+                "adjective": "German",
+                "color": "black",
+                "name": "Germany",
+                "pattern": "Gray",
+                "supply_centers": ["Munich", "Berlin", "Kiel"],
+                "units": [
+                    {"region": "Munich", "type": "Army"},
+                    {"region": "Berlin", "type": "Army"},
+                    {"region": "Kiel", "type": "Fleet"}
+                ]
+            },
+            {
+                "adjective": "Italian",
+                "color": "green",
+                "name": "Italy",
+                "pattern": "Quilt",
+                "supply_centers": ["Naples", "Rome", "Venice"],
+                "units": [
+                    {"region": "Naples", "type": "Fleet"},
+                    {"region": "Rome", "type": "Army"},
+                    {"region": "Venice", "type": "Army"}
+                ]
+            },
+            {
+                "adjective": "Russian",
+                "color": "white",
+                "name": "Russia",
+                "pattern": "Sparse",
+                "supply_centers": [
+                    "St Petersburg",
+                    "Moscow",
+                    "Sevastopol",
+                    "Warsaw"
+                ],
+                "units": [
+                    {
+                        "coast": "South",
+                        "region": "St Petersburg",
+                        "type": "Fleet"
+                    },
+                    {"region": "Moscow", "type": "Army"},
+                    {"region": "Sevastopol", "type": "Fleet"},
+                    {"region": "Warsaw", "type": "Army"}
+                ]
+            },
+            {
+                "adjective": "Turkish",
+                "color": "yellow",
+                "name": "Turkey",
+                "pattern": "Diag",
+                "supply_centers": ["Constantinople", "Ankara", "Smyrna"],
+                "units": [
+                    {"region": "Constantinople", "type": "Army"},
+                    {"region": "Ankara", "type": "Fleet"},
+                    {"region": "Smyrna", "type": "Army"}
+                ]
+            }
+        ],
+        "season_year": "Spring 1901",
+        "template": true
+    },
+    "title": "Welcome to Jurassic Park"
 }

@@ -3,6 +3,7 @@
   "version": "0.9.1",
   "description": "An adjudicator for the rules of the Diplomacy board game implemented in coffee script.",
   "dependencies": {
+    "coffeeify": "^2.1.0",
     "underscore": "^1.8.3",
     "yamljs": "^0.2.10"
   },
@@ -21,6 +22,8 @@
   },
   "homepage": "https://github.com/d0liver/gavel#readme",
   "browserify": {
-    "transform": ["coffeeify"]
+    "transform": [
+      "coffeeify"
+    ]
   }
 }
