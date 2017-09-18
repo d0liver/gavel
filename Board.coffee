@@ -155,10 +155,14 @@ Board = (gdata, vdata) ->
 		country = gdata.phase.countries.find (c) -> c.name is country
 		return country.supply_centers?.length ? 0
 
-	self.moveUnit (unit, to) ->
+	self.moveUnit = (unit, to) ->
+		# FIXME: The weird remove then add crap is because the unit that is
+		# passed in is a copy of the real unit. Really units should have their
+		# own interface so we can just say unit.move(region) and have it guard
+		# its own internal state.
 		self.removeUnit unit.region
 		unit.region = to
-		self.addUnit unit.country, unit
+		self.addUnit unit.country.name, type: unit.type, region: unit.region
 
 	return self
 

@@ -1,5 +1,5 @@
 {
-  "name": "gavel.js",
+  "name": "gavel",
   "version": "0.9.1",
   "description": "An adjudicator for the rules of the Diplomacy board game implemented in coffee script.",
   "dependencies": {
@@ -25,5 +25,11 @@
     "transform": [
       "coffeeify"
     ]
-  }
+  },
+  "main": "index.js",
+  "keywords": [
+    "diplomacy",
+    "deadpotato",
+    "gavel"
+  ]
 }

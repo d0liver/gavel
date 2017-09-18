@@ -349,7 +349,7 @@ Resolver = (board, pfinder, orders, options) ->
 		# Go ahead and move the units where orders succeeded
 		morders = orders.filter (o) -> o.type is MOVE and o.succeeds is SUCCEEDS
 		for order in morders
-			unit = board.regions(order.actor).unit
+			unit = board.region(order.actor).unit
 			console.log "MOVE SUCCEEDED"
 			board.moveUnit unit, order.to
 

@@ -50,14 +50,14 @@ Engine = (board, pfinder, phase) ->
 
 		# If the season was spring or fall then we're headed into the retreat
 		# phase and it's possible that we can skip it.
-		if season in ['Spring', 'Fall'] and board.dislodgedUnits().length is 0
-			phase = incPhase phase
-			if season is 'Fall'
-				# If the season was Fall then we need to resolve to have the
-				# retreat resolver apply the adjustments. We know that there
-				# are no actual retreats needed since the number of dislodged
-				# units is 0.
-				self.resolve orders, options, true
+		# if season in ['Spring', 'Fall'] and board.dislodgedUnits().length is 0
+		# 	phase = incPhase phase
+		# 	if season is 'Fall'
+		# 		# If the season was Fall then we need to resolve to have the
+		# 		# retreat resolver apply the adjustments. We know that there
+		# 		# are no actual retreats needed since the number of dislodged
+		# 		# units is 0.
+		# 		self.resolve orders, options, true
 
 		phase = incPhase phase
 
@@ -66,7 +66,7 @@ Engine = (board, pfinder, phase) ->
 	parseOrders = (orders) -> parseOrder order for order in orders
 
 	moveResolver = (orders, options) -> Resolver board, pfinder, orders, options
-	retreatResolver = (orders, options) -> RetreatResolver board, orders, options
+	retreatResolver = (orders, options) -> new RetreatResolver board, orders, options
 	buildResolver = (orders, adjustments, options) ->
 		BuildResolver StubBoard(board, adjustments), orders, options
 
