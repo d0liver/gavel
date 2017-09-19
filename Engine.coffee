@@ -4,7 +4,7 @@ Resolver        = require './Resolver'
 RetreatResolver = require './RetreatResolver'
 BuildResolver   = require './BuildResolver'
 StubBoard       = require './StubBoard'
-{incPhase, parsePhase}      = require './phaseIncrement'
+Phase           = require './Phase'
 
 {english, outcomes, orders: eorders, paths} = require './enums'
 
@@ -14,18 +14,15 @@ StubBoard       = require './StubBoard'
 
 Engine = (board, pfinder, phase) ->
 	self = {}
+	phase = new Phase phase
 
-	Object.defineProperty self, 'phase',
-		configurable: false
-		enumerable: true
-		get: -> phase
+	Object.defineProperty self, 'phase', enumerable: true, value: phase
 
 	self.resolve = (orders, options, apply = false) ->
 		orders = (parseOrder order for order in orders)
 
 		resolver = (
-			[season, ...] = parsePhase phase
-			switch season
+			switch phase.season
 				when 'Spring', 'Fall'
 					moveResolver
 				when 'Spring Retreat', 'Fall Retreat'
@@ -43,30 +40,33 @@ Engine = (board, pfinder, phase) ->
 
 	self.roll = (orders, options) ->
 
-		[season, year] = parsePhase phase
 
 		# Resolve orders and apply them to the board.
 		self.resolve orders, options, true
 
-		# If the season was spring or fall then we're headed into the retreat
-		# phase and it's possible that we can skip it.
-		# if season in ['Spring', 'Fall'] and board.dislodgedUnits().length is 0
-		# 	phase = incPhase phase
-		# 	if season is 'Fall'
-		# 		# If the season was Fall then we need to resolve to have the
-		# 		# retreat resolver apply the adjustments. We know that there
-		# 		# are no actual retreats needed since the number of dislodged
-		# 		# units is 0.
-		# 		self.resolve orders, options, true
+		# If the season was Spring or Fall then we're headed into the retreat
+		# phase and we can auto resolve it if there are no dislodged units (but
+		# we still must resolve it to know about the number of adjustments
+		# needed for the next phase)
+		if phase.season in ['Spring', 'Fall'] and board.dislodgedUnits().length is 0
+			console.log "KICKOFF RETREAT RESOLVER"
+			phase.inc()
+			console.log "Inced phase: #{phase}"
+			self.resolve [], options, true
 
-		phase = incPhase phase
+		phase.inc()
+		console.log "Inced phase: #{phase}"
 
 		return
 
 	parseOrders = (orders) -> parseOrder order for order in orders
 
-	moveResolver = (orders, options) -> Resolver board, pfinder, orders, options
-	retreatResolver = (orders, options) -> new RetreatResolver board, orders, options
+	moveResolver = (orders, options) ->
+		Resolver board, pfinder, orders, options
+
+	retreatResolver = (orders, options) ->
+		new RetreatResolver self, board, orders, options
+
 	buildResolver = (orders, adjustments, options) ->
 		BuildResolver StubBoard(board, adjustments), orders, options
 
@@ -150,6 +150,7 @@ Engine = (board, pfinder, phase) ->
 			region = board.region order.to
 			if region.supply_center
 				throw new Error 'Not yet implemented'
+
 
 	return self
 

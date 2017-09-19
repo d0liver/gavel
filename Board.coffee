@@ -134,26 +134,31 @@ Board = (gdata, vdata) ->
 		)...
 
 	self.adjustments = (country, num) ->
-		country = gdata.phase.countries.find (c) -> c.name is country
+		country = self.country country
+		country.adjustments = num if num?
 
-		if num?
-			country.adjustments = num
+		return country.adjustments ? 0
 
-		return country.adjustments
+	self.adjust = (country, byy) ->
+		adjustments = self.adjustments country
+		self.adjustments country, adjustments + byy
+		console.log "Adjusted country: ", country
+		return
 
 	self.country = (country) ->
 		utils.copy gdata.phase.countries.find (c) -> c.name is country
 
-	self.countries = 
-		utils.copy gdata.phase.countries
-
-	self.incAdjustments = (country, byy) ->
-		adjustments = self.adjustments country
-		self.adjustments country, adjustments + byy
+	self.countries = -> utils.copy gdata.phase.countries
 
 	self.supplyCenters = (country) ->
-		country = gdata.phase.countries.find (c) -> c.name is country
-		return country.supply_centers?.length ? 0
+		if country
+			country = gdata.phase.countries.find (c) -> c.name is country
+			return country.supply_centers?.length ? 0
+		else
+			r = []
+			# Flatten out the centers and hand them back
+			r.push supply_centers... for {supply_centers} in gdata.phase.countries
+			return r
 
 	self.moveUnit = (unit, to) ->
 		# FIXME: The weird remove then add crap is because the unit that is

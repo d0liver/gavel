@@ -310,7 +310,6 @@ Resolver = (board, pfinder, orders, options) ->
 		# resolved and so further calls to adjudicate should only produced
 		# canned responses but this isn't the case.
 		morders = orders.filter (o) -> o.type is MOVE and o.succeeds is SUCCEEDS
-		# Set dislodged units. We're careful not to set 
 		for dislodger in morders
 			console.log "SET DISLODGER"
 			board.setDislodger
