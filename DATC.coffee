@@ -2,7 +2,6 @@
 fs = require 'fs'
 
 # Local
-Resolver                           = require './Resolver'
 {UserException, ResolverException} = require './Exceptions'
 debug                              = require('./debug') 'DATC'
 Board                              = require './Board'

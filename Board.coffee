@@ -145,7 +145,6 @@ Board = (gdata, vdata) ->
 	self.adjust = (country, byy) ->
 		adjustments = self.adjustments country
 		self.adjustments country, adjustments + byy
-		console.log "Adjusted country: ", country
 		return
 
 	self.country = (country) ->

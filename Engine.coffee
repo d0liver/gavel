@@ -1,7 +1,6 @@
 parseOrder      = require './parseOrder'
 describeOrder   = require './describeOrder'
 
-StubBoard       = require './StubBoard'
 Phase           = require './Phase'
 
 MoveResolver        = require './resolvers/MoveResolver'
@@ -73,7 +72,7 @@ Engine = (board, pfinder, phase) ->
 		new RetreatResolver self, board, orders, options
 
 	buildResolver = (orders, adjustments, options) ->
-		BuildResolver StubBoard(board, adjustments), orders, options
+		new BuildResolver board, orders
 
 	# Clear all of the existing units off of the board and set it up so that
 	# each unit which was given an order is actually on the board.
@@ -93,10 +92,8 @@ Engine = (board, pfinder, phase) ->
 		self.test test_name, orders, resolver, dbg_resolver
 
 	self.testRetreats = (test_name, {moves, retreats}) ->
-		# First resolve the moves.
-		board.clearUnits()
 		self.setUnitsForTest(parseOrder move for move in moves)
-		self.apply moves
+		self.resolve moves, {TEST: true, DEBUG: true}, true
 		retreats = extractTestOrders retreats
 
 		# Build up the retreat orders and the resolver for them
@@ -106,10 +103,16 @@ Engine = (board, pfinder, phase) ->
 
 	self.testBuilds = (test_name, adjustments, args...) ->
 		orders = extractTestOrders args
-		resolver = buildResolver orders, adjustments, TEST: true
-		dbg_resolver = buildResolver orders, DEBUG: true, TEST: true
+		resolver = buildResolver orders, adjustments
+		dbg_resolver = buildResolver orders
+
+		# Set up the adjustments on the board
+		board.adjustments cname, adj for cname, adj of adjustments
 
 		self.test test_name, orders, resolver, dbg_resolver
+
+		# Clean up adjustments after the fact
+		board.adjustments cname, 0 for cname, adj of adjustments
 
 	self.test = (test_name, orders, resolver, dbg_resolver) ->
 		console.log "Test: #{test_name}"

@@ -17,7 +17,7 @@ class RetreatResolver
 				u.dislodger?
 
 	resolve: (order) ->
-		preventers = @_orders.filter (o) ->
+		preventers = @_orders.filter (o) =>
 			o.to is order.to and
 			!_.isEqual(o, order) and
 			@_canRetreat(o)
