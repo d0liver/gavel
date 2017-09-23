@@ -1,4 +1,4 @@
-{english, outcomes, orders: eorders, paths} = require './enums'
+{english, outcomes, orders: eorders, paths} = require '../enums'
 {MOVE, SUPPORT, CONVOY, HOLD, BUILD}      = eorders
 {SUCCEEDS, FAILS, ILLEGAL, EXISTS} = outcomes
 

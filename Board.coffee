@@ -110,7 +110,7 @@ Board = (gdata, vdata) ->
 
 	# Remove a dislodged unit in a region.
 	self.removeUnit = (region) ->
-		console.log "Attempt to remove unit from regin: ", region
+		console.log "Attempt to remove unit from region: ", region
 		for country in gdata.phase.countries
 			console.log "Units: ", country.units
 			for unit,i in country.units when unit.region is region
@@ -134,7 +134,10 @@ Board = (gdata, vdata) ->
 		)...
 
 	self.adjustments = (country, num) ->
-		country = self.country country
+		# XXX: Not using self.country because it will make a copy and we need
+		# to make a change. Board data is generally not being handled all that
+		# well and this should probably be fixed.
+		country = gdata.phase.countries.find (c) -> c.name is country
 		country.adjustments = num if num?
 
 		return country.adjustments ? 0
@@ -155,10 +158,8 @@ Board = (gdata, vdata) ->
 			country = gdata.phase.countries.find (c) -> c.name is country
 			return country.supply_centers?.length ? 0
 		else
-			r = []
-			# Flatten out the centers and hand them back
-			r.push supply_centers... for {supply_centers} in gdata.phase.countries
-			return r
+			regions = vdata.map_data.regions
+			name for name,region of regions when region.supply_center
 
 	self.moveUnit = (unit, to) ->
 		# FIXME: The weird remove then add crap is because the unit that is

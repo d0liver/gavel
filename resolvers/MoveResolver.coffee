@@ -2,10 +2,10 @@
 _ = require 'underscore'
 
 # Local
-CycleGuard       = require './CycleGuard'
-{CycleException} = require './Exceptions'
-describeOrder    = require './describeOrder'
-{english, outcomes, orders: eorders, paths} = require './enums'
+CycleGuard       = require '../CycleGuard'
+{CycleException} = require '../Exceptions'
+describeOrder    = require '../describeOrder'
+{english, outcomes, orders: eorders, paths} = require '../enums'
 
 {VIA_ADJACENCY, VIA_CONVOY}                = paths
 {MOVE, SUPPORT, CONVOY, HOLD}      = eorders
@@ -310,6 +310,7 @@ Resolver = (board, pfinder, orders, options) ->
 		# resolved and so further calls to adjudicate should only produced
 		# canned responses but this isn't the case.
 		morders = orders.filter (o) -> o.type is MOVE and o.succeeds is SUCCEEDS
+		# Set dislodged units. We're careful not to set
 		for dislodger in morders
 			console.log "SET DISLODGER"
 			board.setDislodger

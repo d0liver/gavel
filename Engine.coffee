@@ -1,10 +1,12 @@
 parseOrder      = require './parseOrder'
 describeOrder   = require './describeOrder'
-Resolver        = require './Resolver'
-RetreatResolver = require './RetreatResolver'
-BuildResolver   = require './BuildResolver'
+
 StubBoard       = require './StubBoard'
 Phase           = require './Phase'
+
+MoveResolver        = require './resolvers/MoveResolver'
+RetreatResolver = require './resolvers/RetreatResolver'
+BuildResolver   = require './resolvers/BuildResolver'
 
 {english, outcomes, orders: eorders, paths} = require './enums'
 
@@ -22,8 +24,10 @@ Engine = (board, pfinder, phase) ->
 		orders = (parseOrder order for order in orders)
 
 		resolver = (
+			console.log "Season is: ", phase.season
 			switch phase.season
 				when 'Spring', 'Fall'
+					console.log "USE MOVE RESOLVER"
 					moveResolver
 				when 'Spring Retreat', 'Fall Retreat'
 					retreatResolver
@@ -40,6 +44,7 @@ Engine = (board, pfinder, phase) ->
 
 	self.roll = (orders, options) ->
 
+		console.log "Roll phase: #{phase}"
 
 		# Resolve orders and apply them to the board.
 		self.resolve orders, options, true
@@ -62,7 +67,7 @@ Engine = (board, pfinder, phase) ->
 	parseOrders = (orders) -> parseOrder order for order in orders
 
 	moveResolver = (orders, options) ->
-		Resolver board, pfinder, orders, options
+		MoveResolver board, pfinder, orders, options
 
 	retreatResolver = (orders, options) ->
 		new RetreatResolver self, board, orders, options

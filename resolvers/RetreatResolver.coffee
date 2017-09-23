@@ -1,8 +1,8 @@
 _ = require 'underscore'
 
-describeOrder = require './describeOrder'
+describeOrder = require '../describeOrder'
 
-{english, outcomes, orders: eorders, paths} = require './enums'
+{english, outcomes, orders: eorders, paths} = require '../enums'
 {MOVE, SUPPORT, CONVOY, HOLD}      = eorders
 {SUCCEEDS, FAILS, ILLEGAL, EXISTS} = outcomes
 
@@ -41,6 +41,8 @@ class RetreatResolver
 			console.log "Removing failed retreat: ", order.actor
 			@_board.removeUnit order.actor
 
+		console.log "Attempting to apply adjustments..."
+		console.log "SUPPLY CENTERS: ", @_board.supplyCenters()
 		# If this is the end of fall then we need to apply adjustments for
 		# centers taken.
 		if @_engine.phase.season is 'Fall Retreat'
@@ -51,13 +53,14 @@ class RetreatResolver
 				taken_from = @_board.countries().find (c) ->
 					unit.region in c.supply_centers
 
-				@_board.adjust taken_from.name, -1
+				@_board.adjust taken_from.name, -1 if taken_from?
 
 	# Determine if an order can retreat to the area it's trying to retreat to.
 	# This is separate from the resolver because before we fail an order for
 	# retreating to the same destination as another one we have to make sure
 	# that both retreat orders were valid.
 	_canRetreat: (order) ->
+		console.log "Orders? ", @_orders
 		# Only move orders are allowed during retreat
 		order.type is MOVE and
 		order in @_orders and
