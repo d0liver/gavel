@@ -7,7 +7,9 @@
     "underscore": "^1.8.3",
     "yamljs": "^0.2.10"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "minimist": "^1.2.0"
+  },
   "scripts": {
     "test": "coffee DATC.coffee"
   },

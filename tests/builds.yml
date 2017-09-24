@@ -1,0 +1,52 @@
+---
+- description: 6.I.1. Too many build orders
+  orders:
+  - text: 'Germany: Build A Warsaw'
+    expect: FAILS
+  - text: 'Germany: Build A Kiel'
+    expect: SUCCEEDS
+  - text: 'Germany: Build A Munich'
+    expect: FAILS
+  adjustments:
+    Germany: 1
+
+- description: 6.I.2. Fleets can not be build in land areas
+  orders:
+  - text: 'Russia: Build F Moscow'
+    expect: FAILS
+  adjustments:
+    Russia: 1
+
+- description: 6.I.3. Supply center must be empty for building
+  setup:
+  - 'Germany: Build A Berlin'
+  orders:
+  - text: 'Germany: Build A Berlin'
+    expect: FAILS
+  adjustments:
+    Germany: 1
+
+- description: 6.I.4. Both coasts must be empty for building
+  setup:
+  - 'Russia: Build A St Petersburg(sc)'
+  orders:
+  - text: 'Russia: Build A St Petersburg(nc)'
+    expect: FAILS
+  adjustments:
+    Russia: 1
+
+- description: 6.I.6. Building in owned supply center that is not a home supply center
+  orders:
+  - text: 'Germany: Build A Warsaw'
+    expect: FAILS
+  adjustments:
+    Germany: 1
+
+- description: 6.I.7. Only one build in a home supply center
+  orders:
+  - text: 'Russia: Build A Moscow'
+    expect: FAILS
+  - text: 'Russia: Build A Moscow'
+    expect: FAILS
+  adjustments:
+    Russia: 2

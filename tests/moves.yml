@@ -1,0 +1,1399 @@
+---
+- description: Illegal move - move to non-adjacent region
+  orders:
+  - text: 'Austria: F Budapest - Moscow'
+    expect: FAILS
+
+- description: Illegal move - Army to sea
+  orders:
+  - text: 'England: A Liverpool - Irish Sea'
+    expect: FAILS
+
+- description: Illegal move - Fleet to land
+  orders:
+  - text: 'Germany: F Kiel - Munich'
+    expect: FAILS
+
+- description: Illegal move - Unit to its own region
+  orders:
+  - text: 'Germany: F Kiel - Kiel'
+    expect: ILLEGAL
+
+- description: Illegal move - Unit convoy to its own region
+  orders:
+  - text: 'England: F North Sea Convoys A Yorkshire - Yorkshire'
+    expect: ILLEGAL
+  - text: 'England: A Yorkshire - Yorkshire'
+    expect: ILLEGAL
+  - text: 'England: A Liverpool Supports A Yorkshire - Yorkshire'
+    expect: ILLEGAL
+  - text: 'Germany: F London - Yorkshire'
+    expect: SUCCEEDS
+  - text: 'Germany: A Wales Supports F London - Yorkshire'
+    expect: SUCCEEDS
+
+- description: Illegal move - Only armies can be convoyed
+  orders:
+  - text: 'England: F London - Belgium'
+    expect: FAILS
+  - text: 'England: F North Sea Convoys A London - Belgium'
+    expect: SUCCEEDS
+
+- description: Illegal support - An army cannot support itself to hold
+  orders:
+  - text: 'Italy: A Venice - Trieste'
+    expect: SUCCEEDS
+  - text: 'Italy: A Tyrolia Supports A Venice - Trieste'
+    expect: SUCCEEDS
+  - text: 'Austria: F Trieste Supports F Trieste - Trieste'
+    expect: ILLEGAL
+
+- description: Illegal move - Fleets must follow coast if not on sea
+  orders:
+  - text: 'Italy: F Rome - Venice'
+    expect: FAILS
+
+- description: Illegal support - Support on unreachable destination not possible
+  orders:
+  - text: 'Austria: A Venice Hold'
+    expect: SUCCEEDS
+  - text: 'Italy: F Rome Supports A Apulia - Venice'
+    expect: ILLEGAL
+
+- description: Regular bounce - Two armies bouncing with each other
+  orders:
+  - text: 'Austria: A Vienna - Tyrolia'
+    expect: FAILS
+  - text: 'Italy: A Venice - Tyrolia'
+    expect: FAILS
+
+- description: Regular bounce - Three armies bouncing with each other
+  orders:
+  - text: 'Austria: A Vienna - Tyrolia'
+    expect: FAILS
+  - text: 'Germany: A Munich - Tyrolia'
+    expect: FAILS
+  - text: 'Italy: A Venice - Tyrolia'
+    expect: FAILS
+
+- description: Coastal issues - Coast not specified
+  orders:
+  - text: 'France: F Portugal - Spain'
+    expect: FAILS
+
+- description: Coastal issues - illegal coast
+  orders:
+  - text: 'France: F Gascony - Spain(sc)'
+    expect: FAILS
+
+- description: Coastal issues - fleet support to non adjacent coast
+  orders:
+  - text: 'France: F Gascony - Spain(nc)'
+    expect: SUCCEEDS
+
+- description: Coastal issues - A fleet cannot support into an area that is unreachable
+    from its coast
+  orders:
+  - text: 'France: F Spain(nc) Supports F Marseilles - Gulf of Lyon'
+    expect: ILLEGAL
+  - text: 'Italy: F Gulf of Lyon Hold'
+    expect: SUCCEEDS
+  - text: 'France: F Marseilles - Gulf of Lyon'
+    expect: FAILS
+
+- description: Coastal issues - Support can be cut from the other coast
+  orders:
+  - text: 'England: F Irish Sea Supports F North Atlantic Ocean - Mid-Atlantic Ocean'
+    expect: SUCCEEDS
+  - text: 'England: F North Atlantic Ocean - Mid-Atlantic Ocean'
+    expect: SUCCEEDS
+  - text: 'France: F Spain(nc) Supports F Mid-Atlantic Ocean Hold'
+    expect: FAILS
+  - text: 'France: F Mid-Atlantic Ocean Hold'
+    expect: FAILS
+  - text: 'Italy: F Gulf of Lyon - Spain(sc)'
+    expect: FAILS
+
+- description: Coastal issues - Most house rules accept support orders without coast
+    specification
+  orders:
+  - text: 'France: F Portugal Supports F Mid-Atlantic Ocean - Spain'
+    expect: SUCCEEDS
+  - text: 'France: F Mid-Atlantic Ocean - Spain(nc)'
+    expect: FAILS
+  - text: 'Italy: F Gulf of Lyon Supports F Western Mediterranean - Spain(sc)'
+    expect: SUCCEEDS
+  - text: 'Italy: F Western Mediterranean - Spain(sc)'
+    expect: FAILS
+
+- description: Coastal issues - Coastal crawl forbidden
+  orders:
+  - text: 'Turkey: F Bulgaria(sc) - Constantinople'
+    expect: FAILS
+  - text: 'Turkey: F Constantinople - Bulgaria(ec)'
+    expect: FAILS
+
+- description: Circular movement - basic
+  orders:
+  - text: 'Turkey: F Ankara - Constantinople'
+    expect: SUCCEEDS
+  - text: 'Turkey: A Constantinople - Smyrna'
+    expect: SUCCEEDS
+  - text: 'Turkey: A Smyrna - Ankara'
+    expect: SUCCEEDS
+
+- description: Circular movement - Three units can change place, even when one gets
+    support
+  orders:
+  - text: 'Turkey: F Ankara - Constantinople'
+    expect: SUCCEEDS
+  - text: 'Turkey: A Constantinople - Smyrna'
+    expect: SUCCEEDS
+  - text: 'Turkey: A Smyrna - Ankara'
+    expect: SUCCEEDS
+  - text: 'Turkey: A Bulgaria Supports F Ankara - Constantinople'
+    expect: SUCCEEDS
+
+- description: Circular movement - One unit bounces, the whole circular movement is
+    blocked
+  orders:
+  - text: 'Turkey: F Ankara - Constantinople'
+    expect: FAILS
+  - text: 'Turkey: A Constantinople - Smyrna'
+    expect: FAILS
+  - text: 'Turkey: A Smyrna - Ankara'
+    expect: FAILS
+  - text: 'Turkey: A Bulgaria - Constantinople'
+    expect: FAILS
+
+- description: Circular movement - Movement contains an attacked convoy, still succeeds
+  orders:
+  - text: 'Austria: A Trieste - Serbia'
+    expect: SUCCEEDS
+  - text: 'Austria: A Serbia - Bulgaria'
+    expect: SUCCEEDS
+  - text: 'Turkey: A Bulgaria - Trieste'
+    expect: SUCCEEDS
+  - text: 'Turkey: F Aegean Sea Convoys A Bulgaria - Trieste'
+    expect: SUCCEEDS
+  - text: 'Turkey: F Ionian Sea Convoys A Bulgaria - Trieste'
+    expect: SUCCEEDS
+  - text: 'Turkey: F Adriatic Sea Convoys A Bulgaria - Trieste'
+    expect: SUCCEEDS
+
+- description: Circular movement - Disrupted circular movement due to dislodged convoy
+  orders:
+  - text: 'Austria: A Trieste - Serbia'
+    expect: FAILS
+  - text: 'Austria: A Serbia - Bulgaria'
+    expect: FAILS
+  - text: 'Turkey: A Bulgaria - Trieste'
+    expect: FAILS
+  - text: 'Turkey: F Aegean Sea Convoys A Bulgaria - Trieste'
+    expect: SUCCEEDS
+  - text: 'Turkey: F Ionian Sea Convoys A Bulgaria - Trieste'
+    expect: FAILS
+  - text: 'Turkey: F Adriatic Sea Convoys A Bulgaria - Trieste'
+    expect: SUCCEEDS
+  - text: 'Italy: F Naples - Ionian Sea'
+    expect: SUCCEEDS
+  - text: 'Italy: F Tunis Supports F Naples - Ionian Sea'
+    expect: SUCCEEDS
+
+- description: Convoy swap - Two armies can swap places even when they are not adjacent.
+  orders:
+  - text: 'England: F North Sea Convoys A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'England: A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'France: F English Channel Convoys A Belgium - London'
+    expect: SUCCEEDS
+  - text: 'France: A Belgium - London'
+    expect: SUCCEEDS
+
+- description: Convoy swap - If in a swap one of the units bounces, then the swap
+    fails
+  orders:
+  - text: 'England: F North Sea Convoys A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'England: A London - Belgium'
+    expect: FAILS
+  - text: 'France: F English Channel Convoys A Belgium - London'
+    expect: SUCCEEDS
+  - text: 'France: A Belgium - London'
+    expect: FAILS
+  - text: 'France: A Burgundy - Belgium'
+    expect: FAILS
+
+- description: Support to hold - The simplest support to hold order
+  orders:
+  - text: 'Austria: F Adriatic Sea Supports A Trieste - Venice'
+    expect: SUCCEEDS
+  - text: 'Austria: A Trieste - Venice'
+    expect: FAILS
+  - text: 'Italy: A Venice Hold'
+    expect: SUCCEEDS
+  - text: 'Italy: A Tyrolia Supports A Venice Hold'
+    expect: SUCCEEDS
+
+- description: Support to hold - The most simple support on hold cut
+  orders:
+  - text: 'Austria: F Adriatic Sea Supports A Trieste - Venice'
+    expect: SUCCEEDS
+  - text: 'Austria: A Trieste - Venice'
+    expect: SUCCEEDS
+  - text: 'Austria: A Vienna - Tyrolia'
+    expect: FAILS
+  - text: 'Italy: A Venice Hold'
+    expect: FAILS
+  - text: 'Italy: A Tyrolia Supports A Venice Hold'
+    expect: FAILS
+
+- description: Support on move - The most simple support on move cut
+  orders:
+  - text: 'Austria: F Adriatic Sea Supports A Trieste - Venice'
+    expect: FAILS
+  - text: 'Austria: A Trieste - Venice'
+    expect: FAILS
+  - text: 'Italy: A Venice Hold'
+    expect: SUCCEEDS
+  - text: 'Italy: F Ionian Sea - Adriatic Sea'
+    expect: FAILS
+
+- description: Support hold - A unit that is supporting a hold, can receive a hold
+    support
+  orders:
+  - text: 'Germany: A Berlin Supports F Kiel Hold'
+    expect: FAILS
+  - text: 'Germany: F Kiel Supports A Berlin Hold'
+    expect: SUCCEEDS
+  - text: 'Russia: A Prussia - Berlin'
+    expect: FAILS
+  - text: 'Russia: F Baltic Sea Supports A Prussia - Berlin'
+    expect: SUCCEEDS
+
+- description: Support hold - A unit that is supporting a move, can receive a hold
+    support
+  orders:
+  - text: 'Germany: A Berlin Supports A Munich - Silesia'
+    expect: FAILS
+  - text: 'Germany: F Kiel Supports A Berlin Hold'
+    expect: SUCCEEDS
+  - text: 'Germany: A Munich - Silesia'
+    expect: SUCCEEDS
+  - text: 'Russia: F Baltic Sea Supports A Prussia - Berlin'
+    expect: SUCCEEDS
+  - text: 'Russia: A Prussia - Berlin'
+    expect: FAILS
+
+- description: Support hold - A unit that is convoying, can receive a hold support
+  orders:
+  - text: 'Germany: A Berlin - Sweden'
+    expect: SUCCEEDS
+  - text: 'Germany: F Baltic Sea Convoys A Berlin - Sweden'
+    expect: SUCCEEDS
+  - text: 'Germany: F Prussia Supports F Baltic Sea Hold'
+    expect: SUCCEEDS
+  - text: 'Russia: F Livonia - Baltic Sea'
+    expect: FAILS
+  - text: 'Russia: F Gulf of Bothnia Supports F Livonia - Baltic Sea'
+    expect: SUCCEEDS
+
+- description: Support hold - A unit that is moving cannot receive a hold support
+    if the move fails
+  orders:
+  - text: 'Germany: F Baltic Sea - Sweden'
+    expect: FAILS
+  - text: 'Germany: F Prussia Supports F Baltic Sea Hold'
+    expect: ILLEGAL
+  - text: 'Russia: F Livonia - Baltic Sea'
+    expect: SUCCEEDS
+  - text: 'Russia: F Gulf of Bothnia Supports F Livonia - Baltic Sea'
+    expect: SUCCEEDS
+  - text: 'Russia: A Finland - Sweden'
+    expect: FAILS
+
+- description: Support hold - Failed convoy can not receive hold support
+  orders:
+  - text: 'Austria: F Ionian Sea Hold'
+    expect: SUCCEEDS
+  - text: 'Austria: A Serbia Supports A Albania - Greece'
+    expect: SUCCEEDS
+  - text: 'Austria: A Albania - Greece'
+    expect: SUCCEEDS
+  - text: 'Turkey: A Greece - Naples'
+    expect: FAILS
+  - text: 'Turkey: A Bulgaria Supports A Greece Hold'
+    expect: ILLEGAL
+
+- description: Hold - A unit that is holding can not receive a support in moving
+  orders:
+  - text: 'Italy: A Venice - Trieste'
+    expect: SUCCEEDS
+  - text: 'Italy: A Tyrolia Supports A Venice - Trieste'
+    expect: SUCCEEDS
+  - text: 'Austria: A Albania Supports A Trieste - Serbia'
+    expect: SUCCEEDS
+  - text: 'Austria: A Trieste Hold'
+    expect: FAILS
+
+- description: Illegal dislodge - A unit may not dislodge a unit of the same great
+    power
+  orders:
+  - text: 'Germany: A Berlin Hold'
+    expect: SUCCEEDS
+  - text: 'Germany: F Kiel - Berlin'
+    expect: FAILS
+  - text: 'Germany: A Munich Supports F Kiel - Berlin'
+    expect: SUCCEEDS
+
+- description: 6.D.11. No self dislodgment of returning unit
+  orders:
+  - text: 'Germany: A Berlin - Prussia'
+    expect: FAILS
+  - text: 'Germany: F Kiel - Berlin'
+    expect: FAILS
+  - text: 'Germany: A Munich Supports F Kiel - Berlin'
+    expect: SUCCEEDS
+  - text: 'Russia: A Warsaw - Prussia'
+    expect: FAILS
+
+- description: 6.D.12. Support a foreign unit to dislodge own unit prohibited
+  orders:
+  - text: 'Austria: F Trieste Hold'
+    expect: SUCCEEDS
+  - text: 'Austria: A Vienna Supports A Venice - Trieste'
+    expect: SUCCEEDS
+  - text: 'Italy: A Venice - Trieste'
+    expect: FAILS
+
+- description: 6.D.13. Supporting a foreign unit to dislodge returning own unit prohibited.
+  orders:
+  - text: 'Austria: F Trieste - Adriatic Sea'
+    expect: FAILS
+  - text: 'Austria: A Vienna Supports A Venice - Trieste'
+    expect: SUCCEEDS
+  - text: 'Italy: A Venice - Trieste'
+    expect: FAILS
+  - text: 'Italy: F Apulia - Adriatic Sea'
+    expect: FAILS
+
+- description: 6.D.14. Supporting a foreign unit is not enough to prevent dislodgement
+  orders:
+  - text: 'Austria: F Trieste Hold'
+    expect: FAILS
+  - text: 'Austria: A Vienna Supports A Venice - Trieste'
+    expect: SUCCEEDS
+  - text: 'Italy: A Venice - Trieste'
+    expect: SUCCEEDS
+  - text: 'Italy: A Tyrolia Supports A Venice - Trieste'
+    expect: SUCCEEDS
+  - text: 'Italy: F Adriatic Sea Supports A Venice - Trieste'
+    expect: SUCCEEDS
+
+- description: 6.D.15 Illegal Support Cut - A unit cannot cut support into its own
+    region
+  orders:
+  - text: 'Russia: F Constantinople Supports F Black Sea - Ankara'
+    expect: SUCCEEDS
+  - text: 'Russia: F Black Sea - Ankara'
+    expect: SUCCEEDS
+  - text: 'Turkey: F Ankara - Constantinople'
+    expect: FAILS
+
+- description: Convoying a unit dislodging a unit of same power is allowed
+  orders:
+  - text: 'England: A London Hold'
+    expect: FAILS
+  - text: 'England: F North Sea Convoys A Belgium - London'
+    expect: SUCCEEDS
+  - text: 'France: F English Channel Supports A Belgium - London'
+    expect: SUCCEEDS
+  - text: 'France: A Belgium - London'
+    expect: SUCCEEDS
+
+- description: 6.D.17. Dislodgement cuts supports
+  orders:
+  - text: 'Russia: F Constantinople Supports F Black Sea - Ankara'
+    expect: FAILS
+  - text: 'Russia: F Black Sea - Ankara'
+    expect: FAILS
+  - text: 'Turkey: F Ankara - Constantinople'
+    expect: SUCCEEDS
+  - text: 'Turkey: A Smyrna Supports F Ankara - Constantinople'
+    expect: SUCCEEDS
+  - text: 'Turkey: A Armenia - Ankara'
+    expect: FAILS
+
+- description: 6.D.18. A surviving unit will sustain support
+  orders:
+  - text: 'Russia: F Constantinople Supports F Black Sea - Ankara'
+    expect: SUCCEEDS
+  - text: 'Russia: F Black Sea - Ankara'
+    expect: SUCCEEDS
+  - text: 'Russia: A Bulgaria Supports F Constantinople Hold'
+    expect: SUCCEEDS
+  - text: 'Turkey: F Ankara - Constantinople'
+    expect: FAILS
+  - text: 'Turkey: A Smyrna Supports F Ankara - Constantinople'
+    expect: SUCCEEDS
+  - text: 'Turkey: A Armenia - Ankara'
+    expect: FAILS
+
+- description: 6.D.19. Even when surviving is in alternative way
+  orders:
+  - text: 'Russia: F Constantinople Supports F Black Sea - Ankara'
+    expect: SUCCEEDS
+  - text: 'Russia: F Black Sea - Ankara'
+    expect: SUCCEEDS
+  - text: 'Russia: A Smyrna Supports F Ankara - Constantinople'
+    expect: SUCCEEDS
+  - text: 'Turkey: F Ankara - Constantinople'
+    expect: FAILS
+
+- description: 6.D.20. Unit can not cut support of its own country
+  orders:
+  - text: 'England: F London Supports F North Sea - English Channel'
+    expect: SUCCEEDS
+  - text: 'England: F North Sea - English Channel'
+    expect: SUCCEEDS
+  - text: 'England: A Yorkshire - London'
+    expect: FAILS
+  - text: 'France: F English Channel Hold'
+    expect: FAILS
+
+- description: 6.D.21. Dislodging does not cancel a support cut
+  orders:
+  - text: 'Austria: F Trieste Hold'
+    expect: SUCCEEDS
+  - text: 'Italy: A Venice - Trieste'
+    expect: FAILS
+  - text: 'Italy: A Tyrolia Supports A Venice - Trieste'
+    expect: FAILS
+  - text: 'Germany: A Munich - Tyrolia'
+    expect: FAILS
+  - text: 'Russia: A Silesia - Munich'
+    expect: SUCCEEDS
+  - text: 'Russia: A Berlin Supports A Silesia - Munich'
+    expect: SUCCEEDS
+
+- description: 6.D.22. Impossible fleet move can not be supported
+  orders:
+  - text: 'Germany: F Kiel - Munich'
+    expect: FAILS
+  - text: 'Germany: A Burgundy Supports F Kiel - Munich'
+    expect: SUCCEEDS
+  - text: 'Russia: A Munich - Kiel'
+    expect: SUCCEEDS
+  - text: 'Russia: A Berlin Supports A Munich - Kiel'
+    expect: SUCCEEDS
+
+- description: 6.D.23. Impossible coast move can not be supported
+  orders:
+  - text: 'Italy: F Gulf of Lyon - Spain(sc)'
+    expect: SUCCEEDS
+  - text: 'Italy: F Western Mediterranean Supports F Gulf of Lyon - Spain(sc)'
+    expect: SUCCEEDS
+  - text: 'France: F Spain(nc) - Gulf of Lyon'
+    expect: FAILS
+  - text: 'France: F Marseilles Supports F Spain(nc) - Gulf of Lyon'
+    expect: SUCCEEDS
+
+- description: 6.D.24. Impossible army move can not be supported
+  orders:
+  - text: 'France: A Marseilles - Gulf of Lyon'
+    expect: FAILS
+  - text: 'France: F Spain(sc) Supports A Marseilles - Gulf of Lyon'
+    expect: ILLEGAL
+  - text: 'Italy: F Gulf of Lyon Hold'
+    expect: FAILS
+  - text: 'Turkey: F Western Mediterranean - Gulf of Lyon'
+    expect: SUCCEEDS
+  - text: 'Turkey: F Tyrrhenian Sea Supports F Western Mediterranean - Gulf of Lyon'
+    expect: SUCCEEDS
+
+- description: 6.D.25. Failing hold support can be supported
+  orders:
+  - text: 'Germany: A Berlin Supports A Prussia Hold'
+    expect: ILLEGAL
+  - text: 'Germany: F Kiel Supports A Berlin Hold'
+    expect: SUCCEEDS
+  - text: 'Russia: F Baltic Sea Supports A Prussia - Berlin'
+    expect: SUCCEEDS
+  - text: 'Russia: A Prussia - Berlin'
+    expect: FAILS
+
+- description: 6.D.26. Failing move support can be supported
+  orders:
+  - text: 'Germany: A Berlin Supports A Prussia - Silesia'
+    expect: FAILS
+  - text: 'Germany: F Kiel Supports A Berlin Hold'
+    expect: SUCCEEDS
+  - text: 'Russia: F Baltic Sea Supports A Prussia - Berlin'
+    expect: SUCCEEDS
+  - text: 'Russia: A Prussia - Berlin'
+    expect: FAILS
+
+- description: 6.D.27. Failing convoy can be supported
+  orders:
+  - text: 'England: F Sweden - Baltic Sea'
+    expect: FAILS
+  - text: 'England: F Denmark Supports F Sweden - Baltic Sea'
+    expect: SUCCEEDS
+  - text: 'Germany: A Berlin Hold'
+    expect: SUCCEEDS
+  - text: 'Russia: F Baltic Sea Convoys A Berlin - Livonia'
+    expect: SUCCEEDS
+  - text: 'Russia: F Prussia Supports F Baltic Sea Hold'
+    expect: SUCCEEDS
+
+- description: 6.D.28. Impossible move and support
+  orders:
+  - text: 'Austria: A Budapest Supports F Rumania Hold'
+    expect: ILLEGAL
+  - text: 'Russia: F Rumania - Holland'
+    expect: FAILS
+  - text: 'Turkey: F Black Sea - Rumania'
+    expect: SUCCEEDS
+  - text: 'Turkey: A Bulgaria Supports F Black Sea - Rumania'
+    expect: SUCCEEDS
+
+- description: 6.D.31. A tricky impossible support
+  orders:
+  - text: 'Austria: A Rumania - Armenia'
+    expect: FAILS
+  - text: 'Turkey: F Black Sea Supports A Rumania - Armenia'
+    expect: SUCCEEDS
+
+- description: 6.D.33. Unwanted support allowed
+  orders:
+  - text: 'Austria: A Serbia - Budapest'
+    expect: SUCCEEDS
+  - text: 'Austria: A Vienna - Budapest'
+    expect: FAILS
+  - text: 'Russia: A Galicia Supports A Serbia - Budapest'
+    expect: SUCCEEDS
+  - text: 'Turkey: A Bulgaria - Serbia'
+    expect: SUCCEEDS
+
+- description: 6.D.34. Support targeting own area not allowed
+  orders:
+  - text: 'Germany: A Berlin - Prussia'
+    expect: SUCCEEDS
+  - text: 'Germany: A Silesia Supports A Berlin - Prussia'
+    expect: SUCCEEDS
+  - text: 'Germany: F Baltic Sea Supports A Berlin - Prussia'
+    expect: SUCCEEDS
+  - text: 'Italy: A Prussia Supports A Livonia - Prussia'
+    expect: ILLEGAL
+  - text: 'Russia: A Warsaw Supports A Livonia - Prussia'
+    expect: SUCCEEDS
+  - text: 'Russia: A Livonia - Prussia'
+    expect: FAILS
+
+- description: 6.E.1. Dislodged unit has no effect on attackers area
+  orders:
+  - text: 'Germany: A Berlin - Prussia'
+    expect: SUCCEEDS
+  - text: 'Germany: F Kiel - Berlin'
+    expect: SUCCEEDS
+  - text: 'Germany: A Silesia Supports A Berlin - Prussia'
+    expect: SUCCEEDS
+  - text: 'Russia: A Prussia - Berlin'
+    expect: FAILS
+
+- description: 6.E.2. No self dislodgement in head to head battle
+  orders:
+  - text: 'Germany: A Berlin - Kiel'
+    expect: FAILS
+  - text: 'Germany: F Kiel - Berlin'
+    expect: FAILS
+  - text: 'Germany: A Munich Supports A Berlin - Kiel'
+    expect: SUCCEEDS
+
+- description: 6.E.3. No help in dislodging own unit
+  orders:
+  - text: 'Germany: A Berlin - Kiel'
+    expect: FAILS
+  - text: 'Germany: A Munich Supports F Kiel - Berlin'
+    expect: SUCCEEDS
+  - text: 'England: F Kiel - Berlin'
+    expect: FAILS
+
+- description: 6.E.4. Non-dislodged loser has still effect
+  orders:
+  - text: 'Germany: F Holland - North Sea'
+    expect: FAILS
+  - text: 'Germany: F Helgoland Bight Supports F Holland - North Sea'
+    expect: SUCCEEDS
+  - text: 'Germany: F Skagerrak Supports F Holland - North Sea'
+    expect: SUCCEEDS
+  - text: 'France: F North Sea - Holland'
+    expect: FAILS
+  - text: 'France: F Belgium Supports F North Sea - Holland'
+    expect: SUCCEEDS
+  - text: 'England: F Edinburgh Supports F Norwegian Sea - North Sea'
+    expect: SUCCEEDS
+  - text: 'England: F Yorkshire Supports F Norwegian Sea - North Sea'
+    expect: SUCCEEDS
+  - text: 'England: F Norwegian Sea - North Sea'
+    expect: FAILS
+  - text: 'Austria: A Kiel Supports A Ruhr - Holland'
+    expect: SUCCEEDS
+  - text: 'Austria: A Ruhr - Holland'
+    expect: FAILS
+
+- description: 6.E.5. Loser dislodged by another army has still effect
+  orders:
+  - text: 'Germany: F Holland - North Sea'
+    expect: FAILS
+  - text: 'Germany: F Helgoland Bight Supports F Holland - North Sea'
+    expect: SUCCEEDS
+  - text: 'Germany: F Skagerrak Supports F Holland - North Sea'
+    expect: SUCCEEDS
+  - text: 'France: F North Sea - Holland'
+    expect: FAILS
+  - text: 'France: F Belgium Supports F North Sea - Holland'
+    expect: SUCCEEDS
+  - text: 'England: F Edinburgh Supports F Norwegian Sea - North Sea'
+    expect: SUCCEEDS
+  - text: 'England: F Yorkshire Supports F Norwegian Sea - North Sea'
+    expect: SUCCEEDS
+  - text: 'England: F Norwegian Sea - North Sea'
+    expect: SUCCEEDS
+  - text: 'England: F London Supports F Norwegian Sea - North Sea'
+    expect: SUCCEEDS
+  - text: 'Austria: A Kiel Supports A Ruhr - Holland'
+    expect: SUCCEEDS
+  - text: 'Austria: A Ruhr - Holland'
+    expect: FAILS
+
+- description: 6.E.6. Not dislodge because of own support has still effect
+  orders:
+  - text: 'Germany: F Holland - North Sea'
+    expect: FAILS
+  - text: 'Germany: F Helgoland Bight Supports F Holland - North Sea'
+    expect: SUCCEEDS
+  - text: 'France: F North Sea - Holland'
+    expect: FAILS
+  - text: 'France: F Belgium Supports F North Sea - Holland'
+    expect: SUCCEEDS
+  - text: 'France: F English Channel Supports F Holland - North Sea'
+    expect: SUCCEEDS
+  - text: 'Austria: A Kiel Supports A Ruhr - Holland'
+    expect: SUCCEEDS
+  - text: 'Austria: A Ruhr - Holland'
+    expect: FAILS
+
+- description: 6.E.7. No self dislodgement with beleaguered garrison
+  orders:
+  - text: 'England: F North Sea Hold'
+    expect: SUCCEEDS
+  - text: 'England: F Yorkshire Supports F Norway - North Sea'
+    expect: SUCCEEDS
+  - text: 'Germany: F Holland Supports F Helgoland Bight - North Sea'
+    expect: SUCCEEDS
+  - text: 'Germany: F Helgoland Bight - North Sea'
+    expect: FAILS
+  - text: 'Russia: F Skagerrak Supports F Norway - North Sea'
+    expect: SUCCEEDS
+  - text: 'Russia: F Norway - North Sea'
+    expect: FAILS
+
+- description: 6.E.8. Test case, no self dislodgement with beleaguered garrison and
+    head to head battle
+  orders:
+  - text: 'England: F North Sea - Norway'
+    expect: FAILS
+  - text: 'England: F Yorkshire Supports F Norway - North Sea'
+    expect: SUCCEEDS
+  - text: 'Germany: F Holland Supports F Helgoland Bight - North Sea'
+    expect: SUCCEEDS
+  - text: 'Germany: F Helgoland Bight - North Sea'
+    expect: FAILS
+  - text: 'Russia: F Skagerrak Supports F Norway - North Sea'
+    expect: SUCCEEDS
+  - text: 'Russia: F Norway - North Sea'
+    expect: FAILS
+
+- description: 6.E.9. Almost self dislodgement with beleaguered garrison
+  orders:
+  - text: 'England: F North Sea - Norwegian Sea'
+    expect: SUCCEEDS
+  - text: 'England: F Yorkshire Supports F Norway - North Sea'
+    expect: SUCCEEDS
+  - text: 'Germany: F Helgoland Bight - North Sea'
+    expect: FAILS
+  - text: 'Germany: F Holland Supports F Helgoland Bight - North Sea'
+    expect: SUCCEEDS
+  - text: 'Russia: F Norway - North Sea'
+    expect: SUCCEEDS
+  - text: 'Russia: F Skagerrak Supports F Norway - North Sea'
+    expect: SUCCEEDS
+
+- description: 6.E.10. Almost circular movement with no self dislodgement with beleaguered
+    garrison
+  orders:
+  - text: 'England: F North Sea - Denmark'
+    expect: FAILS
+  - text: 'England: F Yorkshire Supports F Norway - North Sea'
+    expect: SUCCEEDS
+  - text: 'Germany: F Holland Supports F Helgoland Bight - North Sea'
+    expect: SUCCEEDS
+  - text: 'Germany: F Helgoland Bight - North Sea'
+    expect: FAILS
+  - text: 'Germany: F Denmark - Helgoland Bight'
+    expect: FAILS
+  - text: 'Russia: F Skagerrak Supports F Norway - North Sea'
+    expect: SUCCEEDS
+  - text: 'Russia: F Norway - North Sea'
+    expect: FAILS
+
+- description: 6.E.12. Support on attack on own unit can be used for other means
+  orders:
+  - text: 'Austria: A Budapest - Rumania'
+    expect: FAILS
+  - text: 'Austria: A Serbia Supports A Vienna - Budapest'
+    expect: SUCCEEDS
+  - text: 'Italy: A Vienna - Budapest'
+    expect: FAILS
+  - text: 'Russia: A Galicia - Budapest'
+    expect: FAILS
+  - text: 'Russia: A Rumania Supports A Galicia - Budapest'
+    expect: SUCCEEDS
+
+- description: 6.E.13. Three way beleaguered garrison
+  orders:
+  - text: 'England: F Edinburgh Supports F Yorkshire - North Sea'
+    expect: SUCCEEDS
+  - text: 'England: F Yorkshire - North Sea'
+    expect: FAILS
+  - text: 'France: F Belgium - North Sea'
+    expect: FAILS
+  - text: 'France: F English Channel Supports F Belgium - North Sea'
+    expect: SUCCEEDS
+  - text: 'Germany: F North Sea Hold'
+    expect: SUCCEEDS
+  - text: 'Russia: F Norwegian Sea - North Sea'
+    expect: FAILS
+  - text: 'Russia: F Norway Supports F Norwegian Sea - North Sea'
+    expect: SUCCEEDS
+
+- description: 6.E.14. Illegal head to head battle can still defend
+  orders:
+  - text: 'England: A Liverpool - Edinburgh'
+    expect: FAILS
+  - text: 'Russia: F Edinburgh - Liverpool'
+    expect: FAILS
+
+- description: 6.E.15. The friendly head to head battle
+  orders:
+  - text: 'England: F Holland Supports A Ruhr - Kiel'
+    expect: SUCCEEDS
+  - text: 'England: A Ruhr - Kiel'
+    expect: FAILS
+  - text: 'France: A Kiel - Berlin'
+    expect: FAILS
+  - text: 'France: A Munich Supports A Kiel - Berlin'
+    expect: SUCCEEDS
+  - text: 'France: A Silesia Supports A Kiel - Berlin'
+    expect: SUCCEEDS
+  - text: 'Germany: A Berlin - Kiel'
+    expect: FAILS
+  - text: 'Germany: F Denmark Supports A Berlin - Kiel'
+    expect: SUCCEEDS
+  - text: 'Germany: F Helgoland Bight Supports A Berlin - Kiel'
+    expect: SUCCEEDS
+  - text: 'Russia: F Baltic Sea Supports A Prussia - Berlin'
+    expect: SUCCEEDS
+  - text: 'Russia: A Prussia - Berlin'
+    expect: FAILS
+
+- description: 6.F.1. No convoy in coastal areas
+  orders:
+  - text: 'Turkey: A Greece - Sevastopol'
+    expect: FAILS
+  - text: 'Turkey: F Aegean Sea Convoys A Greece - Sevastopol'
+    expect: SUCCEEDS
+  - text: 'Turkey: F Constantinople Convoys A Greece - Sevastopol'
+    expect: SUCCEEDS
+  - text: 'Turkey: F Black Sea Convoys A Greece - Sevastopol'
+    expect: SUCCEEDS
+
+- description: 6.F.2. An army being convoyed can bounce as normal
+  orders:
+  - text: 'England: F English Channel Convoys A London - Brest'
+    expect: SUCCEEDS
+  - text: 'England: A London - Brest'
+    expect: FAILS
+  - text: 'France: A Paris - Brest'
+    expect: FAILS
+
+- description: 6.F.3. An army being convoyed can receive support
+  orders:
+  - text: 'England: F English Channel Convoys A London - Brest'
+    expect: SUCCEEDS
+  - text: 'England: A London - Brest'
+    expect: SUCCEEDS
+  - text: 'England: F Mid-Atlantic Ocean Supports A London - Brest'
+    expect: SUCCEEDS
+  - text: 'France: A Paris - Brest'
+    expect: FAILS
+
+- description: 6.F.4. An attacked convoy is not disrupted
+  orders:
+  - text: 'England: F North Sea Convoys A London - Holland'
+    expect: SUCCEEDS
+  - text: 'England: A London - Holland'
+    expect: SUCCEEDS
+  - text: 'Germany: F Skagerrak - North Sea'
+    expect: FAILS
+
+- description: 6.F.5. A beleaguered convoy is not disrupted
+  orders:
+  - text: 'England: F North Sea Convoys A London - Holland'
+    expect: SUCCEEDS
+  - text: 'England: A London - Holland'
+    expect: SUCCEEDS
+  - text: 'France: F English Channel - North Sea'
+    expect: FAILS
+  - text: 'France: F Belgium Supports F English Channel - North Sea'
+    expect: SUCCEEDS
+  - text: 'Germany: F Skagerrak - North Sea'
+    expect: FAILS
+  - text: 'Germany: F Denmark Supports F Skagerrak - North Sea'
+    expect: SUCCEEDS
+
+- description: 6.F.6. Dislodged convoy does not cut support
+  orders:
+  - text: 'England: F North Sea Convoys A London - Holland'
+    expect: FAILS
+  - text: 'England: A London - Holland'
+    expect: FAILS
+  - text: 'Germany: A Holland Supports A Belgium Hold'
+    expect: SUCCEEDS
+  - text: 'Germany: A Belgium Supports A Holland Hold'
+    expect: FAILS
+  - text: 'Germany: F Helgoland Bight Supports F Skagerrak - North Sea'
+    expect: SUCCEEDS
+  - text: 'Germany: F Skagerrak - North Sea'
+    expect: SUCCEEDS
+  - text: 'France: A Picardy - Belgium'
+    expect: FAILS
+  - text: 'France: A Burgundy Supports A Picardy - Belgium'
+    expect: SUCCEEDS
+
+- description: 6.F.8. Dislodged convoy does not cause a bounce
+  orders:
+  - text: 'England: F North Sea Convoys A London - Holland'
+    expect: FAILS
+  - text: 'England: A London - Holland'
+    expect: FAILS
+  - text: 'Germany: F Helgoland Bight Supports F Skagerrak - North Sea'
+    expect: SUCCEEDS
+  - text: 'Germany: F Skagerrak - North Sea'
+    expect: SUCCEEDS
+  - text: 'Germany: A Belgium - Holland'
+    expect: SUCCEEDS
+
+- description: 6.F.9. Dislodge of multi-route convoy
+  orders:
+  - text: 'England: F English Channel Convoys A London - Belgium'
+    expect: FAILS
+  - text: 'England: F North Sea Convoys A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'England: A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'France: F Brest Supports F Mid-Atlantic Ocean - English Channel'
+    expect: SUCCEEDS
+  - text: 'France: F Mid-Atlantic Ocean - English Channel'
+    expect: SUCCEEDS
+
+- description: 6.F.10. Dislodge of multi-route convoy with foreign fleet
+  orders:
+  - text: 'England: F North Sea Convoys A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'England: A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'Germany: F English Channel Convoys A London - Belgium'
+    expect: FAILS
+  - text: 'France: F Brest Supports F Mid-Atlantic Ocean - English Channel'
+    expect: SUCCEEDS
+  - text: 'France: F Mid-Atlantic Ocean - English Channel'
+    expect: SUCCEEDS
+
+- description: 6.F.11. Dislodge of multi-route convoy with only foreign fleets
+  orders:
+  - text: 'England: A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'Germany: F English Channel Convoys A London - Belgium'
+    expect: FAILS
+  - text: 'Russia: F North Sea Convoys A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'France: F Brest Supports F Mid-Atlantic Ocean - English Channel'
+    expect: SUCCEEDS
+  - text: 'France: F Mid-Atlantic Ocean - English Channel'
+    expect: SUCCEEDS
+
+- description: 6.F.12. Dislodged convoying fleet not on route
+  orders:
+  - text: 'England: F English Channel Convoys A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'England: A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'England: F Irish Sea Convoys A London - Belgium'
+    expect: FAILS
+  - text: 'France: F North Atlantic Ocean Supports F Mid-Atlantic Ocean - Irish Sea'
+    expect: SUCCEEDS
+  - text: 'France: F Mid-Atlantic Ocean - Irish Sea'
+    expect: SUCCEEDS
+
+- description: 6.F.13. The unwanted alternative
+  orders:
+  - text: 'England: A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'England: F North Sea Convoys A London - Belgium'
+    expect: FAILS
+  - text: 'France: F English Channel Convoys A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'Germany: F Holland Supports F Denmark - North Sea'
+    expect: SUCCEEDS
+  - text: 'Germany: F Denmark - North Sea'
+    expect: SUCCEEDS
+
+- description: 6.F.14. Simple convoy paradox
+  orders:
+  - text: 'England: F London Supports F Wales - English Channel'
+    expect: SUCCEEDS
+  - text: 'England: F Wales - English Channel'
+    expect: SUCCEEDS
+  - text: 'France: A Brest - London'
+    expect: FAILS
+  - text: 'France: F English Channel Convoys A Brest - London'
+    expect: FAILS
+
+- description: 6.F.15. Simple convoy paradox with additional convoy
+  orders:
+  - text: 'England: F London Supports F Wales - English Channel'
+    expect: SUCCEEDS
+  - text: 'England: F Wales - English Channel'
+    expect: SUCCEEDS
+  - text: 'France: A Brest - London'
+    expect: FAILS
+  - text: 'France: F English Channel Convoys A Brest - London'
+    expect: FAILS
+  - text: 'Italy: F Irish Sea Convoys A North Africa - Wales'
+    expect: SUCCEEDS
+  - text: 'Italy: F Mid-Atlantic Ocean Convoys A North Africa - Wales'
+    expect: SUCCEEDS
+  - text: 'Italy: A North Africa - Wales'
+    expect: SUCCEEDS
+
+- description: 6.F.16. Pandin's paradox
+  orders:
+  - text: 'England: F London Supports F Wales - English Channel'
+    expect: SUCCEEDS
+  - text: 'England: F Wales - English Channel'
+    expect: FAILS
+  - text: 'France: A Brest - London'
+    expect: FAILS
+  - text: 'France: F English Channel Convoys A Brest - London'
+    expect: FAILS
+  - text: 'Germany: F North Sea Supports F Belgium - English Channel'
+    expect: SUCCEEDS
+  - text: 'Germany: F Belgium - English Channel'
+    expect: FAILS
+
+- description: 6.F.17. Pandin's extended paradox
+  orders:
+  - text: 'England: F London Supports F Wales - English Channel'
+    expect: SUCCEEDS
+  - text: 'England: F Wales - English Channel'
+    expect: FAILS
+  - text: 'France: A Brest - London'
+    expect: FAILS
+  - text: 'France: F English Channel Convoys A Brest - London'
+    expect: FAILS
+  - text: 'France: F Yorkshire Supports A Brest - London'
+    expect: SUCCEEDS
+  - text: 'Germany: F North Sea Supports F Belgium - English Channel'
+    expect: SUCCEEDS
+  - text: 'Germany: F Belgium - English Channel'
+    expect: FAILS
+
+- description: 6.F.18 Betrayl paradox
+  orders:
+  - text: 'England: F North Sea Convoys A London - Belgium'
+    expect: FAILS
+  - text: 'England: A London - Belgium'
+    expect: FAILS
+  - text: 'England: F English Channel Supports A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'France: F Belgium Supports F North Sea Hold'
+    expect: SUCCEEDS
+  - text: 'Germany: F Helgoland Bight Supports F Skagerrak - North Sea'
+    expect: SUCCEEDS
+  - text: 'Germany: F Skagerrak - North Sea'
+    expect: FAILS
+
+- description: 6.F.19. Multi-route convoy disruption paradox
+  orders:
+  - text: 'France: A Tunis - Naples'
+    expect: FAILS
+  - text: 'France: F Tyrrhenian Sea Convoys A Tunis - Naples'
+    expect: SUCCEEDS
+  - text: 'France: F Ionian Sea Convoys A Tunis - Naples'
+    expect: SUCCEEDS
+  - text: 'Italy: F Naples Supports F Rome - Tyrrhenian Sea'
+    expect: FAILS
+  - text: 'Italy: F Rome - Tyrrhenian Sea'
+    expect: FAILS
+
+- description: 6.F.20. Unwanted multi-route convoy paradox
+  orders:
+  - text: 'France: A Tunis - Naples'
+    expect: FAILS
+  - text: 'France: F Tyrrhenian Sea Convoys A Tunis - Naples'
+    expect: SUCCEEDS
+  - text: 'Italy: F Naples Supports F Ionian Sea Hold'
+    expect: FAILS
+  - text: 'Italy: F Ionian Sea Convoys A Tunis - Naples'
+    expect: FAILS
+  - text: 'Turkey: F Aegean Sea Supports F Eastern Mediterranean - Ionian Sea'
+    expect: SUCCEEDS
+  - text: 'Turkey: F Eastern Mediterranean - Ionian Sea'
+    expect: SUCCEEDS
+
+- description: 6.F.21. Dad's army convoy
+  orders:
+  - text: 'Russia: A Edinburgh Supports A Norway - Clyde'
+    expect: SUCCEEDS
+  - text: 'Russia: F Norwegian Sea Convoys A Norway - Clyde'
+    expect: SUCCEEDS
+  - text: 'Russia: A Norway - Clyde'
+    expect: SUCCEEDS
+  - text: 'France: F Irish Sea Supports F Mid-Atlantic Ocean - North Atlantic Ocean'
+    expect: SUCCEEDS
+  - text: 'France: F Mid-Atlantic Ocean - North Atlantic Ocean'
+    expect: SUCCEEDS
+  - text: 'England: A Liverpool - Clyde'
+    expect: FAILS
+  - text: 'England: F North Atlantic Ocean Convoys A Liverpool - Clyde'
+    expect: FAILS
+  - text: 'England: F Clyde Supports F North Atlantic Ocean Hold'
+    expect: FAILS
+
+- description: 6.F.22. Second order paradox with two resolutions
+  orders:
+  - text: 'England: F Edinburgh - North Sea'
+    expect: SUCCEEDS
+  - text: 'England: F London Supports F Edinburgh - North Sea'
+    expect: SUCCEEDS
+  - text: 'France: A Brest - London'
+    expect: FAILS
+  - text: 'France: F English Channel Convoys A Brest - London'
+    expect: FAILS
+  - text: 'Germany: F Belgium Supports F Picardy - English Channel'
+    expect: SUCCEEDS
+  - text: 'Germany: F Picardy - English Channel'
+    expect: SUCCEEDS
+  - text: 'Russia: A Norway - Belgium'
+    expect: FAILS
+  - text: 'Russia: F North Sea Convoys A Norway - Belgium'
+    expect: FAILS
+
+- description: 6.F.23. Second order paradox with two exclusive convoys
+  orders:
+  - text: 'England: F Edinburgh - North Sea'
+    expect: FAILS
+  - text: 'England: F Yorkshire Supports F Edinburgh - North Sea'
+    expect: SUCCEEDS
+  - text: 'France: A Brest - London'
+    expect: FAILS
+  - text: 'France: F English Channel Convoys A Brest - London'
+    expect: FAILS
+  - text: 'Germany: F Belgium Supports F English Channel Hold'
+    expect: SUCCEEDS
+  - text: 'Germany: F London Supports F North Sea Hold'
+    expect: SUCCEEDS
+  - text: 'Italy: F Mid-Atlantic Ocean - English Channel'
+    expect: FAILS
+  - text: 'Italy: F Irish Sea Supports F Mid-Atlantic Ocean - English Channel'
+    expect: SUCCEEDS
+  - text: 'Russia: A Norway - Belgium'
+    expect: FAILS
+  - text: 'Russia: F North Sea Convoys A Norway - Belgium'
+    expect: FAILS
+
+- description: 6.F.24. Second order paradox with no resolution
+  orders:
+  - text: 'England: F Edinburgh - North Sea'
+    expect: SUCCEEDS
+  - text: 'England: F London Supports F Edinburgh - North Sea'
+    expect: SUCCEEDS
+  - text: 'England: F Irish Sea - English Channel'
+    expect: FAILS
+  - text: 'England: F Mid-Atlantic Ocean Supports F Irish Sea - English Channel'
+    expect: SUCCEEDS
+  - text: 'France: A Brest - London'
+    expect: FAILS
+  - text: 'France: F English Channel Convoys A Brest - London'
+    expect: FAILS
+  - text: 'France: F Belgium Supports F English Channel Hold'
+    expect: SUCCEEDS
+  - text: 'Russia: A Norway - Belgium'
+    expect: FAILS
+  - text: 'Russia: F North Sea Convoys A Norway - Belgium'
+    expect: FAILS
+
+- description: 6.G.1. Two units can swap places by convoy
+  orders:
+  - text: 'England: A Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'England: F Skagerrak Convoys A Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'Russia: A Sweden - Norway'
+    expect: SUCCEEDS
+
+- description: 6.G.2. Kidnapping an army
+  orders:
+  - text: 'England: A Norway - Sweden'
+    expect: FAILS
+  - text: 'Russia: F Sweden - Norway'
+    expect: FAILS
+  - text: 'Germany: F Skagerrak Convoys A Norway - Sweden'
+    expect: SUCCEEDS
+
+- description: 6.G.3. Kidnapping with a disrupted convoy
+  orders:
+  - text: 'France: F Brest - English Channel'
+    expect: SUCCEEDS
+  - text: 'France: A Picardy - Belgium'
+    expect: SUCCEEDS
+  - text: 'France: A Burgundy Supports A Picardy - Belgium'
+    expect: SUCCEEDS
+  - text: 'France: F Mid-Atlantic Ocean Supports F Brest - English Channel'
+    expect: SUCCEEDS
+  - text: 'England: F English Channel Convoys A Picardy - Belgium'
+    expect: FAILS
+
+- description: 6.G.4. Kidnapping with a disrupted convoy and opposite move
+  orders:
+  - text: 'France: F Brest - English Channel'
+    expect: SUCCEEDS
+  - text: 'France: A Picardy - Belgium'
+    expect: SUCCEEDS
+  - text: 'France: A Burgundy Supports A Picardy - Belgium'
+    expect: SUCCEEDS
+  - text: 'France: F Mid-Atlantic Ocean Supports F Brest - English Channel'
+    expect: SUCCEEDS
+  - text: 'England: F English Channel Convoys A Picardy - Belgium'
+    expect: FAILS
+  - text: 'England: A Belgium - Picardy'
+    expect: FAILS
+
+- description: 6.G.5. Swapping with intent
+  orders:
+  - text: 'Italy: A Rome - Apulia'
+    expect: SUCCEEDS
+  - text: 'Italy: F Tyrrhenian Sea Convoys A Apulia - Rome'
+    expect: SUCCEEDS
+  - text: 'Turkey: A Apulia - Rome'
+    expect: SUCCEEDS
+  - text: 'Turkey: F Ionian Sea Convoys A Apulia - Rome'
+    expect: SUCCEEDS
+
+- description: 6.G.6. Swapping with unintended intent
+  orders:
+  - text: 'England: A Liverpool - Edinburgh'
+    expect: SUCCEEDS
+  - text: 'England: F English Channel Convoys A Liverpool - Edinburgh'
+    expect: SUCCEEDS
+  - text: 'Germany: A Edinburgh - Liverpool'
+    expect: SUCCEEDS
+  - text: 'France: F Irish Sea Hold'
+    expect: SUCCEEDS
+  - text: 'France: F North Sea Hold'
+    expect: SUCCEEDS
+  - text: 'Russia: F Norwegian Sea Convoys A Liverpool - Edinburgh'
+    expect: SUCCEEDS
+  - text: 'Russia: F North Atlantic Ocean Convoys A Liverpool - Edinburgh'
+    expect: SUCCEEDS
+
+- description: 6.G.7. Swapping with illegal intent
+  orders:
+  - text: 'England: F Skagerrak Convoys A Sweden - Norway'
+    expect: SUCCEEDS
+  - text: 'England: F Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'Russia: A Sweden - Norway'
+    expect: SUCCEEDS
+  - text: 'Russia: F Gulf of Bothnia Convoys A Sweden - Norway'
+    expect: SUCCEEDS
+
+- description: 6.G.8. Explicit convoy that isn't there
+  orders:
+  - text: 'France: A Belgium - Holland via Convoy'
+    expect: FAILS
+  - text: 'England: F North Sea - Helgoland Bight'
+    expect: SUCCEEDS
+  - text: 'England: A Holland - Kiel'
+    expect: SUCCEEDS
+
+- description: 6.G.9. Swapped or dislodged?
+  orders:
+  - text: 'England: A Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'England: F Skagerrak Convoys A Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'England: F Finland Supports A Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'Russia: A Sweden - Norway'
+    expect: SUCCEEDS
+
+- description: 6.G.10. Swapped or an head to head battle?
+  orders:
+  - text: 'England: A Norway - Sweden via Convoy'
+    expect: SUCCEEDS
+  - text: 'England: F Denmark Supports A Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'England: F Finland Supports A Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'Germany: F Skagerrak Convoys A Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'Russia: A Sweden - Norway'
+    expect: FAILS
+  - text: 'Russia: F Barents Sea Supports A Sweden - Norway'
+    expect: SUCCEEDS
+  - text: 'France: F Norwegian Sea - Norway'
+    expect: FAILS
+  - text: 'France: F North Sea Supports F Norwegian Sea - Norway'
+    expect: SUCCEEDS
+
+- description: 6.G.11. A convoy to an adjacent place with a paradox
+  orders:
+  - text: 'England: F Norway Supports F North Sea - Skagerrak'
+    expect: SUCCEEDS
+  - text: 'England: F North Sea - Skagerrak'
+    expect: SUCCEEDS
+  - text: 'Russia: A Sweden - Norway'
+    expect: FAILS
+  - text: 'Russia: F Skagerrak Convoys A Sweden - Norway'
+    expect: FAILS
+  - text: 'Russia: F Barents Sea Supports A Sweden - Norway'
+    expect: SUCCEEDS
+
+- description: 6.G.12. Swapping two units with two convoys
+  orders:
+  - text: 'England: A Liverpool - Edinburgh via Convoy'
+    expect: SUCCEEDS
+  - text: 'England: F North Atlantic Ocean Convoys A Liverpool - Edinburgh'
+    expect: SUCCEEDS
+  - text: 'England: F Norwegian Sea Convoys A Liverpool - Edinburgh'
+    expect: SUCCEEDS
+  - text: 'Germany: A Edinburgh - Liverpool via Convoy'
+    expect: SUCCEEDS
+  - text: 'Germany: F North Sea Convoys A Edinburgh - Liverpool'
+    expect: SUCCEEDS
+  - text: 'Germany: F English Channel Convoys A Edinburgh - Liverpool'
+    expect: SUCCEEDS
+  - text: 'Germany: F Irish Sea Convoys A Edinburgh - Liverpool'
+    expect: SUCCEEDS
+
+- description: 6.G.13. Support cut on attack on itself via convoy
+  orders:
+  - text: 'Austria: F Adriatic Sea Convoys A Trieste - Venice'
+    expect: SUCCEEDS
+  - text: 'Austria: A Trieste - Venice via Convoy'
+    expect: FAILS
+  - text: 'Italy: A Venice Supports F Albania - Trieste'
+    expect: SUCCEEDS
+  - text: 'Italy: F Albania - Trieste'
+    expect: SUCCEEDS
+
+- description: 6.G.14. Bounce by convoy to adjacent place
+  orders:
+  - text: 'England: A Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'England: F Denmark Supports A Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'England: F Finland Supports A Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'France: F Norwegian Sea - Norway'
+    expect: FAILS
+  - text: 'France: F North Sea Supports F Norwegian Sea - Norway'
+    expect: SUCCEEDS
+  - text: 'Germany: F Skagerrak Convoys A Sweden - Norway'
+    expect: SUCCEEDS
+  - text: 'Russia: A Sweden - Norway via Convoy'
+    expect: FAILS
+  - text: 'Russia: F Barents Sea Supports A Sweden - Norway'
+    expect: SUCCEEDS
+
+- description: 6.G.15. Bounce and dislodge with double convoy
+  orders:
+  - text: 'England: F North Sea Convoys A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'England: A Holland Supports A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'England: A Yorkshire - London'
+    expect: FAILS
+  - text: 'England: A London - Belgium via Convoy'
+    expect: SUCCEEDS
+  - text: 'France: F English Channel Convoys A Belgium - London'
+    expect: SUCCEEDS
+  - text: 'France: A Belgium - London via Convoy'
+    expect: FAILS
+
+- description: 6.G.16. The two unit in one area bug, moving by convoy
+  orders:
+  - text: 'England: A Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'England: A Denmark Supports A Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'England: F Baltic Sea Supports A Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'England: F North Sea - Norway'
+    expect: FAILS
+  - text: 'Russia: A Sweden - Norway via Convoy'
+    expect: SUCCEEDS
+  - text: 'Russia: F Skagerrak Convoys A Sweden - Norway'
+    expect: SUCCEEDS
+  - text: 'Russia: F Norwegian Sea Supports A Sweden - Norway'
+    expect: SUCCEEDS
+
+- description: 6.G.17. The two unit in one area bug, moving over land
+  orders:
+  - text: 'England: A Norway - Sweden via Convoy'
+    expect: SUCCEEDS
+  - text: 'England: A Denmark Supports A Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'England: F Baltic Sea Supports A Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'England: F Skagerrak Convoys A Norway - Sweden'
+    expect: SUCCEEDS
+  - text: 'England: F North Sea - Norway'
+    expect: FAILS
+  - text: 'Russia: A Sweden - Norway'
+    expect: SUCCEEDS
+  - text: 'Russia: F Norwegian Sea Supports A Sweden - Norway'
+    expect: SUCCEEDS
+
+- description: 6.G.18. The two unit in one area bug, with double convoy
+  orders:
+  - text: 'England: F North Sea Convoys A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'England: A Holland Supports A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'England: A Yorkshire - London'
+    expect: FAILS
+  - text: 'England: A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'England: A Ruhr Supports A London - Belgium'
+    expect: SUCCEEDS
+  - text: 'France: F English Channel Convoys A Belgium - London'
+    expect: SUCCEEDS
+  - text: 'France: A Belgium - London'
+    expect: SUCCEEDS
+  - text: 'France: A Wales Supports A Belgium - London'
+    expect: SUCCEEDS

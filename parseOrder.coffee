@@ -1,8 +1,9 @@
 {orders: {BUILD, MOVE, SUPPORT, CONVOY, HOLD}} = require './enums'
 
 parseOrder = (order) ->
+	console.log "Order: ", order
 	coastName = (abbr) ->
-		map = 
+		map =
 			nc: 'North'
 			sc: 'South'
 			ec: 'East'
@@ -104,6 +105,7 @@ parseOrder = (order) ->
 		type: BUILD
 		country: matches[1]
 		utype: matches[2] is 'A' and 'Army' or 'Fleet'
+		actor: matches[3]
 		region: matches[3]
 		region_coast: matches[4]
 

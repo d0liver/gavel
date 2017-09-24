@@ -1,0 +1,213 @@
+---
+- description: 6.H.1. No supports during retreat
+  moves:
+  - 'Austria: F Trieste Hold'
+  - 'Austria: A Serbia Hold'
+  - 'Turkey: F Greece Hold'
+  - 'Italy: A Venice Supports A Tyrolia - Trieste'
+  - 'Italy: A Tyrolia - Trieste'
+  - 'Italy: F Ionian Sea - Greece'
+  - 'Italy: F Aegean Sea Supports F Ionian Sea - Greece'
+  retreats:
+  - text: 'Austria: F Trieste - Albania'
+    expect: FAILS
+  - text: 'Austria: A Serbia Supports F Trieste - Albania'
+    expect: FAILS
+  - text: 'Turkey: F Greece - Albania'
+    expect: FAILS
+
+- description: 6.H.2. No supports from retreating unit
+  moves:
+  - 'England: A Liverpool - Edinburgh'
+  - 'England: F Yorkshire Supports A Liverpool - Edinburgh'
+  - 'England: F Norway Hold'
+  - 'Germany: A Kiel Supports A Ruhr - Holland'
+  - 'Germany: A Ruhr - Holland'
+  - 'Russia: F Edinburgh Hold'
+  - 'Russia: A Sweden Supports A Finland - Norway'
+  - 'Russia: A Finland - Norway'
+  - 'Russia: F Holland Hold'
+  retreats:
+    - text: 'England: F Norway - North Sea'
+      expect: FAILS
+    - text: 'Russia: F Edinburgh - North Sea'
+      expect: FAILS
+    - text: 'Russia: F Holland Supports F Edinburgh - North Sea'
+      expect: FAILS
+
+- description: 6.H.3. No convoy during retreat
+  moves:
+  - 'England: F North Sea Hold'
+  - 'England: A Holland Hold'
+  - 'Germany: F Kiel Supports A Ruhr - Holland'
+  - 'Germany: A Ruhr - Holland'
+  retreats:
+    - text: 'England: A Holland - Yorkshire'
+      expect: FAILS
+    - text: 'England: F North Sea Convoys A Holland - Yorkshire'
+      expect: FAILS
+
+- description: 6.H.4. No other moves during retreat
+  moves:
+  - 'England: F North Sea Hold'
+  - 'England: A Holland Hold'
+  - 'Germany: F Kiel Supports A Ruhr - Holland'
+  - 'Germany: A Ruhr - Holland'
+  retreats:
+  - text: 'England: A Holland - Belgium'
+    expect: SUCCEEDS
+  - text: 'England: F North Sea - Norwegian Sea'
+    expect: FAILS
+
+- description: 6.H.5. A unit may not retreat to the area from which it is attacked
+  moves:
+  - 'Russia: F Constantinople Supports F Black Sea - Ankara'
+  - 'Russia: F Black Sea - Ankara'
+  - 'Turkey: F Ankara Hold'
+  retreats:
+  - text: 'Turkey: F Ankara - Black Sea'
+    expect: FAILS
+
+- description: 6.H.6. Unit may not retreat to a contested area
+  moves:
+  - 'Austria: A Budapest Supports A Trieste - Vienna'
+  - 'Austria: A Trieste - Vienna'
+  - 'Germany: A Munich - Bohemia'
+  - 'Germany: A Silesia - Bohemia'
+  - 'Italy: A Vienna Hold'
+  retreats:
+  - text: 'Italy: A Vienna - Bohemia'
+    expect: FAILS
+
+- description: 6.H.7. Multiple retreat to same area will disband units
+  moves:
+  - 'Austria: A Budapest Supports A Trieste - Vienna'
+  - 'Austria: A Trieste - Vienna'
+  - 'Germany: A Munich Supports A Silesia - Bohemia'
+  - 'Germany: A Silesia - Bohemia'
+  - 'Italy: A Vienna Hold'
+  - 'Italy: A Bohemia Hold'
+  retreats:
+  - text: 'Italy: A Bohemia - Tyrolia'
+    expect: FAILS
+  - text: 'Italy: A Vienna - Tyrolia'
+    expect: FAILS
+
+- description: 6.H.8. Triple retreat to same area will disband units
+  moves:
+  - 'England: A Liverpool - Edinburgh'
+  - 'England: F Yorkshire Supports A Liverpool - Edinburgh'
+  - 'England: F Norway Hold'
+  - 'Germany: A Kiel Supports A Ruhr - Holland'
+  - 'Germany: A Ruhr - Holland'
+  - 'Russia: F Edinburgh Hold'
+  - 'Russia: A Sweden Supports A Finland - Norway'
+  - 'Russia: A Finland - Norway'
+  - 'Russia: F Holland Hold'
+  retreats:
+  - text: 'England: F Norway - North Sea'
+    expect: FAILS
+  - text: 'Russia: F Edinburgh - North Sea'
+    expect: FAILS
+  - text: 'Russia: F Holland - North Sea'
+    expect: FAILS
+
+- description: 6.H.9. Dislodged unit will not make attackers area contested
+  moves:
+  - 'England: F Helgoland Bight - Kiel'
+  - 'England: F Denmark Supports F Helgoland Bight - Kiel'
+  - 'Germany: A Berlin - Prussia'
+  - 'Germany: F Kiel Hold'
+  - 'Germany: A Silesia Supports A Berlin - Prussia'
+  - 'Russia: A Prussia - Berlin'
+  retreats:
+  - text: 'Germany: F Kiel - Berlin'
+    expect: SUCCEEDS
+
+- description: 6.H.10. Not retreating to attacker does not mean contested
+  moves:
+  - 'England: A Kiel Hold'
+  - 'Germany: A Berlin - Kiel'
+  - 'Germany: A Munich Supports A Berlin - Kiel'
+  - 'Germany: A Prussia Hold'
+  - 'Russia: A Warsaw - Prussia'
+  - 'Russia: A Silesia Supports A Warsaw - Prussia'
+  retreats:
+  - text: 'England: A Kiel - Berlin'
+    expect: FAILS
+  - text: 'Germany: A Prussia - Berlin'
+    expect: SUCCEEDS
+
+- description: 6.H.11. Retreat when dislodged by adjacent convoy
+  moves:
+  - 'France: A Gascony - Marseilles via Convoy'
+  - 'France: A Burgundy Supports A Gascony - Marseilles'
+  - 'France: F Mid-Atlantic Ocean Convoys A Gascony - Marseilles'
+  - 'France: F Western Mediterranean Convoys A Gascony - Marseilles'
+  - 'France: F Gulf of Lyon Convoys A Gascony - Marseilles'
+  - 'Italy: A Marseilles Hold'
+  retreats:
+  - text: 'Italy: A Marseilles - Gascony'
+    expect: SUCCEEDS
+
+- description: 6.H.12. Retreat when dislodged by adjacent convoy while trying to do
+    the same
+  moves:
+  - 'England: A Liverpool - Edinburgh via Convoy'
+  - 'England: F Irish Sea Convoys A Liverpool - Edinburgh'
+  - 'England: F English Channel Convoys A Liverpool - Edinburgh'
+  - 'England: F North Sea Convoys A Liverpool - Edinburgh'
+  - 'France: F Brest - English Channel'
+  - 'France: F Mid-Atlantic Ocean Supports F Brest - English Channel'
+  - 'Russia: A Edinburgh - Liverpool via Convoy'
+  - 'Russia: F Norwegian Sea Convoys A Edinburgh - Liverpool'
+  - 'Russia: F North Atlantic Ocean Convoys A Edinburgh - Liverpool'
+  - 'Russia: A Clyde Supports A Edinburgh - Liverpool'
+  retreats:
+  - text: 'England: A Liverpool - Edinburgh'
+    expect: SUCCEEDS
+
+- description: 6.H.13. No retreat with convoy in main phase
+  moves:
+  - 'England: A Picardy Hold'
+  - 'England: F English Channel Convoys A Picardy - London'
+  - 'France: A Paris - Picardy'
+  - 'France: A Brest Supports A Paris - Picardy'
+  retreats:
+  - text: 'England: A Picardy - London'
+    expect: FAILS
+
+- description: 6.H.14. No retreat with support in main phase
+  moves:
+  - 'England: A Picardy Hold'
+  - 'England: F English Channel Supports A Picardy - Belgium'
+  - 'France: A Paris - Picardy'
+  - 'France: A Brest Supports A Paris - Picardy'
+  - 'France: A Burgundy Hold'
+  - 'Germany: A Munich Supports A Marseilles - Burgundy'
+  - 'Germany: A Marseilles - Burgundy'
+  retreats:
+  - text: 'England: A Picardy - Belgium'
+    expect: FAILS
+  - text: 'France: A Burgundy - Belgium'
+    expect: FAILS
+
+- description: 6.H.15. No coastal crawl in retreat
+  moves:
+  - 'England: F Portugal Hold'
+  - 'France: F Spain(sc) - Portugal'
+  - 'France: F Mid-Atlantic Ocean Supports F Spain(sc) - Portugal'
+  retreats:
+  - text: 'France: F Spain(sc) - Spain(nc)'
+    expect: FAILS
+
+- description: 6.H.16. Contested for both coasts
+  moves:
+  - 'France: F Mid-Atlantic Ocean - Spain(nc)'
+  - 'France: F Gascony - Spain(nc)'
+  - 'France: F Western Mediterranean Hold'
+  - 'Italy: F Tunis Supports F Tyrrhenian Sea - Western Mediterranean'
+  - 'Italy: F Tyrrhenian Sea - Western Mediterranean'
+  retreats:
+  - text: 'France: F Spain(nc) - Spain(sc)'
+    expect: FAILS

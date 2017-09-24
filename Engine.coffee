@@ -3,15 +3,9 @@ describeOrder   = require './describeOrder'
 
 Phase           = require './Phase'
 
-MoveResolver        = require './resolvers/MoveResolver'
+MoveResolver    = require './resolvers/MoveResolver'
 RetreatResolver = require './resolvers/RetreatResolver'
 BuildResolver   = require './resolvers/BuildResolver'
-
-{english, outcomes, orders: eorders, paths} = require './enums'
-
-{OVERLAND, OVERSEA}                = paths
-{MOVE, SUPPORT, CONVOY, HOLD}      = eorders
-{SUCCEEDS, FAILS, ILLEGAL, EXISTS} = outcomes
 
 Engine = (board, pfinder, phase) ->
 	self = {}
@@ -22,22 +16,22 @@ Engine = (board, pfinder, phase) ->
 	self.resolve = (orders, options, apply = false) ->
 		orders = (parseOrder order for order in orders)
 
-		resolver = (
-			console.log "Season is: ", phase.season
+		opts = TEST: false
+
+		resolver =
 			switch phase.season
 				when 'Spring', 'Fall'
 					console.log "USE MOVE RESOLVER"
-					moveResolver
+					new MoveResolver board, pfinder, orders, opts
 				when 'Spring Retreat', 'Fall Retreat'
-					retreatResolver
+					new RetreatResolver self, board, orders, opts
 				when 'Winter'
+					new BuildResolver board, orders, opts
 					buildResolver
-		) orders, TEST: false
 
 		resolver.resolve order for order in orders
 
-		if apply
-			resolver.apply()
+		resolver.apply() if apply
 
 		return orders
 
@@ -64,86 +58,6 @@ Engine = (board, pfinder, phase) ->
 		return
 
 	parseOrders = (orders) -> parseOrder order for order in orders
-
-	moveResolver = (orders, options) ->
-		MoveResolver board, pfinder, orders, options
-
-	retreatResolver = (orders, options) ->
-		new RetreatResolver self, board, orders, options
-
-	buildResolver = (orders, adjustments, options) ->
-		new BuildResolver board, orders
-
-	# Clear all of the existing units off of the board and set it up so that
-	# each unit which was given an order is actually on the board.
-	self.setUnitsForTest = (orders) ->
-		board.clearUnits()
-		for order in orders
-			board.addUnit order.country,
-				type: order.utype
-				region: order.actor
-
-	self.testMoves = (test_name, args...) ->
-		orders = extractTestOrders args
-		resolver = moveResolver orders, TEST: true
-		dbg_resolver = moveResolver orders, DEBUG: true, TEST: true
-
-		self.setUnitsForTest orders
-		self.test test_name, orders, resolver, dbg_resolver
-
-	self.testRetreats = (test_name, {moves, retreats}) ->
-		self.setUnitsForTest(parseOrder move for move in moves)
-		self.resolve moves, {TEST: true, DEBUG: true}, true
-		retreats = extractTestOrders retreats
-
-		# Build up the retreat orders and the resolver for them
-		resolver = retreatResolver retreats, TEST: true
-		dbg_resolver = retreatResolver retreats, DEBUG: true, TEST: true
-		self.test test_name, retreats, resolver, dbg_resolver
-
-	self.testBuilds = (test_name, adjustments, args...) ->
-		orders = extractTestOrders args
-		resolver = buildResolver orders, adjustments
-		dbg_resolver = buildResolver orders
-
-		# Set up the adjustments on the board
-		board.adjustments cname, adj for cname, adj of adjustments
-
-		self.test test_name, orders, resolver, dbg_resolver
-
-		# Clean up adjustments after the fact
-		board.adjustments cname, 0 for cname, adj of adjustments
-
-	self.test = (test_name, orders, resolver, dbg_resolver) ->
-		console.log "Test: #{test_name}"
-
-		for order in orders
-			result = resolver.resolve order
-
-			if result isnt order.expects
-				console.log 'Test failed, rerunning in debug mode'
-				delete order.succeeds
-				# Running with the debug resolver which show the debug outputs.
-				# Consider changing DEBUG to VERBOSE. Consider making options
-				# lower cased.
-				dbg_resolver.resolve order
-				console.log 'Evaluated order: ', describeOrder order
-				console.log "
-					Expect: #{english outcomes, order.expects},
-					Actual: #{english outcomes, result}
-				"
-				console.log "Test failed\n"
-				return
-
-		console.log "Test succeeded\n"
-
-	# Takes arguments for a test case where each argument is an order followed
-	# by an argument describing the expected outcome. Breaks this down and
-	# returns a set of parsed orders where each has an expects property.
-	extractTestOrders = (args) ->
-		for arg,i in args by 2
-			expect = args[i+1]; order = parseOrder arg
-			Object.assign order, expects: expect
 
 	# Apply resolved move orders and return an object with the number of
 	# adjustments for each nation.
