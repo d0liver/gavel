@@ -22,6 +22,7 @@ class BuildResolver
 		@_orders.filter((o) -> o.region is order.region).length isnt 1 or
 		order.type isnt BUILD
 
+		@_board.addUnit order.country, type: order.utype, region: order.actor
 		@_board.adjust order.country, -1
 
 		SUCCEEDS

@@ -27,7 +27,6 @@ Engine = (board, pfinder, phase) ->
 					new RetreatResolver self, board, orders, opts
 				when 'Winter'
 					new BuildResolver board, orders, opts
-					buildResolver
 
 		resolver.resolve order for order in orders
 

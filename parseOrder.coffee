@@ -1,7 +1,6 @@
 {orders: {BUILD, MOVE, SUPPORT, CONVOY, HOLD}} = require './enums'
 
 parseOrder = (order) ->
-	console.log "Order: ", order
 	coastName = (abbr) ->
 		map =
 			nc: 'North'
