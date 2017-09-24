@@ -21,6 +21,7 @@ Board = (gdata, vdata) ->
 
 		region = utils.copy vdata.map_data.regions[rname]
 		region.unit = _.findWhere self.units(), region: rname
+		region.name = rname
 		return region
 
 	self.adjacencies = ({from, from_coast, to, to_coast, utype}) ->
@@ -151,6 +152,9 @@ Board = (gdata, vdata) ->
 		utils.copy gdata.phase.countries.find (c) -> c.name is country
 
 	self.countries = -> utils.copy gdata.phase.countries
+	self.regions = ->
+		for name,region of vdata.map_data.regions
+			yield self.region(name)
 
 	self.supplyCenters = (country) ->
 		if country
