@@ -164,6 +164,10 @@ Board = (gdata, vdata) ->
 			regions = vdata.map_data.regions
 			name for name,region of regions when region.supply_center
 
+	# Return the country owning the region if it is an owned supply center
+	self.countryOwns = (rname) ->
+		gdata.phase.countries.find (c) -> rname in c.supply_centers
+
 	self.moveUnit = (unit, to) ->
 		# FIXME: The weird remove then add crap is because the unit that is
 		# passed in is a copy of the real unit. Really units should have their
