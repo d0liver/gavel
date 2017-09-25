@@ -20,7 +20,8 @@ Board = (gdata, vdata) ->
 		return unless rname of vdata.map_data.regions
 
 		region = utils.copy vdata.map_data.regions[rname]
-		region.unit = _.findWhere self.units(), region: rname
+		region.unit = self.units().find (u) -> u.region is rname and not u.dislodger?
+		region.dislodged_unit = self.units().find (u) -> u.region is rname and u.dislodger?
 		region.name = rname
 		return region
 
