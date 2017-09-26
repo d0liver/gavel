@@ -7,7 +7,7 @@ CycleGuard       = require '../CycleGuard'
 describeOrder    = require '../describeOrder'
 {english, outcomes, orders: eorders, paths} = require '../enums'
 
-{VIA_ADJACENCY, VIA_CONVOY}                = paths
+{VIA_ADJACENCY, VIA_CONVOY}        = paths
 {MOVE, SUPPORT, CONVOY, HOLD}      = eorders
 {SUCCEEDS, FAILS, ILLEGAL, EXISTS} = outcomes
 
@@ -16,7 +16,6 @@ describeOrder    = require '../describeOrder'
 # Adapted from "The Math of Adjudication" by Lucas Kruijswijk
 # We assume in the resolver that the map constraints have been satisfied (moves
 # are to valid locations, etc.)
-# pfinder = PathFinder instance
 Resolver = (board, pfinder, orders, options) ->
 	depth = -1
 	self = {}
@@ -171,20 +170,12 @@ Resolver = (board, pfinder, orders, options) ->
 
 		debug "Via convoy? #{via_convoy}"
 		debug "Convoy intent? #{has_convoy_intent}"
+		corders = ordersWhere(null, CONVOY, SUCCEEDS, {from, to}) ? []
+		# pfinder.hasPath expects which units, rather than which orders should
+		# be considered for the convoy path.
+		units = (board.region(corder.actor).unit for corder in corders)
+		return pfinder.hasPath order, units, has_convoy_intent or via_convoy
 
-		# We have a _from_ connected directly to the _to_. This is the normal
-		# case where convoys don't come into play.
-		if !via_convoy and !has_convoy_intent and
-		board.canMove {utype, from, to, from_coast, to_coast}
-			return VIA_ADJACENCY
-		# Convoys are valid when it's an army being convoyed and the
-		# destination is on land.
-		else if utype is 'Army' and board.region(to).type is 'Land'
-			corders = ordersWhere(null, CONVOY, SUCCEEDS, {from, to}) ? []
-			# convoyPath expects which units, rather than which orders should
-			# be considered for the convoy path.
-			units = (board.region(corder.actor).unit for corder in corders)
-			return VIA_CONVOY if pfinder.convoyPath({from, to}, units).length isnt 0
 
 	holdStrength = (region) ->
 		debug 'Calculating hold strength...'

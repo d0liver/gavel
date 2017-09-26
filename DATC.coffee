@@ -48,5 +48,5 @@ catch e
 	process.exit 1
 
 board = Board gdata, vdata
-pfinder = PathFinder board
+pfinder = new PathFinder board
 datc board, pfinder

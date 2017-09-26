@@ -1,8 +1,7 @@
 exports.outcomes =
 	FAILS    : 0
 	SUCCEEDS : 1
-	ILLEGAL  : 2
-	EXISTS   : 3
+	EXISTS   : 2
 
 exports.orders =
 	MOVE    : 0
