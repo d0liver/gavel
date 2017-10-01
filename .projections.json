@@ -1,4 +1,5 @@
 {
     "README.md": {"type": "doc"},
-	"resolvers/*Resolver.coffee": {"type": "resolver"}
+	"resolvers/*Resolver.coffee": {"type": "resolver"},
+	"validators/*Validator.coffee": {"type": "validator"}
 }

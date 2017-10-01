@@ -4,29 +4,30 @@ describeOrder   = require './describeOrder'
 Phase           = require './Phase'
 
 MoveResolver    = require './resolvers/MoveResolver'
+MoveValidator   = require './validators/MoveValidator.coffee'
 RetreatResolver = require './resolvers/RetreatResolver'
 BuildResolver   = require './resolvers/BuildResolver'
 
-Engine = (board, pfinder, phase) ->
-	self = {}
-	phase = new Phase phase
+class Engine
+	constructor: (@board, @pfinder, phase) ->
+		@_phase = new Phase @_phase
 
-	Object.defineProperty self, 'phase', enumerable: true, value: phase
+		Object.defineProperty @, 'phase', enumerable: true, value: @_phase
 
-	self.resolve = (orders, options, apply = false) ->
+	resolve: (orders, options, apply = false) ->
 		orders = (parseOrder order for order in orders)
 
 		opts = TEST: false
 
 		resolver =
-			switch phase.season
+			switch @_phase.season
 				when 'Spring', 'Fall'
 					console.log "USE MOVE RESOLVER"
-					new MoveResolver board, pfinder, orders, opts
+					new MoveResolver @board, @pfinder, orders, opts
 				when 'Spring Retreat', 'Fall Retreat'
-					new RetreatResolver self, board, orders, opts
+					new RetreatResolver @, @board, orders, opts
 				when 'Winter'
-					new BuildResolver board, orders, opts
+					new BuildResolver @board, orders, opts
 
 		resolver.resolve order for order in orders
 
@@ -34,45 +35,26 @@ Engine = (board, pfinder, phase) ->
 
 		return orders
 
-	self.roll = (orders, options) ->
+	roll: (orders, options) ->
 
-		console.log "Roll phase: #{phase}"
+		console.log "Roll phase: #{@_phase}"
 
-		# Resolve orders and apply them to the board.
-		self.resolve orders, options, true
+		# Resolve orders and apply them to the @board.
+		@resolve orders, options, true
 
 		# If the season was Spring or Fall then we're headed into the retreat
 		# phase and we can auto resolve it if there are no dislodged units (but
 		# we still must resolve it to know about the number of adjustments
 		# needed for the next phase)
-		if phase.season in ['Spring', 'Fall'] and board.dislodgedUnits().length is 0
+		if @_phase.season in ['Spring', 'Fall'] and @board.dislodgedUnits().length is 0
 			console.log "KICKOFF RETREAT RESOLVER"
-			phase.inc()
-			console.log "Inced phase: #{phase}"
-			self.resolve [], options, true
+			@_phase.inc()
+			console.log "Inced phase: #{@_phase}"
+			@resolve [], options, true
 
-		phase.inc()
-		console.log "Inced phase: #{phase}"
+		@_phase.inc()
+		console.log "Inced phase: #{@_phase}"
 
 		return
-
-	parseOrders = (orders) -> parseOrder order for order in orders
-
-	# Apply resolved move orders and return an object with the number of
-	# adjustments for each nation.
-	self.adjust = (orders) ->
-		# Only move orders can effect an adjustment and only when they are
-		# successful.
-		orders = orders.filter (o) ->
-			o.type is 'MOVE' and
-			o.succeeds is 'succeeds'
-
-		for order in orders
-			region = board.region order.to
-			if region.supply_center
-				throw new Error 'Not yet implemented'
-
-
-	return self
 
 module.exports = Engine
