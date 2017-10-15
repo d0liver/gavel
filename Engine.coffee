@@ -19,6 +19,15 @@ class Engine
 		Object.defineProperty @, 'phase', enumerable: true, value: @_phase
 		Object.defineProperty @, 'board', value: @_board
 		Object.defineProperty @, 'pfinder', value: @_pfinder
+		Object.defineProperty @, 'country',
+			get: -> @_country
+			set: (c) ->
+				cnames = (country.name for country in gdata.phase.countries)
+
+				if c in cnames
+					@_country = c
+				else
+					throw new Error "Tried to set invalid country: #{c}"
 
 	resolve: (orders, options, apply = false) ->
 		orders = (parseOrder order for order in orders)
@@ -63,7 +72,7 @@ class Engine
 
 		return
 
-	isLegal: (order) ->
+	isLegal: (order, country = null) ->
 		validator = switch @_phase.season
 			when 'Spring', 'Fall'
 				new MoveValidator @_board, @_pfinder
@@ -71,5 +80,14 @@ class Engine
 				throw new Error 'Retreat validator not yet implemented'
 			when 'Winter'
 				throw new Error 'Build validator not yet implemented'
+
+		if country? or @_country?
+			validator.isLegal order, (country or @_country)
+		else
+			throw new Error '
+				No country was specified while validating an order. A country
+				name should be passed as an argument to engine.isLegal or set
+				on the engine itself, i.e., engine.country = "MyCountry".
+			'
 
 module.exports = Engine

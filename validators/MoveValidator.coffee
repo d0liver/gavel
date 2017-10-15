@@ -9,16 +9,16 @@ class MoveValidator
 	isLegal: (order, country = null) ->
 		order = parseOrder order
 
-		# Order was given for the wrong country
-		country? and order.country is country? and (
+		# Check order was given for the wrong country
+		country? and order.country is country and (
 			# Check if there is a valid path for any MOVE using any of the
 			# units on the board
 			order.type is MOVE and
-			!@_pfinder.hasPath(order, @_board.units(), order.via_convoy)? or
-			order.type is SUPPORT and
-			@_board.canSupport order or
-			order.type is CONVOY and
-			@_board.canConvoy order
+			!!@_pfinder.hasPath(order, @_board.units(), order.via_convoy)?
+			# order.type is SUPPORT and
+			# @_board.canSupport order or
+			# order.type is CONVOY and
+			# @_board.canConvoy order
 		)
 
 module.exports = MoveValidator
