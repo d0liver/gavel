@@ -1,5 +1,4 @@
-parseOrder      = require './parseOrder'
-describeOrder   = require './describeOrder'
+Order = require './Order'
 
 Phase      = require './Phase'
 Board      = require './Board'
@@ -30,7 +29,7 @@ class Engine
 					throw new Error "Tried to set invalid country: #{c}"
 
 	resolve: (orders, options, apply = false) ->
-		orders = (parseOrder order for order in orders)
+		orders = (Order.from order for order in orders)
 
 		opts = TEST: false
 
@@ -75,7 +74,7 @@ class Engine
 	isLegal: (order, country = null) ->
 		validator = switch @_phase.season
 			when 'Spring', 'Fall'
-				new MoveValidator @_board, @_pfinder
+				new MoveValidator @
 			when 'Spring Retreat', 'Fall Retreat'
 				throw new Error 'Retreat validator not yet implemented'
 			when 'Winter'
@@ -89,5 +88,7 @@ class Engine
 				name should be passed as an argument to engine.isLegal or set
 				on the engine itself, i.e., engine.country = "MyCountry".
 			'
+
+	order: (ord) -> Order.from ord, @
 
 module.exports = Engine

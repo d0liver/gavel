@@ -39,7 +39,8 @@ class PathFinder
 
 	# Check if a path exists for an order using the given units. If via_convoy
 	# is specified then moves must be performed via an available convoy and
-	# fail if none exists.
+	# fail if none exists. TODO: Could be named better - this doesn't actually
+	# return a boolean but rather a path type.
 	hasPath: (order, units, via_convoy = false) ->
 
 		# We have a _from_ connected directly to the _to_. This is the normal
